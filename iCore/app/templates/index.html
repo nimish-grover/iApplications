@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+{% block title %}Welcome Page{% endblock%}
+{% block content %}
+
+<div class="bg-primary text-uppercase text-center py-2">
+    <div class="col bg-transparent text-light">
+        <div><span class="text-warning text-lowercase">i</span><span class="fs-6">ntegrated</span></div>
+        <div class="fs-8">Applications' Dashboard </div>
+    </div>
+</div>
+<div class="container">
+    <div class="d-flex flex-wrap align-items-center align-content-start mt-5">
+
+        <div class="text-center m-2">
+            <a class="btn btn-sm rounded-1 bg-secondary bg-opacity-25 border border-secondary shadow align-items-center"
+                href="/itraining">
+                <img src="{{url_for('static', filename='assets/images/training.png')}}" height="24" alt="">
+            </a>
+            <div class="fs-8 text-center"><span class="text-danger">i</span><span
+                    class="text-secondary-emphasis fw-semibold">Training</span></div>
+        </div>
+        <div class="text-center m-2">
+            <a class="btn btn-sm disabled rounded-1 bg-secondary bg-opacity-25 border border-secondary shadow align-items-center"
+                href="/iriver">
+                <img src="{{url_for('static', filename='assets/images/river.png')}}" height="24" alt="">
+            </a>
+            <div class="fs-8 text-center"><span class="text-danger">i</span><span
+                    class="text-secondary-emphasis fw-semibold">River</span></div>
+        </div>
+        <div class="text-center m-2">
+            <a class="btn btn-sm rounded-1 bg-secondary bg-opacity-25 border border-secondary shadow align-items-center"
+                href="/iland">
+                <img src="{{url_for('static', filename='assets/images/land.png')}}" height="24" alt="">
+            </a>
+            <div class="fs-8 text-center"><span class="text-danger">i</span><span
+                    class="text-secondary-emphasis fw-semibold">Land</span></div>
+        </div>
+        <div class="text-center m-2">
+            <a class="btn btn-sm rounded-1 bg-secondary bg-opacity-25 border border-secondary shadow align-items-center"
+                href="/iwater">
+                <img src="{{url_for('static', filename='assets/images/water.png')}}" height="24" alt="">
+            </a>
+            <div class="fs-8 text-center"><span class="text-danger">i</span><span
+                    class="text-secondary-emphasis fw-semibold">Water</span></div>
+        </div>
+        <div class="text-center m-2">
+            <a class="btn btn-sm disabled rounded-1 bg-secondary bg-opacity-25 border border-secondary shadow align-items-center"
+                href="/iplanning">
+                <img src="{{url_for('static', filename='assets/images/map.png')}}" height="24" alt="">
+            </a>
+            <div class="fs-8 text-center"><span class="text-danger">i</span><span
+                    class="text-secondary-emphasis fw-semibold">MaP</span></div>
+        </div>
+        <div class="text-center m-2">
+            <a class="btn btn-sm disabled rounded-1 bg-secondary bg-opacity-25 border border-secondary shadow align-items-center"
+                href="/iclimate">
+                <img src="{{url_for('static', filename='assets/images/climate.png')}}" height="24" alt="">
+            </a>
+            <div class="fs-8 text-center"><span class="text-danger">i</span><span
+                    class="text-secondary-emphasis fw-semibold">Climate</span></div>
+        </div>
+        <div class="text-center m-2">
+            <a class="btn btn-sm rounded-1 bg-secondary bg-opacity-25 border border-secondary shadow align-items-center"
+                href="/isaksham">
+                <img src="{{url_for('static', filename='assets/images/gis.png')}}" height="24" alt="">
+            </a>
+            <div class="fs-8 text-center"><span class="text-danger">i</span><span
+                    class="text-secondary-emphasis fw-semibold">Saksham</span></div>
+        </div>
+        <div class="text-center m-2">
+            <a class="btn btn-sm disabled rounded-1 bg-secondary bg-opacity-25 border border-secondary shadow align-items-center"
+                href="/irbm">
+                <img src="{{url_for('static', filename='assets/images/rbm.png')}}" height="24" alt="">
+            </a>
+            <div class="fs-8 text-center"><span class="text-danger">i</span><span
+                    class="text-secondary-emphasis fw-semibold">RbM</span></div>
+        </div>
+        <div class="text-center m-2">
+            <a class="btn btn-sm rounded-1 bg-secondary bg-opacity-25 border border-secondary shadow align-items-center"
+                href="/ifinance">
+                <img src="{{url_for('static', filename='assets/images/finance.png')}}" height="24" alt="">
+            </a>
+            <div class="fs-8 text-center"><span class="text-danger">i</span><span
+                    class="text-secondary-emphasis fw-semibold">Finance</span></div>
+        </div>
+        <div class="text-center m-2">
+            <a class="btn btn-sm rounded-1 bg-secondary bg-opacity-25 border border-secondary shadow align-items-center"
+                href="/ibot">
+                <img src="{{url_for('static', filename='assets/images/waterbot_bg.png')}}" height="24" alt="">
+            </a>
+            <div class="fs-8 text-center"><span class="text-danger">i</span><span
+                    class="text-secondary-emphasis fw-semibold">Bot</span></div>
+        </div>
+        <div class="text-center m-2">
+            <a class="btn btn-sm rounded-1 bg-secondary bg-opacity-25 border border-secondary shadow align-items-center"
+                href="/icarbon">
+                <img src="{{url_for('static', filename='assets/images/carbon.png')}}" height="24" alt="">
+            </a>
+            <div class="fs-8 text-center"><span class="text-danger">i</span><span
+                    class="text-secondary-emphasis fw-semibold">Carbon</span></div>
+        </div>
+    </div>
+</div>
+{% endblock %}

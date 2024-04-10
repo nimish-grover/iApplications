@@ -1,0 +1,8 @@
+{
+    "apps": {
+        "image": ":cdms-application.apps-container.59",
+        "ports": {
+            "8080": "HTTP"
+        }
+    }
+}

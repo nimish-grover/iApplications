@@ -1,0 +1,151 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container" style="overflow-y: auto; height:80vh;" id="chatMessages">
+    <div class="d-none d-sm-none d-md-block">
+        <div class="mx-5 px-5 mt-5 pt-4">
+            {% if chats: %}
+            {% for chat in chats %}
+            <div class="bot-message mb-1" href="#">
+                <img src="{{url_for('static',filename='images/user.png')}}" alt="Logo" height="24"
+                    class="d-inline-block align-text-top">
+                You
+            </div>
+            <div class="alert alert-light">
+                {{chat['user_message']}}
+            </div>
+            <div class="user-message mb-1" href="#">
+                <img src="{{url_for('static',filename='images/waterbot_bg.png')}}" alt="Logo" height="24"
+                    class="d-inline-block align-text-top">
+                JiM
+            </div>
+            <div class="alert alert-light">
+                {{chat['bot_message']}}
+            </div>
+            {% endfor %}
+            {% endif %}
+        </div>
+        <div class="fixed-bottom">
+            <form class="container mx-5 px-5" action="{{url_for('openai.ai_response')}}" method="post">
+                <div class="d-inline-block position-relative mb-5 w-100">
+                    <textarea type="" class="form-control d-inline-block pe-5" name="user_message" id="userMessage"
+                        placeholder="Type your message..." aria-label="Type your message..."
+                        aria-describedby="button-addon2" tabindex="0"></textarea>
+                    <input type="submit" value="Send"
+                        class="btn btn-primary btn-sm position-absolute mt-3 m-2 top-0 end-0" id="submit">
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="d-block d-sm-block d-md-none ">
+        <div class="mt-5 pt-2 mb-3">
+            <!-- <div class="container" style="overflow-y: auto; height:80vh;" id="mobileChatMessages"> -->
+            {% if chats: %}
+            {% for chat in chats %}
+            <div class="bot-message mb-1" href="#">
+                <img src="/ibot/static/images/user.png" alt="Logo" height="24" class="d-inline-block align-text-top">
+                You
+            </div>
+            <div class="alert alert-light">
+                {{chat['user_message']}}
+            </div>
+            <div class="user-message mb-1" href="#">
+                <img src="/ibot/static/images/waterbot_bg.png" alt="Logo" height="24"
+                    class="d-inline-block align-text-top">
+                JiM
+            </div>
+            <div class="alert alert-light">
+                {{chat['bot_message']}}
+            </div>
+            {% endfor %}
+            {% endif %}
+        </div>
+        <div class="fixed-bottom">
+            <form class="container" action="/ibot/" method="post">
+                <div class="d-inline-block position-relative mb-2 w-100">
+                    <textarea type="" class="form-control d-inline-block pe-5" name="user_message" id="userMessage"
+                        placeholder="Type your message..." aria-label="Type your message..."
+                        aria-describedby="button-addon2"></textarea>
+                    <input type="submit" value="Send"
+                        class="btn btn-primary btn-sm position-absolute mt-3 m-2 top-0 end-0" id="submitButton">
+                    <div class="btn btn-primary btn-sm position-absolute mt-3 m-2 top-0 end-0 px-4 visually-hidden"
+                        id="loader">
+                        <div class='spinner-border text-light' style="height:20px; width:20px;" role='status'>
+                            <span class='visually-hidden'>Loading...</span>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<script>
+
+    document.addEventListener('DOMContentLoaded', function () {
+        // Your code goes here
+        userMessage = document.getElementById('userMessage')
+        userMessage.focus();
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+        messageDivs = document.getElementsByClassName('alert alert-light');
+        if (messageDivs.length > 0) {
+            messageDiv = messageDivs[messageDivs.length - 1];
+            bot_message = messageDiv.innerText;
+            // bot_message = 'this is a test message. to be created on load';
+            messageDiv.innerText = '';
+            typeText(messageDiv, bot_message, 10, 0);
+        }
+
+
+
+        document.getElementById('submitButton').addEventListener('click', function () {
+            // event.preventDefault();
+            document.getElementById('submitButton').classList.add('visually-hidden');
+            document.getElementById('loader').classList.remove('visually-hidden');
+        });
+
+        userMessage.addEventListener('change', function () {
+            document.getElementById('submitButton').classList.add('disabled');
+        });
+
+        function typeText(item, text, delay, i) {
+            if (i < text.length) {
+                item.textContent += text.charAt(i);
+                setTimeout(function () {
+                    typeText(item, text, delay, i + 1);
+                }, delay);
+            }
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+        // function typeText(item, text, delay, i) {
+        //     item.append(text.charAt(i))
+        //         .delay(delay)
+        //         .promise()
+        //         .done(function () {
+        //             if (i < text.length) {
+        //                 i++;
+        //                 typeText(item, text, delay, i);
+        //             }
+        //         });
+        // }
+    });
+    // TYPE SIMULATION TEXT
+    //     function typeText(item, text, delay, i) {
+    //     $(item).append(text.charAt(i))
+    //         .delay(delay)
+    //         .promise()
+    //         .done(function() {
+    //           if(i<text.length) {
+    //             i++;
+    //             typeText(item, text, delay, i);
+    //           }
+    //     });
+    // }
+
+    // var text = 'This is bit longer text. This will be typed at the speed of 100 or less';
+    // var item = $("div");
+
+    // $(document).on('click', 'button', function(){
+    //   item.empty();
+    //   typeText(item, text, 30, 0);
+    // });
+</script>
+{% endblock %}
