@@ -1,0 +1,142 @@
+{% extends 'base.html' %}
+{% block title %}<title>State Gauge</title>{%endblock%}
+{% block content %}
+<div class="container text-center">
+    <h1 class="pt-2">State Gauge</h1>
+
+    <div class="plot">
+        {% for i in range(1, 13) %}
+        <div class="row">
+            {% for j in range(1, 4) %}
+            <div class="col">
+                <canvas id="chart_{{ (i - 1) * 3 + j }}" height="200"></canvas>
+                <div class="state-title fw-semibold text-dark"></div> <!-- Add div for state title -->
+            </div>
+            {% endfor %}
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+{% endblock %}
+
+
+{%block script%}
+<script src="https://unpkg.com/chart.js@2.8.0/dist/Chart.bundle.js"></script>
+<script src="https://unpkg.com/chartjs-gauge@0.3.0/dist/chartjs-gauge.js"></script>
+<script>
+    // Define variable to store state data
+    let state_data;
+
+    // Fetch state data
+    fetch("{{url_for('dashboard.state_area')}}")
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            // Store the fetched data in the state_data variable
+            state_data = data;
+            console.log('State Data:', state_data);
+
+            // Iterate over state_data object
+            let index = 1; // Initialize index variable
+            for (const key in state_data) {
+                if (state_data.hasOwnProperty(key)) {
+                    const data_array = state_data[key];
+                    // Check if data_array contains at least two elements
+                    if (data_array.length >= 4) {
+                        const gauge_data = [data_array[3], data_array[2]];
+                        console.log('chart_' + index)
+                        create_gauge(gauge_data, 'chart_' + index, data_array[1], data_array[0] ); // Call create_gauge function with gauge_data and index
+                        index++; // Increment index variable
+                    } else {
+                        console.error(`Array at index ${key} does not have enough elements`);
+                    }
+                }
+            }
+        })
+        .catch(error => {
+            console.error('There was a problem with the fetch operation:', error);
+        });
+
+// Function to create a gauge with given data
+// Function to create a gauge with given data
+function create_gauge(gauge_data, id, state_name, state_code) {
+    // Define the configuration object for the gauge chart
+    var config = {
+        type: 'gauge',
+        data: {
+            datasets: [{
+                data: gauge_data,
+                value: gauge_data[0], // Assuming the first value is used as the initial value
+                backgroundColor: [
+                    'rgba(224, 75, 212, 0.5)',
+                    'rgba(75, 192, 192, 0.5)'
+                ],
+                borderWidth: 2
+            }],
+            labels: ['Waste Land', 'TGA'] // Labels of your choice
+        },
+        options: {
+            responsive: true,
+            layout: {
+                padding: {
+                    bottom: 30
+                }
+            },
+            needle: {
+                radiusPercentage: 2,
+                widthPercentage: 3.2,
+                lengthPercentage: 80,
+                color: 'rgba(0, 0, 0, 1)'
+            },
+            valueLabel: {
+                formatter: Math.round
+            },
+            tooltips: {
+                enabled: true,
+                callbacks: {
+                    title: function (tooltipItems, data) {
+                        return 'Values';
+                    },
+                    label: function (tooltipItem, data) {
+                        var dataset = data.datasets[0];
+                        var value = dataset.data[tooltipItem.index];
+                        var label = data.labels[tooltipItem.index];
+                        return label + ': ' + value;
+                    }
+                }
+            }
+        }
+    };
+
+    // Create the gauge chart
+    var ctx = document.getElementById(`${id}`).getContext('2d');
+    window.myGauge = new Chart(ctx, config);
+
+    // Set state name below the gauge
+    var stateTitleElement = document.querySelector(`#${id} + .state-title`);
+    if (stateTitleElement) {
+        stateTitleElement.textContent = state_name;
+
+        // Create anchor tag with href attribute
+        var anchorTag = document.createElement('a');
+        anchorTag.href = `/iland/district_gauge/${state_code}`;
+
+        // Wrap state title with anchor tag
+        stateTitleElement.parentNode.insertBefore(anchorTag, stateTitleElement); // Insert anchor tag before state title
+        anchorTag.appendChild(stateTitleElement); // Append state title as child of anchor tag
+    }
+
+    console.log('Creating gauge with data:', gauge_data);
+}
+
+
+
+
+</script>
+
+{%endblock%}

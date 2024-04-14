@@ -1,5 +1,218 @@
 {% extends 'base.html' %}
+{% block title %}
+<title>Dashboard</title>
+
+{%endblock%}
 {% block content %}
+
+<div class="row p-0 m-0" style="max-height: 100%; width: 100%;">
+    <!-- horizontal bar chart  -->
+    <div class="col-4 border border-dark mt-4 mx-2 shadow" style="height: 100%; ">
+        <div class="canvas-holder text-center" style="height: 100%; max-width: 100%;">
+            <div class="title fw-bold pt-1 text-dark">State Wise Waste Land Area</div>
+            <canvas class="py-4" id="horizontalbar" height="620" width="500" style="height: 100%;"></canvas>
+        </div>
+    </div>
+    <div class="col mt-4 mx-2" style="height: fit-content;">
+        <div class="row" style="height: 15%;">
+            <!-- total_wl_area -->
+            <div class="col border border-dark text-center shadow" style="height: 100%; margin-right: 0.5rem;">
+                <h1 class="number fw-bold pt-3">{{total_wl_area | int}}</h1>
+                <p class="title m-0 fw-bold pb-2 text-secondary">Total Waste Land</p>
+            </div>
+            <!-- total_tga -->
+            <div class="col border border-dark text-center shadow"
+                style="height: 100%; margin-left: 0.5rem; margin-right: 0.25rem;">
+                <h1 class="number fw-bold pt-3">{{total_tga | int}}</h1>
+                <p class="title m-0 fw-bold text-secondary pb-2">Total TGA</p>
+            </div>
+        </div>
+        <div class="row mt-3" style="height: 85%;">
+            <!-- category doughnut -->
+            <div class="col border border-dark text-center pt-1 shadow" style="height: 100%; max-width: 50%; margin-right: 0.5rem;">
+                <div class="title fw-bold pt-1 text-dark pb-4">Category Wise Waste Land Area</div>
+                <div class="canvas-holder pb-4 mb-4" style="width: max-content;">
+                    <canvas id="categorydoughnut" width="550" height="550" class="py-4 px-2"></canvas>
+                </div>
+            </div>
+
+            <div class="col" style="height: 100%; max-width: 50%; margin-left: 0.5rem;">
+                
+                <!-- category bar by district -->
+                <div class="row border border-dark text-center shadow justify-content-center" style="max-height: 50%;">
+                    <div class="title fw-bold pt-1 text-dark">Category Wise Waste Land Area(in District)</div>
+                    <div class="title fw-bold pt-1 text-dark pb-3">{{district_bar_name | title}}</div>
+                    <div class="canvas-holder" style="width: max-content;">
+                        <canvas id="categorybar" height="250" width="500"></canvas>
+                    </div>
+                </div>
+
+                <!-- state gauge -->
+                <div class="row border border-dark text-center pt-1 mt-2 shadow justify-content-center" style="max-height: 50%; ">
+                    <div class="title fw-bold pt-1 text-dark">TGA vs Waste Land Area(in State)</div>
+                    <div class="title fw-bold pt-1 text-dark pb-4">{{state_gauge_name | title}}</div>
+                    <div class="canvas-holder" style="width: max-content;">
+                        <canvas id="stategauge" height="250" width="500"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+</div>
+
 
 
 {% endblock %}
+{% block script%}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var ctx_horizontalbar = document.getElementById('horizontalbar').getContext('2d');
+        var horizontalbar = new Chart(ctx_horizontalbar, {
+            type: 'bar',
+            data: {
+                labels: {{ labels_statewise | safe}},
+        datasets: [{
+            label: 'State',
+            data: {{ values_statewise | safe}},
+        backgroundColor: 'rgba(75, 192, 192, 0.5)',
+        borderColor: 'rgba(75, 192, 192, 1)',
+        borderWidth: 1
+            }]
+        },
+        options: {
+        indexAxis: 'y', // Set the index axis to 'y' for horizontal bar chart
+        scales: {
+            x: {
+                beginAtZero: true
+            }
+        }
+    }
+    });
+
+    var ctx_doughnut = document.getElementById('categorydoughnut').getContext('2d');
+    var categorydoughnut = new Chart(ctx_doughnut, {
+        type: 'doughnut', // Use 'doughnut' type for doughnut chart
+        data: {
+            labels: {{ labels_categorywise | safe}},
+    datasets: [{
+        label: 'Doughnut Chart',
+        data: {{ values_categorywise | safe}}, // Adjust the data values as needed
+        backgroundColor: [
+        'rgba(255, 99, 132, 0.5)',
+        'rgba(224, 75, 212, 0.5)',
+        'rgba(255, 206, 86, 0.5)',
+        'rgba(75, 192, 192, 0.5)',
+        'rgba(153, 102, 255, 0.5)',
+        'rgba(255, 159, 64, 0.5)',
+        'rgba(119, 209, 111, 0.5)',
+        'rgba(255, 140, 0, 0.5)'
+    ],
+
+        borderWidth: 1
+                }]
+            },
+        });
+
+    var ctx_categorybar = document.getElementById('categorybar').getContext('2d');
+    var categorybar = new Chart(ctx_categorybar, {
+        type: 'bar',
+        data: {
+            labels: {{ labels_district_category | safe}},
+    datasets: [{
+        label: 'Category',
+        data: {{ values_district_category | safe}},
+        backgroundColor: 'rgba(75, 192, 192, 0.5)',
+        borderColor: 'rgba(75, 192, 192, 1)',
+        borderWidth: 1
+                }]
+            },
+    options: {
+        // Set the index axis to 'y' for horizontal bar chart
+        scales: {
+            x: {
+                beginAtZero: true
+            }
+        }
+    }
+        });
+});
+
+</script>
+<script>
+    var existingChartJsScript = document.querySelector('script[src="https://cdn.jsdelivr.net/npm/chart.js"]');
+    if (existingChartJsScript) {
+        existingChartJsScript.parentNode.removeChild(existingChartJsScript);
+    }
+    // Dynamically add Chart.js script tag
+    var chartJsScript = document.createElement('script');
+    chartJsScript.src = "https://unpkg.com/chart.js@2.8.0/dist/Chart.bundle.js";
+    document.body.insertBefore(chartJsScript, document.currentScript);
+
+    // Dynamically add chartjs-gauge.js script tag
+    var gaugeJsScript = document.createElement('script');
+    gaugeJsScript.src = "https://unpkg.com/chartjs-gauge@0.3.0/dist/chartjs-gauge.js";
+    document.body.insertBefore(gaugeJsScript, document.currentScript);
+
+
+
+    gaugeJsScript.onload = chartJsScript.onload = function () {
+        var config = {
+        type: 'gauge',
+        data: {
+            datasets: [{
+                labels: ['TGA'],
+                data: {{ state_gauge_values | safe }}, // Static data
+        value: {{ state_gauge_values[1] | safe}}, // Static value
+    backgroundColor: [
+        'rgba(224, 75, 212, 0.5)',
+        'rgba(75, 192, 192, 0.5)'
+    ],
+        borderWidth: 2
+            }],
+    labels: ['Waste Land', 'TGA'] // Labels of your choice
+        },
+    options: {
+        responsive: true,
+            layout: {
+            padding: {
+                bottom: 30
+            }
+        },
+        needle: {
+            radiusPercentage: 2,
+                widthPercentage: 3.2,
+                    lengthPercentage: 80,
+                        color: 'rgba(0, 0, 0, 1)'
+        },
+        valueLabel: {
+            formatter: Math.round
+        },
+        tooltips: {
+            enabled: true,
+                callbacks: {
+                title: function(tooltipItems, data) {
+                    return 'Values';
+                },
+                label: function(tooltipItem, data) {
+                    var dataset = data.datasets[0];
+                    var value = dataset.data[tooltipItem.index];
+                    var label = data.labels[tooltipItem.index];
+                    return label + ': ' + value;
+                }
+            }
+        }
+    }
+    };
+        var ctx_gauge = document.getElementById('stategauge').getContext('2d');
+        window.myGauge = new Chart(ctx_gauge, config);
+        window.addEventListener('load', function () {
+            document.body.removeChild(chartJsScript);
+            document.body.removeChild(gaugeJsScript);
+        });
+    };
+</script>
+
+
+{%endblock%}

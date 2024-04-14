@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+{% block title %}<title>National Gauge</title>
+
+{%endblock%}
+{% block content %}
+<div class="container text-center">
+    <h1 class="pt-2">National Gauge</h1>
+
+    <div id="canvas-holder mt-2" style="width:100%">
+        <canvas id="chart"></canvas>
+    </div>
+</div>
+
+{% endblock %}
+
+
+{%block script%}
+<script src="https://unpkg.com/chart.js@2.8.0/dist/Chart.bundle.js"></script>
+<script src="https://unpkg.com/chartjs-gauge@0.3.0/dist/chartjs-gauge.js"></script>   
+<script>
+    var config = {
+        type: 'gauge',
+        data: {
+            datasets: [{
+                data: {{national_gauge_value | safe }}, // Static data
+                value: {{national_gauge_value[0] | safe}}, // Static value
+                backgroundColor: [
+                'rgba(224, 75, 212, 0.5)',
+                'rgba(75, 192, 192, 0.5)'
+                ],
+                borderWidth: 2
+            }],
+            labels: ['Waste Land', 'TGA'] // Labels of your choice
+        },
+        options: {
+            responsive: true,
+            layout: {
+                padding: {
+                    bottom: 30
+                }
+            },
+            needle: {
+                radiusPercentage: 2,
+                widthPercentage: 3.2,
+                lengthPercentage: 80,
+                color: 'rgba(0, 0, 0, 1)'
+            },
+            valueLabel: {
+                formatter: Math.round
+            },
+            tooltips: {
+                enabled: true,
+                callbacks: {
+                    title: function(tooltipItems, data) {
+                        return 'Values';
+                    },
+                    label: function(tooltipItem, data) {
+                        var dataset = data.datasets[0];
+                        var value = dataset.data[tooltipItem.index];
+                        var label = data.labels[tooltipItem.index];
+                        return label + ': ' + value;
+                    }
+                }
+            }
+        }
+    };
+
+    window.onload = function () {
+        var ctx = document.getElementById('chart').getContext('2d');
+        window.myGauge = new Chart(ctx, config);
+    };
+
+
+</script>
+
+{%endblock%}

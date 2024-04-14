@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% block title %}<title>Select State</title>{%endblock%}
+{% block content %}
+<div class="container text-center">
+    <h1 class="pt-2">Select State</h1>
+    <form action="/iland/select_state" method="post">
+        <div>
+            <select class="form-select" name="state" id="exampleSelect1">
+                <option class=" disabled">Select State</option>
+                {% for item in states %}
+                <option value="{{item.code}}">{{item.name | title()}}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <button type="submit" class="btn btn-primary mt-4">Submit</button>
+
+    </form>
+</div>
+
+{% endblock %}
+
+
+{%block script%}
+
+{%endblock%}

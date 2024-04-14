@@ -2,7 +2,7 @@
 from flask import Flask
 from iLand.app.db import db
 from flask_migrate import Migrate
-from iLand.app.routes.state_wise_area import blp as StateBlueprint
+from iLand.app.routes.dashboard import blp as StateBlueprint
 
 
 def create_app():

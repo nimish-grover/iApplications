@@ -1,12 +1,116 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>iLand</title>
+
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        {% block title %}{% endblock %}
+        <!--Import Google Icon Font-->
+        <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+        <link href="https://bootswatch.com/5/lux/bootstrap.css" rel="stylesheet">
+        <meta name="theme-color" content="transparent" />
+        <meta name="description" content="This is iLand application">
+        <link rel="shortcut icon" href="{{url_for('static',filename='assets/favicon.ico')}}" type="image/x-icon">
+        <link rel="stylesheet" href="{{url_for('static',filename = 'css/base.css')}}">
+        <link rel="icon" href="{{ url_for('static', filename='assets/404621.png') }}" sizes="192x192">
+
+    </head>
 </head>
-<body>
-    {% block contents %}
+
+<body style="height: 100vh;">
+    <nav class="navbar navbar-expand-lg bg-primary" data-bs-theme="dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">iLand</a>
+            <button class="navbar-toggler no-loader" type="button" data-bs-toggle="collapse"
+                data-bs-target="#navbarColor01" aria-controls="navbarColor01" aria-expanded="false"
+                aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarColor01">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/iland/state_wise_area">State Wise Area
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/iland/select_state">Select State
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/iland/category_wise_area">Category Wise Area
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/iland/tga_vs_wl">Tga vs Wl_area
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/iland/national_gauge">National Gauge
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/iland/state_gauge">State Gauge
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/iland/district_gauge/8">District Gauge(Rajasthan)
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/iland/district_category/145">District Category(Ghaziabad)
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    {% block content %}
     {% endblock %}
+    <!-- <div class="loader">
+            <div class="row" style="margin-bottom: 6rem;">
+                <div class="loading-icon">
+                    <div class="sk-cube-grid">
+                        <div class="sk-cube sk-cube1"></div>
+                        <div class="sk-cube sk-cube2"></div>
+                        <div class="sk-cube sk-cube3"></div>
+                        <div class="sk-cube sk-cube4"></div>
+                        <div class="sk-cube sk-cube5"></div>
+                        <div class="sk-cube sk-cube6"></div>
+                        <div class="sk-cube sk-cube7"></div>
+                        <div class="sk-cube sk-cube8"></div>
+                        <div class="sk-cube sk-cube9"></div>
+                    </div>
+                </div>
+                <p id="textAfter30Secs" style="display: none; margin-top: -90px;" class="text-center fw-semibold">It's
+                    taking longer than usual. Please Wait !!</p>
+                <p id="textAfter1Minute" class="text-center fw-semibold" style="display: none; margin-top: -90px;">We're
+                    working on it. Please stay with us !!</p>
+            </div>
+        </div> -->
+
+    <script src="https://kit.fontawesome.com/b8fa5f2ca2.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
+        integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js"
+        integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js"
+        integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
+        crossorigin="anonymous"></script>
+    <script src="{{url_for('static',filename = 'js/base.js')}}"></script>
+
+    {% block script %}
+
+    {%endblock%}
+
 </body>
+
 </html>

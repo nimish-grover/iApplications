@@ -1,11 +1,11 @@
 {% extends 'base.html' %}
-{% block title %}<title>State wise</title>{%endblock%}
+{% block title %}<title>Category Wise Area</title>{%endblock%}
 {% block content %}
 <div class="container text-center">
-    <h1 class="pt-2">State Wise Area</h1>
+    <h1 class="pt-2">Category Wise Area ({{district_db.name | title}})</h1>
 
     <div class="plot">
-        <canvas id="myChart" height="200"></canvas>
+        <canvas id="myChart" height="150"></canvas>
     </div>
 </div>
 
@@ -19,17 +19,17 @@
         var myChart = new Chart(ctx, {
             type: 'bar',
             data: {
-                labels: {{ state_wise_label | safe}},
+                labels: {{ category_wise_label | safe}},
                 datasets: [{
-                    label: 'State',
-                    data: {{ state_wise_value | safe}},
+                    label: 'Category',
+                    data: {{ category_wise_value | safe}},
                     backgroundColor: 'rgba(54, 162, 235, 0.5)',
                     borderColor: 'rgba(54, 162, 235, 1)',
                     borderWidth: 1
                 }]
             },
             options: {
-                indexAxis: 'y', // Set the index axis to 'y' for horizontal bar chart
+                 // Set the index axis to 'y' for horizontal bar chart
                 scales: {
                     x: {
                         beginAtZero: true

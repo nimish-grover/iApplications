@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+{% block title %}<title>Category wise</title>
+
+{%endblock%}
+{% block content %}
+<div class="container text-center">
+    <h1 class="pt-2">Category Wise Area</h1>
+
+    <div class="plot">
+        <canvas id="myChart" style="max-height: 700px;"></canvas>
+    </div>
+</div>
+
+{% endblock %}
+
+
+{%block script%}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var ctx = document.getElementById('myChart').getContext('2d');
+        var myChart = new Chart(ctx, {
+            type: 'doughnut', // Use 'doughnut' type for doughnut chart
+            data: {
+                labels: {{category_wise_label | safe}},
+                datasets: [{
+                    label: 'Doughnut Chart',
+                    data: {{category_wise_value | safe}}, // Adjust the data values as needed
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.5)',
+                        'rgba(224, 75, 212, 0.5)',
+                        'rgba(255, 206, 86, 0.5)',
+                        'rgba(75, 192, 192, 0.5)',
+                        'rgba(153, 102, 255, 0.5)',
+                        'rgba(255, 159, 64, 0.5)',
+                        'rgba(119, 209, 111, 0.5)',
+                        'rgba(255, 140, 0, 0.5)'
+                    ],
+                    
+                    borderWidth: 1
+                }]
+            },
+        });
+    });
+</script>
+
+{%endblock%}
+<!-- borderColor: [
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(224, 75, 212, 1)',
+                        'rgba(255, 206, 86, 1)',
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(153, 102, 255, 1)',
+                        'rgba(255, 159, 64, 1)',
+                        'rgba(119, 209, 111, 1)',
+                        'rgba(255, 140, 0, 1)'
+                    ], -->

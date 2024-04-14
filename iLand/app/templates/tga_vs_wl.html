@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% block title %}<title>TGA vs WL</title>{%endblock%}
+{% block content %}
+<div class="container text-center">
+    <h1 class="pt-2">TGA vs WL_AREA</h1>
+
+    <div class="plot">
+        <canvas id="myChart" style="max-height: 700px;"></canvas>
+    </div>
+</div>
+
+{% endblock %}
+
+
+{%block script%}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var ctx = document.getElementById('myChart').getContext('2d');
+        var myChart = new Chart(ctx, {
+            type: 'doughnut', // Use 'doughnut' type for doughnut chart
+            data: {
+                labels: {{tga_vs_wl_label | safe}},
+                datasets: [{
+                    label: 'Doughnut Chart',
+                    data: {{tga_vs_wl_value | safe}}, // Adjust the data values as needed
+                    backgroundColor: [
+                        
+                        'rgba(224, 75, 212, 0.5)',
+                        
+                        'rgba(75, 192, 192, 0.5)',
+                ],
+                    
+                    borderWidth: 1
+                }]
+            },
+        });
+    });
+</script>
+
+{%endblock%}

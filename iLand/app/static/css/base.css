@@ -1,0 +1,97 @@
+.page-content {
+    min-height: calc(100vh - 116px);
+    /* Adjust the value (100px) to match the height of your footer */
+}
+
+.active-nav {
+    font-weight: 600;
+    color: black;
+}
+
+.loader {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #ffffffff;
+    z-index: 9999;
+    /* Ensure it's above other elements */
+    transition: opacity 0.3s;
+}
+
+.loader-hidden {
+    opacity: 0;
+    pointer-events: none;
+    /* Disable mouse events when hidden */
+}
+
+
+/* Your custom styles here */
+.loading-icon {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.sk-cube-grid {
+    width: 40px;
+    height: 40px;
+    margin: 100px auto;
+}
+
+.sk-cube {
+    width: 33%;
+    height: 33%;
+    background-color: #0d6efd;
+    float: left;
+    animation: sk-cube-grid 1.3s infinite ease-in-out;
+}
+
+.sk-cube1 {
+    animation-delay: 0.2s;
+}
+
+.sk-cube2 {
+    animation-delay: 0.3s;
+}
+
+.sk-cube3 {
+    animation-delay: 0.4s;
+}
+
+.sk-cube4 {
+    animation-delay: 0.1s;
+}
+
+.sk-cube5 {
+    animation-delay: 0.2s;
+}
+
+.sk-cube6 {
+    animation-delay: 0.3s;
+}
+
+.sk-cube7 {
+    animation-delay: 0s;
+}
+
+.sk-cube8 {
+    animation-delay: 0.1s;
+}
+
+.sk-cube9 {
+    animation-delay: 0.2s;
+}
+
+@keyframes sk-cube-grid {
+    33% {
+        transform: scale(0.5);
+    }
+
+    66% {
+        transform: scale(1);
+    }
+}
