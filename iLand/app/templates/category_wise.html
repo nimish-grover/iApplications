@@ -4,7 +4,43 @@
 {%endblock%}
 {% block content %}
 <div class="container text-center">
-    <h1 class="pt-2">Category Wise Area</h1>
+    <h1 class="pt-2">{{title}}</h1>
+    <form action="{{url_for('dashboard.category_wise_area')}}" method="post">
+        <div>
+            <select class="form-select" name="state_code" id="states">
+                <option class="" value="">Select State</option>
+
+                <option class="" value="0">All States</option>
+                
+                {% for item in states %}
+                <option value="{{item.code}}">{{item.name | title()}}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div>
+            <select class="form-select mt-2" name="district_code" id="districts">
+                <option class="Selected" value="0">Select District</option>
+                
+                
+            </select>
+        </div>
+        <button type="submit" class="btn btn-primary mt-4">Submit</button>
+    </form>
+</div>
+
+<div class="container text-center mt-2 mb-5">
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+        <ul>
+            {% for message in messages %}
+            <div class="alert alert-danger" role="alert">
+                {{ message }}
+            </div>
+
+            {% endfor %}
+        </ul>
+    {% endif %}
+{% endwith %}
 
     <div class="plot">
         <canvas id="myChart" style="max-height: 700px;"></canvas>
@@ -15,6 +51,50 @@
 
 
 {%block script%}
+
+<script>
+    // Function to convert string to title case
+    function toTitleCase(str) {
+        return str.toLowerCase().split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+    }
+
+    // Function to fetch districts by state code and append options to select element
+    function getDistrictsByStateCode(stateCode) {
+        fetch(`/iland/get_districts/${stateCode}`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Clear existing options except the default one
+                var districtsSelect = document.getElementById('districts');
+                districtsSelect.innerHTML = '<option value="" selected>Select District</option>';
+                // Append new options
+                data.forEach(district => {
+                    var option = document.createElement('option');
+                    option.value = district.code; // Assuming district code is used as value
+                    option.textContent = toTitleCase(district.name); // Convert district name to title case
+                    districtsSelect.appendChild(option);
+                });
+            })
+            .catch(error => {
+                console.error('There was a problem with the fetch operation:', error);
+            });
+    }
+
+    // Event listener to fetch districts when state selection changes
+    document.getElementById('states').addEventListener('change', function() {
+        var selectedStateCode = this.value;
+        if (selectedStateCode) {
+            getDistrictsByStateCode(selectedStateCode);
+        } else {
+            // Clear districts select when no state is selected
+            document.getElementById('districts').innerHTML = '<option value="" selected>Select District</option>';
+        }
+    });
+</script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         var ctx = document.getElementById('myChart').getContext('2d');

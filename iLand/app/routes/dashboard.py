@@ -26,7 +26,7 @@ def dashboard():
     #category doughnut
     labels_categorywise = []
     values_categorywise = []
-    category_area = WL_Area.get_area_category_wise(2)
+    category_area = WL_Area.get_area_category_wise_nation(2)
     for item in category_area:
         labels_categorywise.append(item[0].title())
         values_categorywise.append(item[1])
@@ -51,7 +51,7 @@ def dashboard():
     labels_district_category = []
     values_district_category = []
     
-    district_data = WL_Area.get_district_area_category_wise(random_district_code,2)
+    district_data = WL_Area.get_area_category_wise_district(random_district_code,2)
     if district_data:
         district_db = District.get_district_by_code(random_district_code)
         district_bar_name = district_db['name']
@@ -90,63 +90,113 @@ def dashboard():
                         )
 
 
-
-@blp.route('/state_wise_area')
+# all nation state wise wl area
+@blp.route('/state_wise_area',methods = ["POST","GET"])
 def state_wise_area():
-    db = WL_Area.get_area_state_wise(2)
-    labels = []
-    values = []
-    for item in db:
-        labels.append(item[0].title())
-        values.append(item[1])
-    return render_template('state_wise.html',state_wise_label = labels,state_wise_value= values )
-
-
-@blp.route('/select_state',methods = ["POST","GET"])
-def select_state():
-    if request.method == "GET":
-        states = State.get_all()
-        return render_template('state_form.html',states = states)
     if request.method == "POST":
         state_code = request.form.get('state')
         return redirect(url_for('dashboard.district_wise_area',code = state_code))
     
+    if request.method == "GET":
+        states = State.get_all()
+        return redirect(url_for('dashboard.district_wise_area',code= 0))
+
     
 @blp.route('/district_wise_area/<int:code>')
 def district_wise_area(code):
+    if code == 0:
+        title= 'State Wise Area'
+        db = WL_Area.get_area_state_wise(2)
+        labels = []
+        values = []
+        for item in db:
+            labels.append(item[0].title())
+            values.append(item[1])
+            
+        states = State.get_all()
+        return render_template('state_wise.html',state_wise_label = labels,state_wise_value = values,states = states,title=title)
+
     labels = []
     values = []
     districts_area = WL_Area.get_area_district_wise(code,2)
+    state_db = State.get_state_by_code(code)
     for item in districts_area:
         labels.append(item[0].title())
         values.append(item[1])
     
-        
-    return render_template('district_wise.html', district_wise_label = labels, district_wise_value = values)
+    title = state_db['name'] + ' Waste Land Area'
+    states = State.get_all()
+    return render_template('state_wise.html', state_wise_label = labels, state_wise_value = values,states=states,title = title)
 
-@blp.route('/category_wise_area')
+
+@blp.route('/category_wise_area',methods = ["POST","GET"])
 def category_wise_area():
+    if request.method == "POST":
+
+        state_code = int(request.form.get('state_code'))
+        if state_code:
+            district_code = request.form.get('district_code')
+            if district_code:
+                district_code = int(district_code)
+        if state_code == 0 :
+            return redirect(url_for('dashboard.doughnut_area_nation'))
+        
+        elif district_code:
+            return redirect(url_for('dashboard.doughnut_area_district',code=district_code))
+        
+        elif state_code:
+            return redirect(url_for('dashboard.doughnut_area_state',code=state_code))
+        
+
+    
+    if request.method == "GET":
+        return redirect(url_for("dashboard.doughnut_area_nation"))
+
+
+@blp.route('/doughnut_area_nation')
+def doughnut_area_nation():
     labels = []
     values = []
-    category_area = WL_Area.get_area_category_wise(2)
+    title= 'Category Wise Area'
+    category_area = WL_Area.get_area_category_wise_nation(2)
     for item in category_area:
         labels.append(item[0].title())
         values.append(item[1])
+    states = State.get_all()
         
-        
-    return render_template('category_wise.html', category_wise_label = labels, category_wise_value = values)
+    return render_template('category_wise.html', category_wise_label = labels, category_wise_value = values,title = title,states = states)
 
-@blp.route('/tga_vs_wl')
-def tga_vs_wl():
-    labels = ["TGA","WL_AREA"]
+@blp.route('/doughnut_area_state/<int:code>')
+def doughnut_area_state(code):
+    if code :
+        labels = []
+        values = []
+        category_area = WL_Area.get_area_category_wise_state(code,2)
+        for item in category_area:
+            labels.append(item[0].title())
+            values.append(item[1])
+        states = State.get_all()  
+        if code:
+            state_db = State.get_state_by_code(code)
+            title = state_db['name']
+        return render_template('category_wise.html', category_wise_label = labels, category_wise_value = values,title = title,states = states)
+    else:
+        return redirect(url_for('dashboard.doughnut_area_nation'))
+
+@blp.route('/doughnut_area_district/<int:code>')
+def doughnut_area_district(code):
+    labels = []
     values = []
-    tga = Tga.get_total_tga()
-    wl_area = WL_Area.get_total_area(2) 
-    
-    values.append(tga)
-    values.append(wl_area)
-    
-    return render_template('tga_vs_wl.html', tga_vs_wl_label = labels, tga_vs_wl_value = values)
+    category_area = WL_Area.get_area_category_wise_district(code,2)
+    for item in category_area:
+        labels.append(item[0].title())
+        values.append(item[1])
+    states = State.get_all()
+    district_db = District.get_district_by_code(code)
+    title = district_db['name']
+    if not(category_area):
+        flash('Data for this district not available in the database.')
+    return render_template('category_wise.html', category_wise_label = labels, category_wise_value = values,title = title,states = states)
 
 
 @blp.route('/national_gauge')
@@ -194,7 +244,7 @@ def district_category(code):
     labels = []
     values = []
     district_db = District.get_district_by_code(code)
-    district_data = WL_Area.get_district_area_category_wise(code,2)
+    district_data = WL_Area.get_area_category_wise_district(code,2)
     for item in district_data:
         if item[1]:
             labels.append(item[0])
@@ -202,3 +252,9 @@ def district_category(code):
             
         
     return render_template('district_category.html', category_wise_label = labels, category_wise_value = values, district_db = district_db)
+
+
+@blp.route('/get_districts/<int:code>')
+def get_districts(code):
+    db = District.get_district_by_state_code(code)
+    return db

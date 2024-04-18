@@ -119,13 +119,14 @@ class WL_Area(db.Model):
         
         
     @classmethod
-    def get_area_category_wise(cls,year):
+    def get_area_category_wise_nation(cls,year):
         result = db.session.query(WL_Category.wl_category.label('category'), func.sum(cls.wl_area).label('total_wl_area')) \
                 .join(WL_Type, cls.wl_type_id == WL_Type.id) \
                 .join(WL_Category, WL_Type.wl_category_id == WL_Category.id) \
                 .filter(not_(WL_Area.wl_area.is_(None))) \
                 .filter(WL_Area.year_id == year) \
                 .group_by(WL_Category.wl_category) \
+                .order_by(func.sum(WL_Area.wl_area).desc()) \
                 .all()
         return result
         """SELECT c.wl_category AS category,
@@ -134,7 +135,52 @@ class WL_Area(db.Model):
         JOIN wl_type t ON w.wl_type_id = t.id
         JOIN wl_category c ON t.wl_category_id = c.id
         GROUP BY c.wl_category;"""
-        
+    
+    @classmethod
+    def get_area_category_wise_state(cls,code,year):
+        result = db.session.query(WL_Category.wl_category.label('category'),
+                func.sum(WL_Area.wl_area).label('total_wl_area')) \
+                .join(WL_Type, WL_Area.wl_type_id == WL_Type.id) \
+                .join(WL_Category, WL_Type.wl_category_id == WL_Category.id) \
+                .join(District, WL_Area.district_id == District.code) \
+                .filter(District.state_code == code) \
+                .filter(WL_Area.year_id == year) \
+                .group_by(WL_Category.wl_category) \
+                .order_by(func.sum(WL_Area.wl_area).desc()) \
+                .all()
+        return result
+    """
+    SELECT 
+    c.wl_category AS category,
+    SUM(w.wl_area) AS total_wl_area
+    FROM 
+        wl_area w
+    JOIN 
+        wl_type t ON w.wl_type_id = t.id
+    JOIN 
+        wl_category c ON t.wl_category_id = c.id
+    JOIN 
+        districts d ON w.district_id = d.code
+    WHERE 
+        d.state_code = 8
+    GROUP BY 
+        c.wl_category LIMIT 100
+    """
+    
+    @classmethod
+    def get_area_category_wise_district(cls,code,year):
+        result = db.session.query(WL_Category.wl_category.label('category'),
+                func.sum(WL_Area.wl_area).label('total_wl_area')) \
+                .join(WL_Type, WL_Area.wl_type_id == WL_Type.id) \
+                .join(WL_Category, WL_Type.wl_category_id == WL_Category.id) \
+                .join(District, WL_Area.district_id == District.code) \
+                .filter(District.code == code) \
+                .filter(WL_Area.year_id == year) \
+                .group_by(WL_Category.wl_category) \
+                .order_by((func.sum(WL_Area.wl_area)).desc()) \
+                .all()
+        return result
+    
     @classmethod
     def get_total_area(cls,year):
         result = db.session.query(func.sum(cls.wl_area)).filter(WL_Area.year_id == year).scalar()
@@ -163,7 +209,9 @@ class WL_Area(db.Model):
         WHERE d.code = 188
         GROUP BY c.wl_category;
         """
-        
+    
+
+    
     @classmethod
     def get_area_sorted_state_wise(cls,year):
         result = db.session.query(State.code.label('state_code'),

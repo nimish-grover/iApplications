@@ -23,7 +23,7 @@ class District(db.Model):
     
     @classmethod
     def get_district_by_state_code(cls, _code):
-        query=cls.query.filter_by(state_code=_code).all()
+        query=cls.query.filter_by(state_code=_code).order_by(cls.name).all()
         districts = []
         for item in query:
             districts.append(item.json())
