@@ -1,0 +1,85 @@
+def get_category_index(list,category):
+    for index in range(len(list)):
+        if category == list[index][0]:
+            return index
+
+
+@blp.route('/get_total/<int:state_code>')
+def get_total(state_code):
+    json_data = {}
+    total_water_spread = Water_bodies.get_total_water_spread_area(state_code)
+    total_storage_capacity = Water_bodies.get_total_storage_capacity(state_code)
+    total_water_bodies = Water_bodies.get_total_water_bodies(state_code)
+    
+    json_data['total_water_spread'] = ['total_water_spread',int(total_water_spread)]
+    json_data['total_storage_capacity'] = ['total_storage_capacity',int(total_storage_capacity)]
+    json_data['total_water_bodies'] = ['total_water_bodies',int(total_water_bodies)]
+    
+    return json_data
+
+@blp.route('/get_total_type_wise/<int:state_code>')
+def get_total_type_wise(state_code):
+    json_data={}
+    db_result = Water_bodies.get_total_values_type_wise(state_code)
+    total_spread_area = []
+    total_storage_capacity = []
+    total_water_bodies = []
+    
+    for item in db_result:
+        if item[1]:
+            total_spread_area.append([item[0],int(item[1])])
+            
+        if item[2]:
+            total_storage_capacity.append([item[0],int(item[2])])
+            
+        if item[3]:
+            total_water_bodies.append([item[0],int(item[3])])
+    
+
+    json_data['total_spread_area'] = total_spread_area
+    json_data['total_storage_capacity'] = total_storage_capacity
+    json_data['total_water_bodies'] = total_water_bodies
+    
+    return json_data
+
+@blp.route('/get_total_storage_category/<int:state_code>')
+def get_total_storage_capacity(state_code):
+    json_data = {}
+    small_db = Water_bodies.get_total_values_by_storage_small(state_code)
+    medium_db = Water_bodies.get_total_values_by_storage_medium(state_code)
+    large_db = Water_bodies.get_total_values_by_storage_large(state_code)
+    
+    total_spread_area = [int(small_db[0]),int(medium_db[0]),int(large_db[0])]
+    total_storage_capacity = [int(small_db[1]),int(medium_db[1]),int(large_db[1])]
+    total_water_bodies = [small_db[2],medium_db[2],large_db[2]]
+    
+    json_data['total_spread_area'] = total_spread_area
+    json_data['total_storage_capacity'] = total_storage_capacity
+    json_data['total_water_bodies'] = total_water_bodies
+    
+    return json_data
+
+@blp.route('/get_total_type_wise_category/<int:state_code>')
+def get_total_type_wise_category(state_code):
+    json_data={}
+    small_db = Water_bodies.get_total_values_type_wise_small(state_code)
+    medium_db = Water_bodies.get_total_values_type_wise_medium(state_code)
+    large_db = Water_bodies.get_total_values_type_wise_large(state_code)
+    
+    categories = ["Ponds","Tanks","Lakes","Reservoirs","Others","WCS"]
+    
+    for category in categories:
+        json_data[category] = {}
+        small_index = get_category_index(small_db,category) if get_category_index(small_db,category) is not None else -1
+        if small_index >= 0:
+            json_data[category]["small"] = [int(small_db[small_index][1]),int(small_db[small_index][2]),small_db[small_index][3]]
+        
+        medium_index = get_category_index(medium_db,category) if get_category_index(medium_db,category) is not None else -1
+        if medium_index >= 0:
+            json_data[category]["medium"] = [int(medium_db[medium_index][1]),int(medium_db[medium_index][2]),medium_db[medium_index][3]]
+            
+        large_index = get_category_index(large_db,category) if get_category_index(large_db,category) is not None else -1
+        if large_index >= 0:
+            json_data[category]["large"] = [int(large_db[large_index][1]),int(large_db[large_index][2]),large_db[large_index][3]]
+
+    return json_data

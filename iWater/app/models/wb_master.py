@@ -1,4 +1,4 @@
-from app.db import db
+from iWater.app.db import db
 
 class WB_master(db.Model):
     __tablename__ = 'wb_master'

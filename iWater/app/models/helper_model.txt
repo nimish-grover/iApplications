@@ -1,0 +1,182 @@
+@classmethod
+    def get_count_and_sum(cls,state_code):
+        result = db.session.query(func.sum(Water_bodies.water_spread_area)).\
+        join(District, District.code == Water_bodies.district_code).\
+        filter(District.state_id == state_code).scalar()
+        
+        return result
+    
+    @classmethod
+    def get_total_water_spread_area(cls,state_code):
+        result = db.session.query(func.sum(Water_bodies.water_spread_area)).\
+        join(District, District.code == Water_bodies.district_code).\
+        filter(District.state_id == state_code).scalar()
+        
+        return result
+    
+    @classmethod
+    def get_total_water_bodies(cls,state_code):
+        result = db.session.query(func.count(Water_bodies.id)).\
+        join(District, District.code == Water_bodies.district_code).\
+        filter(District.state_id == state_code).scalar()
+        
+        return result
+    
+    @classmethod
+    def get_total_storage_capacity(cls,state_code):
+        result = db.session.query(func.sum(Water_bodies.storage_capacity)).\
+        join(District, District.code == Water_bodies.district_code).\
+        filter(District.state_id == state_code).scalar()
+        
+        return result
+    
+    @classmethod
+    def get_total_values_type_wise(cls,state_code):
+        result = db.session.query(
+        WB_master.name,
+        func.sum(Water_bodies.water_spread_area).label('total_water_spread'),
+        func.sum(Water_bodies.storage_capacity).label('total_storage_capacity'),
+        func.count(Water_bodies.wb_type_id).label('total_water_bodies')).\
+        join(Water_bodies, WB_master.code == Water_bodies.wb_type_id).\
+        join(District, District.id == Water_bodies.district_code).\
+        filter(District.state_id == state_code).\
+        group_by(WB_master.name).\
+        order_by(func.sum(Water_bodies.water_spread_area).desc()).all()
+        
+        return result
+        """
+        SELECT wb_master.name,sum(water_spread_area) as total_water_spread, sum(storage_capacity) as total_storage_capacity, 
+        count(wb_type_id) as total_water_bodies FROM water_bodies
+        join districts on districts.id = water_bodies.district_code 
+        join wb_master on wb_master.code = water_bodies.wb_type_id
+        WHERE districts.state_id = '23'
+        GROUP BY wb_master.name
+        ORDER BY sum(water_spread_area) DESC 
+        """
+        
+    @classmethod
+    def get_total_values_by_storage_small(cls,state_code):
+        result = db.session.query(
+            func.sum(Water_bodies.water_spread_area).label('total_water_spread'),
+            func.sum(Water_bodies.storage_capacity).label('total_storage_capacity'),
+            func.count(Water_bodies.id).label('total_water_bodies')).\
+            join(District, District.id == Water_bodies.district_code).\
+            filter(District.state_id == state_code).\
+            filter(Water_bodies.storage_capacity < 1).first()
+            
+        return result
+        """SELECT sum(water_spread_area) as total_water_spread, sum(storage_capacity) as total_storage_capacity,
+            count(water_bodies.id) as total_water_bodies from water_bodies
+            join districts on districts.id = water_bodies.district_code 
+            where districts.state_id = 23 AND storage_capacity<1"""
+            
+    @classmethod
+    def get_total_values_by_storage_medium(cls,state_code):
+        result = db.session.query(
+            func.sum(Water_bodies.water_spread_area).label('total_water_spread'),
+            func.sum(Water_bodies.storage_capacity).label('total_storage_capacity'),
+            func.count(Water_bodies.id).label('total_water_bodies')).\
+            join(District, District.id == Water_bodies.district_code).\
+            filter(District.state_id == state_code).\
+            filter(Water_bodies.storage_capacity.between(1, 10)).first()
+            
+        return result
+        """SELECT sum(water_spread_area) as total_water_spread, sum(storage_capacity) as total_storage_capacity,
+            count(water_bodies.id) as total_water_bodies from water_bodies
+            join districts on districts.id = water_bodies.district_code 
+            where districts.state_id = 23 AND storage_capacity between 1 and 10 """
+            
+            
+    @classmethod
+    def get_total_values_by_storage_large(cls,state_code):
+        result = db.session.query(
+            func.sum(Water_bodies.water_spread_area).label('total_water_spread'),
+            func.sum(Water_bodies.storage_capacity).label('total_storage_capacity'),
+            func.count(Water_bodies.id).label('total_water_bodies')).\
+            join(District, District.id == Water_bodies.district_code).\
+            filter(District.state_id == state_code).\
+            filter(Water_bodies.storage_capacity > 10).first()
+            
+        return result
+        """SELECT sum(water_spread_area) as total_water_spread, sum(storage_capacity) as total_storage_capacity,
+            count(water_bodies.id) as total_water_bodies from water_bodies
+            join districts on districts.id = water_bodies.district_code 
+            where districts.state_id = 23 AND storage_capacity>10"""
+            
+    @classmethod 
+    def get_total_values_type_wise_small(cls,state_code):
+        result = db.session.query(
+            WB_master.name,
+            func.sum(Water_bodies.water_spread_area).label('total_water_spread'),
+            func.sum(Water_bodies.storage_capacity).label('total_storage_capacity'),
+            func.count(Water_bodies.id).label('total_water_bodies')).\
+            join(Water_bodies, WB_master.code == Water_bodies.wb_type_id).\
+            join(District, District.id == Water_bodies.district_code).\
+            filter(District.state_id == state_code).\
+            filter(Water_bodies.storage_capacity < 1).\
+            group_by(WB_master.name).\
+            order_by(func.sum(Water_bodies.storage_capacity).desc()).all()
+            
+        return result
+        """
+        SELECT wb_master.name,sum(water_spread_area) as total_water_spread, sum(storage_capacity) as total_storage_capacity,
+        count(water_bodies.id) as total_water_bodies from water_bodies
+        join districts on districts.id = water_bodies.district_code 
+        join wb_master on wb_master.code = water_bodies.wb_type_id
+        where districts.state_id = 23 AND storage_capacity <1 
+        GROUP BY wb_master.name
+        ORDER BY sum(storage_capacity) DESC
+        """
+        
+    @classmethod 
+    def get_total_values_type_wise_medium(cls,state_code):
+        result = db.session.query(
+            WB_master.name,
+            func.sum(Water_bodies.water_spread_area).label('total_water_spread'),
+            func.sum(Water_bodies.storage_capacity).label('total_storage_capacity'),
+            func.count(Water_bodies.id).label('total_water_bodies')).\
+            join(Water_bodies, WB_master.code == Water_bodies.wb_type_id).\
+            join(District, District.id == Water_bodies.district_code).\
+            filter(District.state_id == state_code).\
+            filter(Water_bodies.storage_capacity.between(1, 10)).\
+            group_by(WB_master.name).\
+            order_by(func.sum(Water_bodies.storage_capacity).desc()).all()
+            
+        return result
+        """
+        SELECT wb_master.name,sum(water_spread_area) as total_water_spread, sum(storage_capacity) as total_storage_capacity,
+        count(water_bodies.id) as total_water_bodies from water_bodies
+        join districts on districts.id = water_bodies.district_code 
+        join wb_master on wb_master.code = water_bodies.wb_type_id
+        where districts.state_id = 23 AND storage_capacity <1 
+        GROUP BY wb_master.name
+        ORDER BY sum(storage_capacity) DESC
+        """
+        
+        
+    @classmethod 
+    def get_total_values_type_wise_large(cls,state_code):
+        result = db.session.query(
+            WB_master.name,
+            func.sum(Water_bodies.water_spread_area).label('total_water_spread'),
+            func.sum(Water_bodies.storage_capacity).label('total_storage_capacity'),
+            func.count(Water_bodies.id).label('total_water_bodies')).\
+            join(Water_bodies, WB_master.code == Water_bodies.wb_type_id).\
+            join(District, District.id == Water_bodies.district_code).\
+            filter(District.state_id == state_code).\
+            filter(Water_bodies.storage_capacity > 10).\
+            group_by(WB_master.name).\
+            order_by(func.sum(Water_bodies.storage_capacity).desc()).all()
+            
+        return result
+        """
+        SELECT wb_master.name,sum(water_spread_area) as total_water_spread, sum(storage_capacity) as total_storage_capacity,
+        count(water_bodies.id) as total_water_bodies from water_bodies
+        join districts on districts.id = water_bodies.district_code 
+        join wb_master on wb_master.code = water_bodies.wb_type_id
+        where districts.state_id = 23 AND storage_capacity <1 
+        GROUP BY wb_master.name
+        ORDER BY sum(storage_capacity) DESC
+        """
+        
+        
