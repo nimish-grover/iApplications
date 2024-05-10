@@ -1,0 +1,43 @@
+api json format : {"state_code":23,"district_code":410,"block_code":3742,"village_code":456464}
+
+bubble response :
+
+[
+    [
+        [storage_cap,wb_body_count,spread_area,district_name],storage_cap,wb_body_count,spread_area,district_name
+    ],
+    [
+        [storage_cap,wb_body_count,spread_area,district_name],storage_cap,wb_body_count,spread_area,district_name
+    ],
+]
+
+
+doughnut response : 
+
+[
+  [wb_count, "wb_category"],
+  [4, "Lakes"]
+]
+
+
+top five response:
+
+[
+  [
+    "State_name",
+    wb_count, "storage_cap",
+    "spread_area",
+    max_depth],
+  [
+    "Gujarat",
+    12950, "45786.27",
+    "36386.68",
+    100]
+]
+
+
+count and sum response:
+
+[["name",wb_body_count,storage_cap,spread_area]]
+[["national",81796,"335057.05","256932.86"]]
+

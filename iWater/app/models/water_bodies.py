@@ -1,7 +1,7 @@
 from iWater.app.db import db
 from iWater.app.models.district import District
 from iWater.app.models.wb_master import WB_master
-from sqlalchemy import func
+from sqlalchemy import func,literal
 from iWater.app.models.village import Village
 from iWater.app.models.state import State
 from iWater.app.models.block import Block
@@ -89,8 +89,8 @@ class Water_bodies(db.Model):
             func.count(Water_bodies.wb_type_id), ',',
             func.to_char(func.sum(Water_bodies.water_spread_area), 'FM999999999'), ',"',
             District.name, '"]'),
-            func.count(Water_bodies.wb_type_id).label('count'),
             func.to_char(func.sum(Water_bodies.storage_capacity), 'FM999999999.00').label('storage_capacity'),
+            func.count(Water_bodies.wb_type_id).label('count'),
             func.to_char(func.sum(Water_bodies.water_spread_area), 'FM999999999.00').label('spread_area'),
             District.name).\
             join(Village, Village.code == Water_bodies.village_code).\
@@ -274,8 +274,7 @@ class Water_bodies(db.Model):
             join(State, State.id == District.state_id).\
             filter(District.code == json_data['district_code']).\
             group_by(District.id).\
-            order_by(func.count(Water_bodies.id).desc()).\
-            limit(5).all()
+            order_by(func.count(Water_bodies.id).desc()).all()
             
         elif 'village_code' in json_data:
             query = db.session.query(
@@ -288,8 +287,20 @@ class Water_bodies(db.Model):
             join(State, State.id == District.state_id).\
             filter(Village.code == json_data['village_code']).\
             group_by(Village.name).\
-            order_by(func.count(Water_bodies.id).desc()).\
-            limit(5).all()
+            order_by(func.count(Water_bodies.id).desc()).all()
+            
+        elif 'state_code' in json_data:
+            query = db.session.query(
+            State.name.label('state_name'),
+            func.count(Water_bodies.id).label('wb_count'),
+            func.to_char(func.sum(Water_bodies.storage_capacity), 'FM999999999.00').label('storage_capacity'),
+            func.to_char(func.sum(Water_bodies.water_spread_area), 'FM999999999.00').label('spread_area')).\
+            join(Village, Village.id == Water_bodies.village_code).\
+            join(District, District.code == Village.district_id).\
+            join(State, State.id == District.state_id).\
+            filter(State.code == json_data['state_name']).\
+            group_by(State.name).\
+            order_by(func.count(Water_bodies.id).desc()).all()
             
         elif 'block_code' in json_data:
             query = db.session.query(
@@ -303,21 +314,18 @@ class Water_bodies(db.Model):
             join(Block, Block.district_id == District.code).\
             filter(Block.code == json_data['block_code']).\
             group_by(Block.name).\
-            order_by(func.count(Water_bodies.id).desc()).\
-            limit(5).all()
+            order_by(func.count(Water_bodies.id).desc()).all()
             
         else:
             query = db.session.query(
-            State.name.label('state_name'),
+            literal('national').label('name'),
             func.count(Water_bodies.id).label('wb_count'),
             func.to_char(func.sum(Water_bodies.storage_capacity), 'FM999999999.00').label('storage_capacity'),
             func.to_char(func.sum(Water_bodies.water_spread_area), 'FM999999999.00').label('spread_area')).\
             join(Village, Village.id == Water_bodies.village_code).\
             join(District, District.code == Village.district_id).\
             join(State, State.id == District.state_id).\
-            group_by(State.id).\
-            order_by(func.count(Water_bodies.id).desc()).\
-            limit(5).all()
+            order_by(func.count(Water_bodies.id).desc()).all()
             
         return query
     """
@@ -331,5 +339,4 @@ class Water_bodies(db.Model):
             where districts.code = 410
             GROUP BY districts.id
             ORDER BY wb_count desc
-            LIMIT 5
     """
