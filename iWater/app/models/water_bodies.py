@@ -81,7 +81,6 @@ class Water_bodies(db.Model):
         user = Water_bodies.query.filter_by(code=_code).update(data)
         db.session.commit()
         
-        
     @classmethod 
     def bubble_chart_values(cls,json_data={}):
         query = db.session.query(
@@ -93,10 +92,10 @@ class Water_bodies(db.Model):
             func.count(Water_bodies.wb_type_id).label('count'),
             func.to_char(func.sum(Water_bodies.water_spread_area), 'FM999999999.00').label('spread_area'),
             District.name).\
-            join(Village, Village.code == Water_bodies.village_code).\
-            join(District, District.id == Village.district_id).\
-            join(State, State.code == District.state_id).\
-            join(Block, Block.district_id == Water_bodies.district_code).\
+            join(Village, Water_bodies.village_code == Village.code).\
+            join(Block, Village.block_id == Block.id).\
+            join(District, Water_bodies.district_code == District.code).\
+            join(State, District.state_id == State.id).\
             group_by(District.id, District.name).\
             order_by(func.count(Water_bodies.wb_type_id).desc())
                 
@@ -142,10 +141,10 @@ class Water_bodies(db.Model):
         func.count(Water_bodies.wb_type_id).label('count'),
         WB_master.name).\
         join(WB_master, WB_master.code == Water_bodies.wb_type_id).\
-        join(District, District.code == Water_bodies.district_code).\
-        join(State, State.code == District.state_id).\
-        join(Village, Village.code == Water_bodies.village_code).\
-        join(Block, Block.district_id == Water_bodies.district_code).\
+        join(Village, Water_bodies.village_code == Village.code).\
+        join(Block, Village.block_id == Block.id).\
+        join(District, Water_bodies.district_code == District.code).\
+        join(State, District.state_id == State.id).\
         group_by(WB_master.name, WB_master.code).\
         order_by(WB_master.code)
         
@@ -186,10 +185,10 @@ class Water_bodies(db.Model):
             func.to_char(func.sum(Water_bodies.storage_capacity), 'FM999999999.00').label('storage_capacity'),
             func.to_char(func.sum(Water_bodies.water_spread_area), 'FM999999999.00').label('spread_area'),
             func.max(Water_bodies.max_depth).label('max_depth')).\
-            join(Village, Village.id == Water_bodies.village_code).\
-            join(District, District.code == Village.district_id).\
-            join(Block, Block.district_id == District.code).\
-            join(State, State.id == District.state_id).\
+            join(Village, Water_bodies.village_code == Village.code).\
+            join(Block, Village.block_id == Block.id).\
+            join(District, Water_bodies.district_code == District.code).\
+            join(State, District.state_id == State.id).\
             filter(District.code == json_data['district_code']).\
             group_by(State.name,District.name,Block.id).\
             order_by(func.count(Water_bodies.id).desc()).\
@@ -203,9 +202,10 @@ class Water_bodies(db.Model):
             func.to_char(func.sum(Water_bodies.storage_capacity), 'FM999999999.00').label('storage_capacity'),
             func.to_char(func.sum(Water_bodies.water_spread_area), 'FM999999999.00').label('spread_area'),
             func.max(Water_bodies.max_depth).label('max_depth')).\
-            join(Village, Village.id == Water_bodies.village_code).\
-            join(District, District.code == Village.district_id).\
-            join(State, State.id == District.state_id).\
+            join(Village, Water_bodies.village_code == Village.code).\
+            join(Block, Village.block_id == Block.id).\
+            join(District, Water_bodies.district_code == District.code).\
+            join(State, District.state_id == State.id).\
             filter(State.code == json_data['state_code']).\
             group_by(State.name,District.id).\
             order_by(func.count(Water_bodies.id).desc()).\
@@ -221,10 +221,10 @@ class Water_bodies(db.Model):
             func.to_char(func.sum(Water_bodies.storage_capacity), 'FM999999999.00').label('storage_capacity'),
             func.to_char(func.sum(Water_bodies.water_spread_area), 'FM999999999.00').label('spread_area'),
             func.max(Water_bodies.max_depth).label('max_depth')).\
-            join(Village, Village.id == Water_bodies.village_code).\
-            join(District, District.code == Village.district_id).\
-            join(State, State.id == District.state_id).\
-            join(Block, Block.district_id == District.code).\
+            join(Village, Water_bodies.village_code == Village.code).\
+            join(Block, Village.block_id == Block.id).\
+            join(District, Water_bodies.district_code == District.code).\
+            join(State, District.state_id == State.id).\
             filter(Block.code == json_data['block_code']).\
             group_by(State.name,District.name,Block.name,Village.id).\
             order_by(func.count(Water_bodies.id).desc()).\
@@ -237,9 +237,10 @@ class Water_bodies(db.Model):
             func.to_char(func.sum(Water_bodies.storage_capacity), 'FM999999999.00').label('storage_capacity'),
             func.to_char(func.sum(Water_bodies.water_spread_area), 'FM999999999.00').label('spread_area'),
             func.max(Water_bodies.max_depth).label('max_depth')).\
-            join(Village, Village.id == Water_bodies.village_code).\
-            join(District, District.code == Village.district_id).\
-            join(State, State.id == District.state_id).\
+            join(Village, Water_bodies.village_code == Village.code).\
+            join(Block, Village.block_id == Block.id).\
+            join(District, Water_bodies.district_code == District.code).\
+            join(State, District.state_id == State.id).\
             group_by(State.id).\
             order_by(func.count(Water_bodies.id).desc()).\
             limit(5).all()
@@ -268,10 +269,10 @@ class Water_bodies(db.Model):
             func.count(Water_bodies.id).label('wb_count'),
             func.to_char(func.sum(Water_bodies.storage_capacity), 'FM999999999.00').label('storage_capacity'),
             func.to_char(func.sum(Water_bodies.water_spread_area), 'FM999999999.00').label('spread_area')).\
-            join(Village, Village.id == Water_bodies.village_code).\
-            join(District, District.code == Village.district_id).\
-            join(Block, Block.district_id == District.code).\
-            join(State, State.id == District.state_id).\
+            join(Village, Water_bodies.village_code == Village.code).\
+            join(Block, Village.block_id == Block.id).\
+            join(District, Water_bodies.district_code == District.code).\
+            join(State, District.state_id == State.id).\
             filter(District.code == json_data['district_code']).\
             group_by(District.id).\
             order_by(func.count(Water_bodies.id).desc()).all()
@@ -282,9 +283,10 @@ class Water_bodies(db.Model):
             func.count(Water_bodies.id).label('wb_count'),
             func.to_char(func.sum(Water_bodies.storage_capacity), 'FM999999999.00').label('storage_capacity'),
             func.to_char(func.sum(Water_bodies.water_spread_area), 'FM999999999.00').label('spread_area')).\
-            join(Village, Village.id == Water_bodies.village_code).\
-            join(District, District.code == Village.district_id).\
-            join(State, State.id == District.state_id).\
+            join(Village, Water_bodies.village_code == Village.code).\
+            join(Block, Village.block_id == Block.id).\
+            join(District, Water_bodies.district_code == District.code).\
+            join(State, District.state_id == State.id).\
             filter(Village.code == json_data['village_code']).\
             group_by(Village.name).\
             order_by(func.count(Water_bodies.id).desc()).all()
@@ -295,9 +297,10 @@ class Water_bodies(db.Model):
             func.count(Water_bodies.id).label('wb_count'),
             func.to_char(func.sum(Water_bodies.storage_capacity), 'FM999999999.00').label('storage_capacity'),
             func.to_char(func.sum(Water_bodies.water_spread_area), 'FM999999999.00').label('spread_area')).\
-            join(Village, Village.id == Water_bodies.village_code).\
-            join(District, District.code == Village.district_id).\
-            join(State, State.id == District.state_id).\
+            join(Village, Water_bodies.village_code == Village.code).\
+            join(Block, Village.block_id == Block.id).\
+            join(District, Water_bodies.district_code == District.code).\
+            join(State, District.state_id == State.id).\
             filter(State.code == json_data['state_name']).\
             group_by(State.name).\
             order_by(func.count(Water_bodies.id).desc()).all()
@@ -308,10 +311,10 @@ class Water_bodies(db.Model):
             func.count(Water_bodies.id).label('wb_count'),
             func.to_char(func.sum(Water_bodies.storage_capacity), 'FM999999999.00').label('storage_capacity'),
             func.to_char(func.sum(Water_bodies.water_spread_area), 'FM999999999.00').label('spread_area')).\
-            join(Village, Village.id == Water_bodies.village_code).\
-            join(District, District.code == Village.district_id).\
-            join(State, State.id == District.state_id).\
-            join(Block, Block.district_id == District.code).\
+            join(Village, Water_bodies.village_code == Village.code).\
+            join(Block, Village.block_id == Block.id).\
+            join(District, Water_bodies.district_code == District.code).\
+            join(State, District.state_id == State.id).\
             filter(Block.code == json_data['block_code']).\
             group_by(Block.name).\
             order_by(func.count(Water_bodies.id).desc()).all()
@@ -322,9 +325,10 @@ class Water_bodies(db.Model):
             func.count(Water_bodies.id).label('wb_count'),
             func.to_char(func.sum(Water_bodies.storage_capacity), 'FM999999999.00').label('storage_capacity'),
             func.to_char(func.sum(Water_bodies.water_spread_area), 'FM999999999.00').label('spread_area')).\
-            join(Village, Village.id == Water_bodies.village_code).\
-            join(District, District.code == Village.district_id).\
-            join(State, State.id == District.state_id).\
+            join(Village, Water_bodies.village_code == Village.code).\
+            join(Block, Village.block_id == Block.id).\
+            join(District, Water_bodies.district_code == District.code).\
+            join(State, District.state_id == State.id).\
             order_by(func.count(Water_bodies.id).desc()).all()
             
         return query
