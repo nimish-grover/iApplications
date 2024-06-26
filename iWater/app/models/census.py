@@ -27,6 +27,7 @@ class CensusDatum(db.Model):
     waterfall_area = db.Column(db.Float(53), server_default=db.text("0"))
     other_sources_area = db.Column(db.Float(53), server_default=db.text("0"))
     village_id = db.Column(db.ForeignKey('villages.id'), nullable=False)
+
     village = db.relationship('Village')
 
     @classmethod

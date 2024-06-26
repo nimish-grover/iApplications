@@ -1,0 +1,722 @@
+{% extends 'base.html' %}
+{%block title %}Waterbodies{% endblock %}
+{% block content %}
+{{super()}}
+<div class="row">
+  <div class="col-2 border-end border-dark">
+    <div class="container">
+      <div class="card shadow-sm mt-3" id="ddForm">
+        <div class="card-header text-center fw-semibold py-1 fs-7">Select State/District/Block/Village</div>
+        <div class="card-body">
+          <div class="mt-2">
+            <!-- <label for="ddStates" class="form-label fw-lighter fs-7 mb-0">Select a State</label> -->
+            <select class="form-select form-select-sm fs-7" aria-label="select states" id="ddStates" name="ddStates">
+              <option value="-1" disabled selected>Select State</option>
+              {% for state in states %}
+              <option value="{{state['id'] | safe}}">{{ state["name"] | safe}}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="mt-2">
+            <!-- <label for="ddDistricts" class="form-label fw-lighter fs-7 mb-0" >Select a District</label> -->
+            <select class="form-select form-select-sm fs-7" aria-label="select states" id="ddDistricts"
+              name="ddDistricts" disabled>
+              <option value="-1" disabled selected>Select District</option>
+            </select>
+          </div>
+          <div class="mt-2">
+            <!-- <label for="ddBlocks" class="form-label fw-lighter fs-7 mb-0" >Select a Block</label> -->
+            <select class="form-select form-select-sm fs-7" aria-label="select states" id="ddBlocks" name="ddBlocks"
+              disabled>
+              <option value="-1" disabled selected>Select Block</option>
+            </select>
+          </div>
+          <div class="mt-2">
+            <!-- <label for="ddVillages" class="form-label fw-lighter fs-7 mb-0" >Select a Village</label> -->
+            <select class="form-select form-select-sm fs-7" aria-label="select states" id="ddVillages" name="ddVillages"
+              disabled>
+              <option value="-1" disabled selected>Select Village</option>
+            </select>
+          </div>
+        </div>
+        <div class="d-grid gap-2">
+          <button class="btn btn-primary m-2 disabled" id="btnSubmit" name="btnSubmit">
+            <span class="fs-7">Submit</span>
+            <div class="spinner-border text-light spinner-border-sm d-none" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+          </button>
+        </div>
+      </div>
+      <div class="alert alert-warning mt-3" role="alert">
+
+        <p class="fs-7"><svg xmlns="http://www.w3.org/2000/svg"
+            class="bi bi-exclamation-triangle-fill flex-shrink-0 me-2" viewBox="0 0 16 16" height="16" role="img"
+            aria-label="Warning:">
+            <path
+              d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z" />
+          </svg>Please note that the <span class="fw-semibold">village level water budget</span> can be
+          consolidated at district and block level. </p>
+        <p class="fs-7"><span class="fw-semibold">To consolidate at block level</span> - leave the dropdown to
+          <em>select village.</em> Select District and Block. Click Submit to continue.
+        </p>
+        <p class="fs-7"><span class="fw-bold">To consolidate at district level</span> - leave the dropdowns to
+          <em>select village</em> and <em>select block.</em>. Select District and click Submit to continue.
+        </p>
+      </div>
+    </div>
+  </div>
+  <!--
+    SELECT states.name state_name, count(water_bodies.id) as wb_count, 
+            to_char(SUM(water_bodies.storage_capacity), 'FM999999999.00') AS storage_capacity, 
+            to_char(SUM(water_bodies.water_spread_area), 'FM999999999.00') AS spread_area, 
+            MAX(water_bodies. max_depth) AS max_depth
+            FROM "public"."water_bodies" 
+            INNER JOIN villages_mp on villages_mp.id= water_bodies.village_code
+            INNER JOIN districts on villages_mp.district_id = districts.code
+            INNER JOIN states on states.id = districts.state_id
+            GROUP BY states.id
+            ORDER BY wb_count desc
+            LIMIT 5
+  -->
+  <div class="col-10">
+    <div class="container mt-3">
+      <div class="row gx-5">
+        <div class="col">
+          <div class="card">
+            <div class="card-body">
+              <div class="d-flex justify-content-between">
+                <div class="card-title fs-4">Count <span class="fw-lighter text-muted">| in Thousands</span></div>
+                <div class="filter">
+                  <a class="icon" href="#" data-bs-toggle="dropdown" aria-expanded="false"><i
+                      class="fa-solid fa-ellipsis"></i></a>
+                  <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
+                    <li class="dropdown-header text-start">
+                      <h6>Select Unit</h6>
+                    </li>
+                    <li><a class="dropdown-item" href="#">in Units</a></li>
+                    <li><a class="dropdown-item" href="#">in Thousands</a></li>
+                    <li><a class="dropdown-item" href="#">in Lakhs</a></li>
+                  </ul>
+                </div>
+              </div>
+              <div class="d-flex align-items-center">
+                <div
+                  class="rounded-circle d-flex align-items-center justify-content-center bg-success bg-opacity-10 text-success fs-2"
+                  style="height:64px; width:64px;">
+                  <i class="fa-solid fa-water"></i>
+                </div>
+                <div class="ps-3">
+                  <div class="display-6" id="wbCount"></div>
+                  <small class="text-success fw-bold" id="wbCountPercent">12%</small> <small
+                    class="text-muted ps-1">increase</small>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col">
+          <div class="card">
+            <div class="card-body">
+              <div class="d-flex justify-content-between">
+                <div class="card-title fs-4">Storage <span class="fw-lighter text-muted">| in Hectare Mtrs</span></div>
+                <div class="filter">
+                  <a class="icon" href="#" data-bs-toggle="dropdown" aria-expanded="false"><i
+                      class="fa-solid fa-ellipsis"></i></a>
+                  <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
+                    <li class="dropdown-header text-start">
+                      <h6>Select Unit</h6>
+                    </li>
+                    <li><a class="dropdown-item" href="#">in Hectare Mtrs</a></li>
+                    <li><a class="dropdown-item" href="#">in Cu Mtrs</a></li>
+                    <!-- <li><a class="dropdown-item" href="#">This Year</a></li> -->
+                  </ul>
+                </div>
+              </div>
+              <div class="d-flex align-items-center">
+                <div
+                  class="rounded-circle d-flex align-items-center justify-content-center bg-primary bg-opacity-10 text-primary fs-2"
+                  style="height:64px; width:64px;">
+                  <i class="fa-solid fa-hand-holding-droplet"></i>
+                </div>
+                <div class="ps-3">
+                  <div class="display-6" id="wbStorage"></div>
+                  <small class="text-success fw-bold" id="wbStoragePercent">12%</small> <small
+                    class="text-muted ps-1">increase</small>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col">
+          <div class="card">
+            <div class="card-body">
+              <div class="d-flex justify-content-between">
+                <div class="card-title fs-4">Area <span class="fw-lighter text-muted">| in Hectares</span></div>
+                <div class="filter">
+                  <a class="icon" href="#" data-bs-toggle="dropdown" aria-expanded="false"><i
+                      class="fa-solid fa-ellipsis"></i></a>
+                  <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
+                    <li class="dropdown-header text-start">
+                      <h6>Select Unit</h6>
+                    </li>
+                    <li><a class="dropdown-item" href="#">in Hectares</a></li>
+                    <li><a class="dropdown-item" href="#">in Sq Kms</a></li>
+                    <!-- <li><a class="dropdown-item" href="#">This Year</a></li> -->
+                  </ul>
+                </div>
+              </div>
+              <div class="d-flex align-items-center">
+                <div
+                  class="rounded-circle d-flex align-items-center justify-content-center bg-dark bg-opacity-10 text-dark fs-2"
+                  style="height:64px; width:64px;">
+                  <i class="fa-regular fa-map"></i>
+                </div>
+                <div class="ps-3">
+                  <div class="display-6" id="wbSpreadArea"></div>
+                  <small class="text-success fw-bold" id="wbSpreadAreaPercent">12%</small> <small
+                    class="text-muted ps-1">increase</small>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="row gx-5 mt-3">
+        <div class="col-7">
+          <div class="card">
+            <div class="card-body">
+              <div class="d-flex justify-content-between">
+                <div class="card-title fs-4">Top 5 States <span class="fw-lighter text-muted">| Storage</span></div>
+                <div class="filter">
+                  <a class="icon" href="#" data-bs-toggle="dropdown" aria-expanded="false"><i
+                      class="fa-solid fa-ellipsis"></i></a>
+                  <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
+                    <li class="dropdown-header text-start">
+                      <h6>Filter</h6>
+                    </li>
+                    <li><a class="dropdown-item" href="#">Today</a></li>
+                    <li><a class="dropdown-item" href="#">This Month</a></li>
+                    <li><a class="dropdown-item" href="#">This Year</a></li>
+                  </ul>
+                </div>
+              </div>
+              <div id="barhChart" style="width: 100%;height:400px;"></div>
+            </div>
+          </div>
+        </div>
+        <!--
+          select count(water_bodies.wb_type_id) as count, wb_master.name as name from water_bodies 
+          inner join wb_master on wb_master.code = water_bodies.wb_type_id
+          group by wb_master.name, wb_master.code
+          order by wb_master.code;
+        -->
+        <div class="col-5">
+          <div class="card">
+            <div class="card-body">
+              <div class="d-flex justify-content-between">
+                <div class="card-title fs-4">Waterbody Types <span class="fw-lighter text-muted">| Distribution</span>
+                </div>
+                <div class="filter">
+                  <a class="icon" href="#" data-bs-toggle="dropdown" aria-expanded="false"><i
+                      class="fa-solid fa-ellipsis"></i></a>
+                  <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
+                    <li class="dropdown-header text-start">
+                      <h6>Filter</h6>
+                    </li>
+                    <li><a class="dropdown-item" href="#">Count</a></li>
+                    <li><a class="dropdown-item" href="#">Storage</a></li>
+                    <li><a class="dropdown-item" href="#">Area</a></li>
+                  </ul>
+                </div>
+              </div>
+              <div id="donutChart" style="width: 100%;min-height:400px;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-12 mt-3">
+        <!--
+            SELECT states.name state_name,
+            districts.name district_name, count(water_bodies.id) as wb_count, 
+            to_char(SUM(water_bodies.storage_capacity), 'FM999999999.00') AS storage_capacity, 
+            to_char(SUM(water_bodies.water_spread_area), 'FM999999999.00') AS spread_area, 
+            MAX(water_bodies. max_depth) AS max_depth
+            FROM "public"."water_bodies" 
+            INNER JOIN villages_mp on villages_mp.id= water_bodies.village_code
+            INNER JOIN districts on villages_mp.district_id = districts.code
+            INNER JOIN states on states.id = districts.state_id
+            GROUP BY districts.id, states.name
+            ORDER BY wb_count desc
+            LIMIT 5
+          -->
+        <div class="card">
+          <div class="card-body">
+            <div class="d-flex justify-content-between">
+              <div class="card-title fs-4">Top 5 Districts <span class="fw-lighter text-muted">| Waterbody Count</span>
+              </div>
+              <div class="filter">
+                <a class="icon" href="#" data-bs-toggle="dropdown" aria-expanded="false"><i
+                    class="fa-solid fa-ellipsis"></i></a>
+                <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
+                  <li class="dropdown-header text-start">
+                    <h6>Filter</h6>
+                  </li>
+                  <li><a class="dropdown-item" href="#">Today</a></li>
+                  <li><a class="dropdown-item" href="#">This Month</a></li>
+                  <li><a class="dropdown-item" href="#">This Year</a></li>
+                </ul>
+              </div>
+            </div>
+            <div id="tableContainer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="col-12 mt-3">
+        <div class="card-body">
+          <div class="d-flex justify-content-between">
+            <div class="card-title fs-4">Top 5 States <span class="fw-lighter text-muted">| Storage</span></div>
+            <div class="filter">
+              <a class="icon" href="#" data-bs-toggle="dropdown" aria-expanded="false"><i
+                  class="fa-solid fa-ellipsis"></i></a>
+              <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
+                <li class="dropdown-header text-start">
+                  <h6>Filter</h6>
+                </li>
+                <li><a class="dropdown-item" href="#">Today</a></li>
+                <li><a class="dropdown-item" href="#">This Month</a></li>
+                <li><a class="dropdown-item" href="#">This Year</a></li>
+              </ul>
+            </div>
+          </div>
+          <div id="bubbleChart" style="width: 100%;height:400px;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+<script>
+  // Bar Chart
+  function load_barhchart(barhchart_x_data, barhchart_y_data) {
+    var barhChartDom = document.getElementById('barhChart');
+    var barhChart = echarts.init(barhChartDom);
+    window.addEventListener('resize', function () {
+      barhChart.resize();
+    });
+    var option_barh;
+    option_barh = {
+      // title: {
+      //   text: 'World Population'
+      // },
+      tooltip: {
+        trigger: 'axis',
+        axisPointer: {
+          type: 'shadow'
+        }
+      },
+      legend: {},
+      grid: {
+        left: '3%',
+        right: '4%',
+        bottom: '3%',
+        containLabel: true
+      },
+      xAxis: {
+        type: 'value',
+        boundaryGap: [0, 0.01]
+      },
+      yAxis: {
+        type: 'category',
+        data: barhchart_y_data,
+        inverse: true,
+      },
+      series: [
+        {
+          name: 'Count',
+          type: 'bar',
+          data: barhchart_x_data
+        },
+        // {
+        //   name: '2012',
+        //   type: 'bar',
+        //   data: [19325, 23438, 31000, 121594, 134141, 681807]
+        // }
+      ]
+    };
+
+    option_barh && barhChart.setOption(option_barh);
+  }
+
+  // Doughnut Chart
+  function load_donutchart(donutchart_data) {
+    var donutChartDom = document.getElementById('donutChart');
+    var donutChart = echarts.init(donutChartDom);
+    window.addEventListener('resize', function () {
+      donutChart.resize();
+    });
+    var option_donut;
+
+    option_donut = {
+      tooltip: {
+        trigger: 'item'
+      },
+      legend: {
+        top: 'center',
+        orient: 'vertical',
+        left: 'right'
+      },
+      series: [
+        {
+          name: 'Access From',
+          type: 'pie',
+          radius: ['40%', '70%'],
+          avoidLabelOverlap: false,
+          label: {
+            show: false,
+            position: 'center'
+          },
+          emphasis: {
+            label: {
+              show: true,
+              fontSize: 40,
+              fontWeight: 'bold'
+            }
+          },
+          labelLine: {
+            show: false
+          },
+          data: donutchart_data
+        }
+      ]
+    };
+    option_donut && donutChart.setOption(option_donut);
+  }
+  
+  // Bubble Chart
+  function load_bubbleChart() {
+    var bubbleChartDom = document.getElementById('bubbleChart');
+    var bubbleChart = echarts.init(bubbleChartDom);
+    var option_bubble;
+
+    const data_bubble = [
+      [
+        [3136.13, 4759, 53637530, "Balaghat"],
+        [134.14, 3915, 76224640, "Katni"],
+        [1632.97, 3802, 36332980, "Shahdol"],
+        [4143.90, 3677, 59180150, "Betul"],
+        [5147.19, 3317, 71275800, "Seoni"],
+        [95.71, 3173, 42288290, "Vidisha"],
+        [2687.71, 3144, 77277450, "Dhar"],
+        [1074.72, 2879, 20436180, "Anuppur"],
+        [890.19, 2694, 38289150, "Panna"],
+        [1447.86, 2674, 306891690, "Mandla"],
+        [4127.75, 2590, 232672730, "Dewas"],
+        [63233.17, 2485, 48348460, "Sehore"],
+        [1074.26, 2282, 65245990, "Umaria"],
+        [5420.17, 2137, 128063220, "Chhatarpur"],
+        [3.41, 2130, 212997020, "Ashoknagar"],
+        [35833.11, 2046, 20245290, "Singrauli"],
+        [8100.84, 1924, 47142700, "Satna"],
+        [46903.33, 1777, 49259330, "Rohtas"],
+        [12034.71, 1649, 40606490, "Ujjain"],
+        [212.08, 1646, 12107210, "Bhind"]
+      ]
+    ];
+    option_bubble = {
+      xAxis: {
+        splitLine: { show: false }
+      },
+      yAxis: {
+        splitLine: { show: false },
+        scale: true
+      },
+      grid: {
+        left: 40,
+        right: 130
+      },
+      series: [
+        {
+          name: '1990',
+          data: data_bubble[0],
+          type: 'scatter',
+          symbolSize: function (data) {
+            return Math.sqrt(data[2]) / 5e2;
+          },
+          emphasis: {
+            focus: 'self'
+          },
+          labelLayout: function () {
+            return {
+              x: bubbleChart.getWidth() - 100,
+              moveOverlap: 'shiftY'
+            };
+          },
+          labelLine: {
+            show: false,
+            length2: 5,
+            lineStyle: {
+              color: '#bbb'
+            }
+          },
+          label: {
+            show: false,
+            formatter: function (param) {
+              return param.data[3];
+            },
+            position: 'top',
+            minMargin: 2
+          }
+        }
+      ]
+    };
+
+    option_bubble && bubbleChart.setOption(option_bubble);
+  }
+
+  document.addEventListener("DOMContentLoaded", function () {
+    payload = { 'country_id': -1 };
+    post_data(payload);
+    // --DEFINE CONSTANTS--
+    // --DEFINE VARIABLES--
+    var dd_states = document.getElementById("ddStates");
+    var dd_districts = document.getElementById("ddDistricts");
+    var dd_blocks = document.getElementById("ddBlocks");
+    var dd_villages = document.getElementById("ddVillages");
+    var submit_button = document.getElementById("btnSubmit")
+
+    // --DEFINE METHODS
+    function fill_dropdown(data, dd_type) {
+      var dropdown_element = "";
+      var select_option = "";
+      switch (dd_type) {
+        case "districts":
+          dd_districts.innerHTML = "";
+          dd_blocks.innerHTML = "";
+          dd_blocks.append(createOption("-1", "Select Block"))
+          dd_villages.innerHTML = "";
+          dd_villages.append(createOption("-1", "Select Village"))
+          dropdown_element = dd_districts;
+          select_option = "Select District";
+          // dropdown_element.disabled = false;
+          break;
+        case "blocks":
+          dd_blocks.innerHTML = "";
+          dd_villages.innerHTML = "";
+          dd_villages.append(createOption("-1", "Select Village"));
+          dropdown_element = dd_blocks;
+          select_option = "Select Block";
+          dropdown_element.disabled = false;
+          break;
+        case "villages":
+          dd_villages.innerHTML = "";
+          dropdown_element = dd_villages;
+          select_option = "Select Village";
+          dropdown_element.disabled = false;
+          break;
+        case "form_data":
+
+        case "submit":
+          dd_type = "";
+        default:
+          break;
+      }
+      // dropdown_element.innerHTML="";
+
+      dropdown_element.append(createOption("-1", select_option))
+      for (let ndx = 0; ndx < data.length; ndx++) {
+        var item = data[ndx];
+        // var html = '<option value="' + item['id'] + '">' + item['name'] + '</option>';
+        dropdown_element.append(createOption(item['id'], item['name']));
+      }
+      dropdown_element.removeAttribute('disabled');
+    }
+    // --FUNCTION FOR APIs--
+    function createOption(option_value, option_text) {
+      option = document.createElement('option')
+      option.value = option_value;
+      option.text = option_text;
+      return option;
+    }
+    // --FECTCH FUNCTION FOR API CALLS--
+    function get_dd_data(dd_type, payload) {
+      api_url = "/iwater/"
+      fetchOptions = {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json;charset=UTF-8"
+        },
+        body: JSON.stringify(payload)
+      }
+      fetch(api_url + dd_type, fetchOptions)
+        .then(response => {
+          if (!response.ok) {
+            throw new Error("Network response was not ok");
+          }
+          return response.json();
+        })
+        .then(data => {
+          fill_dropdown(data, dd_type);
+        })
+        .catch(error => {
+          console.error("Error fetching data:", error);
+        });
+    }
+
+    // --DROPDOWN CHANGE FUNCTIONS--
+    dd_states.addEventListener('change', function () {
+      dd_districts.setAttribute('disabled', 'disabled');
+      dd_blocks.setAttribute('disabled', 'disabled');
+      dd_villages.setAttribute('disabled', 'disabled')
+      submit_button.classList.add('disabled');
+      var payload = { "select_id": this.value }
+      get_dd_data("districts", payload)
+    });
+
+    dd_districts.addEventListener('change', function () {
+      dd_blocks.setAttribute('disabled', 'disabled');
+      dd_villages.setAttribute('disabled', 'disabled');
+      submit_button.classList.remove('disabled');
+      var payload = { "select_id": this.value }
+
+      get_dd_data("blocks", payload)
+    });
+
+    dd_blocks.addEventListener('change', function () {
+      dd_villages.setAttribute('disabled', 'disabled')
+      var payload = { "select_id": this.value }
+      get_dd_data("villages", payload)
+    });
+
+    // -- ON SUBMIT --
+    submit_button.addEventListener("click", function () {
+      var payload = { 'state_id': dd_states.value, 'district_id': dd_districts.value, 'block_id': dd_blocks.value, 'village_id': dd_villages.value }
+      activateLoader();
+      post_data(payload)
+    })
+
+    function activateLoader(params) {
+      button_divs = submit_button.childNodes
+      submit_button.classList.add('disabled')
+      button_divs[1].classList.add('d-none')
+      button_divs[3].classList.remove('d-none')
+    }
+
+    function deactivateLoader(params) {
+      button_divs = submit_button.childNodes
+      submit_button.classList.remove('disabled')
+      button_divs[1].classList.remove('d-none')
+      button_divs[3].classList.add('d-none')
+    }
+
+    async function post_data(payload) {
+      fetchOptions = {
+        method: 'post',
+        headers: {
+          'Content-Type': 'application/json' // Set content type to JSON
+        },
+        body: JSON.stringify(payload),
+      }
+      const response = await fetch('/iwater/wb/api/dash', fetchOptions)
+      const decoder = new TextDecoder();
+      const reader = response.body;
+      if (response.ok) {
+        const data = await response.json(); // Parse the response as JSON
+        fill_data(data);
+        try {
+          deactivateLoader();
+        } catch (error) {
+          console.log(error);
+          deactivateLoader();
+        }
+      } else {
+        console.error('Failed to fetch data:', response.statusText);
+        deactivateLoader();
+      }
+    }
+
+    function fill_data(response_data) {
+      primary_data = JSON.parse(response_data['primary_data']);
+      document.getElementById('wbCount').innerHTML = primary_data['wb_count'];
+      document.getElementById('wbStorage').innerHTML = primary_data['storage'];
+      document.getElementById('wbSpreadArea').innerHTML = primary_data['spread_area'];
+      donutchart_data = JSON.parse(response_data['wb_type_data']);
+      barhchart_x_data = response_data['barhchart_x_data'];
+      barhchart_y_data = response_data['barhchart_y_data'];
+      load_donutchart(donutchart_data);
+      load_barhchart(barhchart_x_data, barhchart_y_data);
+      load_bubbleChart();
+      table_data = response_data['top_five'];
+      table_container = document.getElementById('tableContainer');
+      table_container.innerHTML = '';
+      table_container.appendChild(arrayToTable(table_data));
+    }
+
+    function arrayToTable(data) {
+      // Create the table element
+      const table = document.createElement("table");
+      table.classList.add('table', 'table-hover')
+      const thead = document.createElement('thead');
+      thead.classList.add('table-primary');
+      // Extract table headers from the first object's keys
+      const tableHeaders = Object.keys(data[0]);
+      column_order = ['S.No.', 'Name', 'Count', 'Storage', 'Area']
+      // Create the header row
+      const headerRow = document.createElement("tr");
+
+      // Create and append headers to the header row
+      for (const header of column_order) {
+        const columnHeader = document.createElement("th");
+        columnHeader.textContent = header;
+        headerRow.appendChild(columnHeader);
+      }
+      thead.appendChild(headerRow);
+
+      // Append the header row to the table
+      table.appendChild(thead);
+
+      // Create the table body
+      const tableBody = document.createElement("tbody");
+
+      // Loop through the data and create table rows
+      for (const rowData of data) {
+        const tableRow = document.createElement("tr");
+
+        // Loop through each cell data and create table cells
+        for (const header of column_order) {
+          const tableCell = document.createElement("td");
+          tableCell.textContent = rowData[header];
+          tableRow.appendChild(tableCell);
+        }
+
+        // Append the data row to the table body
+        tableBody.appendChild(tableRow);
+      }
+
+      // Append the table body to the table
+      table.appendChild(tableBody);
+
+      // Return the generated table element
+      return table;
+    }
+
+    function toggleSelect(element) {
+
+      // Toggle the 'disabled' setAttributeibute
+      element.disabled = !element.disabled;
+
+      // Optional: You can also change the color to indicate the state
+      if (element.disabled) {
+        element.style.backgroundColor = "#dddddd"; // Disabled color
+      } else {
+        element.style.backgroundColor = "#ffffff"; // Enabled color
+      }
+    }
+
+  });
+
+</script>
+{% endblock %}
+<!--Reference: https://bootstrapmade.com/demo/NiceAdmin/-->

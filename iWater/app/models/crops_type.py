@@ -4,7 +4,7 @@ class Crops_type(db.Model):
     __tablename__ = 'crops_type'
 
     id = db.Column(db.Integer, primary_key= True)
-    type = db.Column(db.Integer,nullable=False)
+    type = db.Column(db.String,nullable=False)
 
     
     def __init__(self,type):
@@ -35,8 +35,12 @@ class Crops_type(db.Model):
     
     @classmethod
     def get_all(cls):
-        query=cls.query.order_by(cls.name)
-        return query
+        query=cls.query.order_by(cls.id).all()
+        arr =[]
+        for row in query:
+            row.json()
+            arr.append(row)
+        return arr
 
     def save_to_db(self):
         db.session.add(self)

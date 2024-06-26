@@ -1,0 +1,274 @@
+{% extends 'base.html' %}
+{% block title %}Select{% endblock %}
+{% block content %}
+{{super()}}
+<!-- Dropdown Trigger -->
+<div class="container">
+    <form class="card shadow-sm mt-3" method="POST" id="cropForm">
+        <div class="card-header text-center fw-semibold py-1 fs-7">Select State/District/Block/Village</div>
+        <div class="card-body">
+            <div class="mt-2">
+                <!-- <label for="ddStates" class="form-label fw-lighter fs-7 mb-0">Select a State</label> -->
+                <select class="form-select form-select-sm fs-7" aria-label="select states" id="ddStates"
+                    name="ddStates">
+                    <option value="-1" disabled selected>Select State</option>
+                    {% for state in states %}
+                    <option value="{{state['id'] | safe}}">{{ state["name"] | safe}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="mt-2">
+                <!-- <label for="ddDistricts" class="form-label fw-lighter fs-7 mb-0" >Select a District</label> -->
+                <select class="form-select form-select-sm fs-7" aria-label="select states" id="ddDistricts"
+                    name="ddDistricts" disabled>
+                    <option value="-1" disabled selected>Select District</option>
+                </select>
+            </div>
+            <div class="mt-2">
+                <!-- <label for="ddBlocks" class="form-label fw-lighter fs-7 mb-0" >Select a Block</label> -->
+                <select class="form-select form-select-sm fs-7" aria-label="select states" id="ddBlocks" name="ddBlocks"
+                    disabled>
+                    <option value="-1" disabled selected>Select Block</option>
+                </select>
+            </div>
+            <div class="mt-2">
+                <!-- <label for="ddVillages" class="form-label fw-lighter fs-7 mb-0" >Select a Village</label> -->
+                <select class="form-select form-select-sm fs-7" aria-label="select states" id="ddVillages"
+                    name="ddVillages" disabled>
+                    <option value="-1" disabled selected>Select Village</option>
+                </select>
+            </div>
+            <div class="row mt-2">
+                <div class="col-8">
+                    <select class="form-select form-select-sm fs-7" aria-label="Select Crop Type" id="crop_type"
+                        name="croptype">
+                        <option value="-1" disabled selected>Select Crop Type</option>
+                        {% for crop in crop_types %}
+                        <option value="{{crop.id | safe}}">{{ crop.type | safe}}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-4">
+                    <input type="text" class="form-control form-select-sm fs-7" id="crop_area" aria-describedby="Crop Area" placeholder="Area">
+                </div>
+            </div>
+            <div class="row mt-2">
+                <div class="col-8">
+                    <input type="text" class="form-control form-select-sm fs-7" id="crop_name" aria-describedby="Crop Naame" placeholder="Enter Crop Name">
+                </div>
+                <div class="col-4">
+                    <input type="text" class="form-control form-select-sm fs-7" id="coefficient" aria-describedby="coefficient" placeholder="Coefficient">
+                </div>
+            </div>
+        </div>
+
+        <div class="d-grid gap-2">
+            <input type="submit" class="btn btn-primary m-2 disabled fs-7" id="btnSubmit" name="btnSubmit" />
+        </div>
+    </form>
+    <div id="crop_table" class="table-responsive mt-3" style="display: none;">
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Crop</th>
+                    <th class="text-right">Area</th>
+                    <th class="text-right">Coefficient</th>
+                </tr>
+            </thead>
+            <tbody id="cropTableBody">
+                <!-- Dynamic rows will be added here -->
+            </tbody>
+        </table>
+    </div>
+
+
+
+
+</div>
+{% endblock %}
+{% block script %}
+<script>
+    $(document).ready(function () {
+        // --DEFINE CONSTANTS--
+
+        // --DEFINE VARIABLES--
+        var dd_states = $("#ddStates");
+        var dd_districts = $("#ddDistricts");
+        var dd_blocks = $("#ddBlocks");
+        var dd_villages = $("#ddVillages");
+        var submit_button = $("#btnSubmit")
+
+        // --DEFINE METHODS
+        function fill_dropdown(data, dd_type) {
+            var dropdown_element = "";
+            var select_option = "";
+            switch (dd_type) {
+                case "districts":
+                    dd_districts.html("");
+                    dd_blocks.html("");
+                    dd_blocks.append('<option value="-1">Select Block</option>')
+                    dd_villages.html("");
+                    dd_villages.append('<option value="-1">Select Village</option>')
+                    dropdown_element = dd_districts;
+                    select_option = "Select District";
+                    // dropdown_element.disabled = false;
+                    break;
+                case "blocks":
+                    dd_blocks.html("");
+                    dd_villages.html("");
+                    dd_villages.append('<option value="-1">Select Village</option>')
+                    dropdown_element = dd_blocks;
+                    select_option = "Select Block";
+                    dropdown_element.disabled = false;
+                    break;
+                case "villages":
+                    dd_villages.html("");
+                    dropdown_element = dd_villages;
+                    select_option = "Select Village";
+                    dropdown_element.disabled = false;
+                    break;
+                case "submit":
+                    dd_type = "";
+                default:
+                    break;
+            }
+            // dropdown_element.html("");
+            dropdown_element.append('<option value="-1" disabled selected>' + select_option + '</option>')
+            for (let ndx = 0; ndx < data.length; ndx++) {
+                var item = data[ndx];
+                var html = '<option value="' + item['id'] + '">' + item['name'] + '</option>';
+                dropdown_element.append(html);
+            }
+            dropdown_element.removeAttr('disabled');
+        }
+
+        // --AJAX FUNCTION FOR API CALLS--
+        function ajax_call(dd_type, payload) {
+
+            $.ajax(
+                {
+                    url: "/iwater/" + dd_type,
+                    type: "post",
+                    contentType: 'application/json;charset=UTF-8',
+                    dataType: "json",
+                    data: JSON.stringify(payload),
+                    success: function (data) {
+                        fill_dropdown(data, dd_type);
+                    }
+                });
+        }
+
+        // --DROPDOWN CHANGE FUNCTIONS--
+        dd_states.change(function () {
+            dd_districts.attr('disabled', 'disabled');
+            dd_blocks.attr('disabled', 'disabled');
+            dd_villages.attr('disabled', 'disabled')
+            submit_button.addClass('disabled');
+            var payload = { "select_id": $(this).val() }
+            ajax_call("districts", payload)
+        });
+
+        dd_districts.change(function () {
+            dd_blocks.attr('disabled', 'disabled');
+            dd_villages.attr('disabled', 'disabled');
+            submit_button.removeClass('disabled');
+            var payload = { "select_id": $(this).val() }
+
+            ajax_call("blocks", payload)
+        });
+
+        dd_blocks.change(function () {
+            dd_villages.attr('disabled', 'disabled')
+            var payload = { "select_id": $(this).val() }
+            ajax_call("villages", payload)
+        });
+
+        // --SUBMIT FUNCTION--
+        // submit_button.click(function () {
+        //     payload = {
+        //         'state_id': dd_states.val(),
+        //         'district_id': dd_districts.val(),
+        //         'block_id': dd_blocks.val(),
+        //         'village_id': dd_villages.val()
+        //     }
+        //     ajax_call('index', payload)
+        // });
+
+        function toggleSelect(element) {
+
+            // Toggle the 'disabled' attribute
+            element.disabled = !element.disabled;
+
+            // Optional: You can also change the color to indicate the state
+            if (element.disabled) {
+                element.style.backgroundColor = "#dddddd"; // Disabled color
+            } else {
+                element.style.backgroundColor = "#ffffff"; // Enabled color
+            }
+        }
+
+    });
+
+</script>
+<script>
+    document.getElementById('cropForm').addEventListener('submit', function(event) {
+        event.preventDefault(); // Prevent the default form submission
+
+        // Gather form data
+        const formData = {
+            crop_type: document.getElementById('crop_type').value,
+            crop_name: document.getElementById('crop_name').value,
+            crop_area: document.getElementById('crop_area').value,
+            coefficient: document.getElementById('coefficient').value,
+            state: document.getElementById('ddStates').value,
+            district: document.getElementById('ddDistricts').value,
+            block: document.getElementById('ddBlocks').value,
+            village: document.getElementById('ddVillages').value
+        };
+
+        // Send data to Flask route
+        fetch('/iwater/add_crop_to_db', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(formData)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                // Create a new row and cells
+                const tableBody = document.getElementById('cropTableBody');
+                const newRow = document.createElement('tr');
+
+                const cropCell = document.createElement('td');
+                cropCell.textContent = data.data.crop_name;
+                newRow.appendChild(cropCell);
+
+                const areaCell = document.createElement('td');
+                areaCell.textContent = parseFloat(data.data.crop_area).toFixed(2); // Format to 2 decimal places
+                areaCell.classList.add('text-right');
+                newRow.appendChild(areaCell);
+
+                const coefficientCell = document.createElement('td');
+                coefficientCell.textContent = parseFloat(data.data.coefficient).toFixed(2); // Format to 2 decimal places
+                coefficientCell.classList.add('text-right');
+                newRow.appendChild(coefficientCell);
+
+                // Append the new row to the table body
+                tableBody.appendChild(newRow);
+
+                // Make the table visible
+                document.getElementById('crop_table').style.display = 'block';
+
+                // Clear the form fields
+                document.getElementById('cropForm').reset();
+            } else {
+                alert('Failed to add crop: ' + data.message);
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    });
+</script>
+
+{%endblock%}

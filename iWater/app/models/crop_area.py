@@ -1,4 +1,11 @@
 from iWater.app.db import db
+from iWater.app.models import State
+from iWater.app.models import District
+from iWater.app.models import Block
+from iWater.app.models import Village
+from iWater.app.models.crops_type import Crops_type
+from iWater.app.models.crops import Crops
+from sqlalchemy import func
 
 class Crop_area(db.Model):
     __tablename__ = 'crop_area'
@@ -11,8 +18,7 @@ class Crop_area(db.Model):
     crop_area = db.Column(db.Float,nullable=False)
 
     
-    def __init__(self,type_id,district_code,village_code,crop_id,crop_type_id,crop_area):
-        self.type_id=type_id
+    def __init__(self,district_code,village_code,crop_id,crop_type_id,crop_area):
         self.crop_area = crop_area
         self.district_code = district_code
         self.village_code = village_code
@@ -28,7 +34,6 @@ class Crop_area(db.Model):
             'district_code' : self.district_code,
             'village_code' : self.village_code,
             'crop_id' : self.crop_id,
-            'crop_type_id' : self.crop_type_id
         }
     
     @classmethod
@@ -67,3 +72,66 @@ class Crop_area(db.Model):
     def update_db(data,_id):
         user = Crop_area.query.filter_by(id=_id).update(data)
         db.session.commit()
+        
+    @classmethod
+    def get_crop_area(cls,json_data):
+        query = db.session.query(
+        Crops_type.type,
+        Crops.name,
+        Crop_area.crop_area,
+        Crops.water_required_per_hectare,
+        Crops_type.id). \
+        join(Crop_area, Crop_area.crop_type_id == Crops_type.id).\
+        join(Crops, Crops.id == Crop_area.crop_id).\
+        join(Village, Crop_area.village_code == Village.code).\
+        join(Block, Village.block_id == Block.id).\
+        join(District, Crop_area.district_code == District.code).\
+        join(State, District.state_id == State.id)
+        
+        
+        if 'state_code' in json_data:
+            query = query.filter(State.code == json_data['state_code']).all()
+        
+        elif 'village_code' in json_data:
+            query = query.filter(Village.code == json_data['village_code']).all()
+            
+        elif 'district_code' in json_data:
+            query = query.filter(District.code == json_data['district_code']).all()
+        
+        elif 'block_code' in json_data:
+            query = query.filter(Block.code == json_data['block_code']).all()
+        else:
+            query = query.all()
+        return query
+    """
+    SELECT crops_type.type, crops.name,crop_area.crop_area, crops.water_required_per_hectare FROM crop_area 
+    INNER join crops on crops.id = crop_area.crop_id 
+    inner join crops_type on crop_area.crop_type_id = crops_type.id LIMIT 100
+    """
+    
+    @classmethod
+    def get_total_crop_types(cls,json_data):
+        query = db.session.query(
+        func.count(db.distinct(Crops_type.type))). \
+        join(Crop_area, Crop_area.crop_type_id == Crops_type.id).\
+        join(Crops, Crops.id == Crop_area.crop_id).\
+        join(Village, Crop_area.village_code == Village.code).\
+        join(Block, Village.block_id == Block.id).\
+        join(District, Crop_area.district_code == District.code).\
+        join(State, District.state_id == State.id)
+        
+        
+        if 'state_code' in json_data:
+            query = query.filter(State.code == json_data['state_code']).scalar()
+        
+        elif 'village_code' in json_data:
+            query = query.filter(Village.code == json_data['village_code']).scalar()
+            
+        elif 'district_code' in json_data:
+            query = query.filter(District.code == json_data['district_code']).scalar()
+        
+        elif 'block_code' in json_data:
+            query = query.filter(Block.code == json_data['block_code']).scalar()
+        else:
+            query = query.scalar()
+        return query

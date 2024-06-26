@@ -6,18 +6,21 @@ class Crops(db.Model):
     id = db.Column(db.Integer, primary_key= True)
     name=db.Column(db.String(80),nullable=False)
     type_id = db.Column(db.Integer,nullable=False)
+    water_required_per_hectare = db.Column(db.Float,nullable=False)
 
     
-    def __init__(self,type_id,name):
+    def __init__(self,type_id,name,water_required_per_hectare):
         self.type_id=type_id
         self.name = name
+        self.water_required_per_hectare = water_required_per_hectare
 
     
     def json(self):
         return {
             'id': self.id,
             'type_id': self.type_id,
-            'name': self.name
+            'name': self.name,
+            'water_required_per_hectare' : self.water_required_per_hectare
         }
     
     @classmethod
@@ -31,6 +34,14 @@ class Crops(db.Model):
     @classmethod
     def get_wb_by_type_id(cls, _type_id):
         query =  cls.query.filter_by(type_id=_type_id).first()
+        if query:
+            return query.json()
+        else:
+            return None
+        
+    @classmethod
+    def check_existing(cls,crop_name):
+        query = db.session.query(Crops).filter(Crops.name.ilike(f'%{crop_name.lower()}%')).first()
         if query:
             return query.json()
         else:

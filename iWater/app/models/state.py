@@ -43,7 +43,7 @@ class State(db.Model):
                     .join(District, State.id == District.state_id)\
                     .join(Block, District.id == Block.district_id)\
                     .join(Village, Block.id == Village.block_id)\
-                    .filter(cls.village_id == json_data['village_id'])
+                    .filter(Village.id == json_data['village_id'])
         elif 'block_id' in json_data:
             query = db.session.query(State.name.label('state'), 
                                  District.name.label('district'), 
