@@ -35,7 +35,7 @@ class WB_master(db.Model):
     
     @classmethod
     def get_all(cls):
-        query=cls.query.order_by(cls.name)
+        query=cls.query.order_by(cls.code).all()
         return query
 
     def save_to_db(self):

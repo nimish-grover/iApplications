@@ -17,3 +17,28 @@ class Livestock(db.Model):
             'name': self.name,
             'water_use': self.water_use
         }
+    
+    @classmethod
+    def get_all(cls):
+        query=cls.query.order_by(cls.id).all()
+        arr =[]
+        for row in query:
+            row.json()
+            arr.append(row)
+        return arr
+    
+    @classmethod
+    def get_by_type(cls, _type):
+        query =  cls.query.filter_by(type=_type).all()
+        if query:
+            return query
+        else:
+            return None
+        
+    @classmethod
+    def get_by_name(cls, _name):
+        query=cls.query.filter_by(name=_name).first()
+        if query:
+            return query.json()
+        else:
+            return None

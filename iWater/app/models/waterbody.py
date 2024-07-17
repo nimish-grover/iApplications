@@ -1,6 +1,10 @@
 from sqlalchemy import case, func
 from iWater.app.db import db
 from iWater.app.models.village import Village
+from iWater.app.models.state import State
+from iWater.app.models.district import District
+from iWater.app.models.block import Block
+from iWater.app.models.village import Village
 
 class Waterbody(db.Model):
     __tablename__ = 'waterbodies'
@@ -33,3 +37,12 @@ class Waterbody(db.Model):
         
         result = query.all()
         return result
+    
+    # @classmethod
+    # def get_total_crop_types(cls):
+    #     query = db.session.query(
+    #     func.count(db.distinct(Crops_type.type))). \
+    #     join(Village, cls.village_code == Village.code).\
+    #     join(Block, Village.block_id == Block.id).\
+    #     join(District, cls.district_code == District.code).\
+    #     join(State, District.state_id == State.id)

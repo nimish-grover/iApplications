@@ -13,7 +13,8 @@ from iWater.app.routes.controllers import blp as controllerBlueprint
 from iWater.app.routes.pwa import blp as pwaBlueprint
 from iWater.app.routes.waterbody_routes import blp as wbBlueprint
 from iWater.app.routes.wb_api import blp as wbApiBlueprint
-
+from iWater.app.routes.village_water_budget import blp as VillageBudget
+from iWater.app.models.water_bodies_mp import Water_bodies_mp
 
 
 def create_app():
@@ -49,6 +50,7 @@ def create_app():
     api.register_blueprint(controllerBlueprint)
     api.register_blueprint(wbBlueprint, url_prefix='/wb')
     api.register_blueprint(wbApiBlueprint, url_prefix='/wb/api')
+    api.register_blueprint(VillageBudget)
 
 
     return app

@@ -34,4 +34,5 @@ class Village(db.Model):
     
     @classmethod
     def get_district_by_village(cls, village_id):
-        return cls.query.filter_by(id = village_id).first()
+        query = cls.query.filter_by(id = village_id).first()
+        return query.json()

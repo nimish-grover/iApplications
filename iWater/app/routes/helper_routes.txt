@@ -83,3 +83,63 @@ def get_total_type_wise_category(state_code):
             json_data[category]["large"] = [int(large_db[large_index][1]),int(large_db[large_index][2]),large_db[large_index][3]]
 
     return json_data
+
+
+
+SELECT * FROM water_bodies 
+INNER JOIN villages on villages.code = water_bodies.village_code
+INNER join blocks on blocks.code = villages.block_id
+INNER join districts on districts.code = blocks.district_id
+inner join states on states.code = districts.state_id
+where states.id = 12
+
+@blp.route('/export_csv')
+def export_csv():
+    # Perform the join query
+    results = db.session.query(
+        WaterBody.id,
+        WaterBody.village_code,
+        WaterBody.water_spread_area,
+        WaterBody.max_depth,
+        WaterBody.storage_capacity,
+        WaterBody.wb_type_id,
+        WaterBody.district_code,
+        WaterBody.longitude,
+        WaterBody.latitude
+    ).join(Village, Village.code == WaterBody.village_code) \
+     .join(Block, Block.code == Village.block_id) \
+     .join(District, District.code == Block.district_id) \
+     .join(State, State.code == District.state_id) \
+     .filter(State.id == 23).all()
+
+    # Prepare the data for CSV
+    data = [{
+        'id': r.id,
+        'village_code': r.village_code,
+        'water_spread_area': r.water_spread_area,
+        'max_depth': r.max_depth,
+        'storage_capacity': r.storage_capacity,
+        'wb_type_id': r.wb_type_id,
+        'district_code': r.district_code,
+        'longitude': r.longitude,
+        'latitude': r.latitude
+    } for r in results]
+
+    # Define the CSV output
+    def generate_csv(data):
+        # Use StringIO to capture the output of the CSV writer
+        from io import StringIO
+        output = StringIO()
+        writer = csv.DictWriter(output, fieldnames=[
+            'id', 'village_code', 'water_spread_area', 'max_depth', 'storage_capacity',
+            'wb_type_id', 'district_code', 'longitude', 'latitude'
+        ])
+        writer.writeheader()
+        writer.writerows(data)
+        return output.getvalue()
+
+    # Create a response object and set the headers for file download
+    response = Response(generate_csv(data), mimetype='text/csv')
+    response.headers.set("Content-Disposition", "attachment", filename="water_bodies.csv")
+
+    return response

@@ -26,7 +26,7 @@ class Crops_type(db.Model):
             return None
     
     @classmethod
-    def get_wb_by_type(cls, _type):
+    def get_by_type(cls, _type):
         query =  cls.query.filter_by(type=_type).first()
         if query:
             return query.json()

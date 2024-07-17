@@ -89,17 +89,17 @@ class Crop_area(db.Model):
         join(State, District.state_id == State.id)
         
         
-        if 'state_code' in json_data:
-            query = query.filter(State.code == json_data['state_code']).all()
+        if 'state_id' in json_data:
+            query = query.filter(State.code == json_data['state_id']).all()
         
-        elif 'village_code' in json_data:
-            query = query.filter(Village.code == json_data['village_code']).all()
+        elif 'village_id' in json_data:
+            query = query.filter(Village.code == json_data['village_id']).all()
             
-        elif 'district_code' in json_data:
-            query = query.filter(District.code == json_data['district_code']).all()
+        elif 'district_id' in json_data:
+            query = query.filter(District.code == json_data['district_id']).all()
         
-        elif 'block_code' in json_data:
-            query = query.filter(Block.code == json_data['block_code']).all()
+        elif 'block_id' in json_data:
+            query = query.filter(Block.code == json_data['block_id']).all()
         else:
             query = query.all()
         return query
@@ -135,3 +135,18 @@ class Crop_area(db.Model):
         else:
             query = query.scalar()
         return query
+    
+    @classmethod
+    def get_existing_data(cls, json_data):
+        # query = db.session.query(filter(cls.livestock_id ==_livestock_id))
+        query=cls.query.filter_by(crop_id= json_data['crop_id'],crop_type_id = json_data['crop_type_id'], district_code = json_data['district_id'])
+
+        if 'village_id' in json_data:
+            query = query.filter(cls.village_code== json_data['village_id'])
+
+        
+        result = query.first()
+        if result:
+            return result.json()
+        else:
+            return None

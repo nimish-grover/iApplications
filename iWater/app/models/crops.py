@@ -24,7 +24,7 @@ class Crops(db.Model):
         }
     
     @classmethod
-    def get_wb_by_id(cls, _id):
+    def get_by_id(cls, _id):
         query=cls.query.filter_by(id=_id).first()
         if query:
             return query.json()
@@ -32,15 +32,15 @@ class Crops(db.Model):
             return None
     
     @classmethod
-    def get_wb_by_type_id(cls, _type_id):
-        query =  cls.query.filter_by(type_id=_type_id).first()
+    def get_by_type_id(cls, _type_id):
+        query =  cls.query.filter_by(type_id=_type_id).all()
         if query:
-            return query.json()
+            return query
         else:
             return None
         
     @classmethod
-    def check_existing(cls,crop_name):
+    def get_by_name(cls,crop_name):
         query = db.session.query(Crops).filter(Crops.name.ilike(f'%{crop_name.lower()}%')).first()
         if query:
             return query.json()

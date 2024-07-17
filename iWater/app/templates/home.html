@@ -40,8 +40,23 @@
                 <canvas id="demandChart" width="400" height="80" aria-label="water demand chart" role="img"></canvas>
             </div>
             <div class="card-footer py-1">
-                <div class="text-end"><a class="btn btn-secondary btn-sm" href="{{url_for('PWA.demand')}}">Demand
-                        Details...</a></div>
+                <div class="row">
+                    <!-- <div class="col-6"></div>
+                    <div class="col-3 p-0">
+                        
+                    </div> -->
+                    <div class="col pe-0">
+                        <div class="text-end"><a class="btn btn-secondary btn-sm" href="{{url_for('village_water_budget.add_data')}}">Edit 
+                            Details</a></div>
+                        
+                    </div>
+                    <div class="col-4 ps-0 ">
+                    
+                        <div class="text-end"><a class="btn btn-secondary btn-sm" href="{{url_for('PWA.demand')}}">View 
+                            Details</a></div>
+                    </div>
+                </div>
+                
             </div>
         </div>
         <div class="row my-1 mx-3">
@@ -76,8 +91,22 @@
                 <canvas id="supplyChart" width="400" height="100" aria-label="water supply chart" role="img"></canvas>
             </div>
             <div class="card-footer py-1">
-                <div class="text-end"><a class="btn btn-secondary btn-sm" href="{{url_for('PWA.supply')}}">Supply
-                        Details...</a></div>
+                <div class="row">
+                    <!-- <div class="col-6"></div>
+                    <div class="col-3 p-0">
+                        
+                    </div> -->
+                    <div class="col pe-0">
+                        <div class="text-end"><a class="btn btn-secondary btn-sm" href="{{url_for('village_water_budget.add_harvest_data')}}">Edit 
+                            Details</a></div>
+                        
+                    </div>
+                    <div class="col-4 ps-0 ">
+                    
+                        <div class="text-end"><a class="btn btn-secondary btn-sm" href="{{url_for('PWA.supply')}}">View 
+                            Details</a></div>
+                    </div>
+                </div>
             </div>
         </div>
         <div class="row my-1 mx-3">
