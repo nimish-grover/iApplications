@@ -42,15 +42,13 @@ def create_app():
     # app.config["OPENAPI_URL_PREFIX"] = "/"
     # app.config["OPENAPI_SWAGGER_UI_PATH"] = "/swagger-ui"
     # app.config["OPENAPI_SWAGGER_UI_URL"] = "https://cdn.jsdelivr.net/npm/swagger-ui-dist/"
-    app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DUMMY_DATABASE_URL')  # Replace with your actual database URI
+    app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('ISAKHSAM_DATABASE_URL')  # Replace with your actual database URI
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config['PROPAGATE_EXCEPTIONS'] = True
-    app.config['ELASTICMAIL_API_KEY'] = os.getenv('ELASTICMAIL_API_KEY')
-    app.config['ELASTICMAIL_API_URL'] = os.getenv('ELASTICMAIL_API_URL')
 
     db.init_app(app)  # Initializing the database with the Flask app
-    migrations_directory = current_directory + '/iSaksham/migrations'
-    migrate = Migrate(app, db, directory=migrations_directory)  # Initializing Flask-Migrate with the Flask app
+    # migrations_directory = current_directory + '/iSaksham/migrations'
+    migrate = Migrate(app, db)  # Initializing Flask-Migrate with the Flask app
     app.register_blueprint(HomeBlueprint)  # Registering home blueprint with the Flask app
     app.register_blueprint(AuthBlueprint)  # Registering authentication blueprint with the Flask app
 

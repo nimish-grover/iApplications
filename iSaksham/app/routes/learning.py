@@ -67,9 +67,9 @@ def course_2018():
 # @login_required
 def course_2024():
     
-        
     return render_template('course_2024.html')  # Rendering course.html template
 
+@login_required
 @blp.route('/play_chapter/<int:id>')
 def play_chapter(id):
     modules = Modules.get_all()

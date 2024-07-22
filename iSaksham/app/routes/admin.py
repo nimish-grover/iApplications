@@ -8,14 +8,6 @@ from iSaksham.app.routes.email_helper import send_email
 
 blp = Blueprint("admin", "admin","Authorisation related routes")
 
-# @blp.route('/login')
-# def login():
-#     pass
-
-# @blp.route('/')
-# def home():
-#     return render_template('home.html')
-                
 # Route for login
 @blp.route('/login', methods=["POST", "GET"])
 def login():
@@ -77,7 +69,9 @@ def register():
 
     return render_template('register.html')
 
+
 # Route for OTP verification
+@login_required
 @blp.route('/verify_otp', methods=["POST", "GET"])
 def verify_otp():
     if request.method == "POST":
@@ -100,6 +94,7 @@ def verify_otp():
     return render_template('verify_otp.html')
 
 # Route to resend OTP
+@login_required
 @blp.route('/resend_otp')
 def resend_otp():
     email = session.get('user_email')
@@ -154,6 +149,7 @@ def change_password(id):
         return render_template('change_password.html')
 
 # Route for verifying email
+@login_required
 @blp.route('/verify_email', methods=["POST", "GET"])
 def verify_email():
     if request.method == "POST":
@@ -175,6 +171,7 @@ def verify_email():
     return render_template('verify_email.html')
 
 # Route for resetting password
+@login_required
 @blp.route('/reset_password/<id>', methods=['POST', 'GET'])
 def reset_password(id):
     if request.method == "GET":
