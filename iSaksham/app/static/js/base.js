@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', function () {
     if (shouldDisplaySplashScreen()) {
 
         // Extend timeout for testing
-        setTimeout(hideSplashScreen, 3000); 
+        setTimeout(hideSplashScreen, 5000); 
 
     } else {
 

@@ -42,7 +42,7 @@ def create_app():
     # app.config["OPENAPI_URL_PREFIX"] = "/"
     # app.config["OPENAPI_SWAGGER_UI_PATH"] = "/swagger-ui"
     # app.config["OPENAPI_SWAGGER_UI_URL"] = "https://cdn.jsdelivr.net/npm/swagger-ui-dist/"
-    app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('ISAKHSAM_DATABASE_URL')  # Replace with your actual database URI
+    app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('ISAKSHAM_DATABASE_URL')  # Replace with your actual database URI
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config['PROPAGATE_EXCEPTIONS'] = True
 
