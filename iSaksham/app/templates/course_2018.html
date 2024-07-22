@@ -91,7 +91,7 @@
                     </div>
                 </div>
                 <div class="card-body p-0">
-                    <div class="priority-lists pb-3">
+                    
                         <div class="accordion accordion-flush" id="accordion">
                             
                             {% for title in accordion_title %}
@@ -108,13 +108,13 @@
                                     </button>
                                 </div>
                                 <div id="desktop-{{title.id}}" class="accordion-collapse collapse px-2 in show">
-                                    <div class="accordion-body px-1">
-                                        <div class="list-group">
+                                    <div class="accordion-body p-0">
+                                        <div class="list-group list-group-flush">
                                             {% for module in accordion_content %}
                                                 {% for chapter in module %}
                                                     {% if chapter.module_id == title.id%}
                                                         <a class="list-group-item list-group-item-action" href="{{url_for('learning.play_chapter',id = chapter.id)}}" style="text-decoration: none;" >
-                                                            <div class="row">
+                                                            <div class="row p-2">
                                                                 {% if 'FAQ' in chapter.title %}
                                                             <div class="col-1 pe-0">
                                                                 <i class="fa-solid fa-circle-question"></i>
@@ -129,8 +129,9 @@
                                                             </div>
                                                             {% endif %}
 
-                                                            <div class="col">
-                                                                <div class="fs-6">{{chapter.title}}</div>
+                                                            <div class="col-9">
+                                                                <div class="fs-6 text-truncate" data-bs-toggle="tooltip"
+                                                            data-bs-title="{{chapter.title}}">{{chapter.title}}</div>
                                                             </div>
                                                             <div class="col-2 d-grid justify-content-end">
                                                                 <div class="fs-6">{{chapter.length}}</div>
@@ -146,7 +147,7 @@
                             </div>
                             {% endfor %}
                         </div>
-                    </div>
+                    
                 </div>
             </div>
         </div>
@@ -245,7 +246,7 @@
                     </div>
                 </div>
                 <div class="card-body p-0">
-                    <div class="priority-lists pb-3">
+                    
                         <div class="accordion accordion-flush" id="accordion">
                             
                             {% for title in accordion_title %}
@@ -262,13 +263,13 @@
                                     </button>
                                 </div>
                                 <div id="mobile-{{title.id}}" class="accordion-collapse collapse px-2 in show">
-                                    <div class="accordion-body px-1">
-                                        <div class="list-group">
+                                    <div class="accordion-body p-0">
+                                        <div class="list-group list-group-flush">
                                             {% for module in accordion_content %}
                                                 {% for chapter in module %}
                                                     {% if chapter.module_id == title.id%}
                                                         <a class="list-group-item list-group-item-action" href="{{url_for('learning.play_chapter',id = chapter.id)}}" style="text-decoration: none;" >
-                                                            <div class="row">
+                                                            <div class="row p-2">
                                                                 {% if 'FAQ' in chapter.title %}
                                                             <div class="col-1 pe-0">
                                                                 <i class="fa-solid fa-circle-question fs-6"></i>
@@ -301,7 +302,7 @@
                             </div>
                             {% endfor %}
                         </div>
-                    </div>
+                    
                 </div>
             </div>
         </div>
