@@ -2,7 +2,7 @@ from flask_smorest import Blueprint
 from iWater.app.models.crop_area import Crop_area
 from iWater.app.models.crops_type import Crops_type                 
 from iWater.app.models.crops import Crops
-from flask import jsonify, render_template,request,session,Response
+from flask import jsonify, render_template,request,session,Response,flash
 from iWater.app.routes.water_budget import WaterBudgetCalc
 from iWater.app.models.livestocks import Livestock
 from iWater.app.models.livestock_census import LivestockCensus
@@ -223,3 +223,59 @@ def add_waterbody_to_db():
                 # data = LivestockCensus(waterbody_area,livestock_id,village_id)
                 # data.save_to_db()
                 return jsonify({'status': 'error', 'message': "Data doesn't exist"}), 400
+
+
+@blp.route('/get_village_id' , methods=['POST'])
+def get_village_id():
+    json_data = request.get_json()
+    if json_data:
+        print(json_data)
+        payload = {'village_id':json_data['village_id']}
+        session['payload'] = payload
+        return {'message': 'Success'}
+    
+@blp.route('/add_new_crops',methods=['POST','GET'])
+def add_new_crops():
+    if request.method == "POST":
+        json_data = request.get_json()
+        for item in json_data:
+            crop_name = item['cropName']
+            water_req = item['water_req']
+            crop_type = item['cropType']
+            crop_db = Crops_type.get_by_type(crop_type)
+            crop_type_id = crop_db['id']
+            crop = Crops(crop_type_id,crop_name,water_req)
+            crop.save_to_db()
+        return {'message':'data added'},200        
+    return render_template('new_crops.html')
+
+@blp.route('/add_new_livestocks',methods=["POST","GET"])
+def add_new_livestocks():
+    if request.method == "POST":
+        json_data = request.get_json()
+        for item in json_data:
+            livestock_name = item['livestockName']
+            water_req = item['water_req']
+            livestock_type = item['livestockType']
+            
+        
+            livestock = Livestock(type=livestock_type,name=livestock_name,water_use=water_req)
+            livestock.save_to_db()
+            
+        return {'message':'data added'},200   
+    
+    return render_template('new_livestocks.html')
+
+@blp.route('/add_new_waterbody',methods = ['POST','GET'])
+def add_new_waterbody():
+    if request.method == "POST":
+        json_data = request.get_json()
+        for item in json_data:
+            water_body_name = item['waterbodyName']
+        
+            water_body = WB_master(water_body_name)
+            water_body.save_to_db()
+            
+        return {'message':'data added'},200   
+    
+    return render_template('new_waterbody.html')

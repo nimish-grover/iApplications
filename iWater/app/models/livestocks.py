@@ -8,6 +8,12 @@ class Livestock(db.Model):
     bird_type = db.Column(db.String(30))
     name = db.Column(db.String(80), nullable=False, unique=True)
     water_use = db.Column(db.Float(53), nullable=False)
+    
+    def __init__(self,type,name,water_use,bird_type = ''):
+        self.type = type
+        self.bird_type = bird_type
+        self.name = name 
+        self.water_use = water_use        
 
     def json(self):
         return{
@@ -42,3 +48,19 @@ class Livestock(db.Model):
             return query.json()
         else:
             return None
+        
+    def save_to_db(self):
+        db.session.add(self)
+        db.session.commit()
+
+    def delete_from_db(_id):
+        participant = Livestock.query.filter_by(id=_id).first()
+        db.session.delete(participant)
+        db.session.commit()
+
+    def commit_db():
+        db.session.commit()
+
+    def update_db(data,_id):
+        user = Livestock.query.filter_by(id=_id).update(data)
+        db.session.commit()

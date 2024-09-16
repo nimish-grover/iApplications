@@ -27,16 +27,45 @@
 <body>
 
   {% block content %}
-  <nav class="navbar navbar-light py-1">
+  <nav class="navbar navbar-light py-1" style="background-color: var(--bs-purple);">
     <div class="container-fluid">
-      <a class="navbar-brand text-white fs-6" href="{{url_for('PWA.index')}}">
-        <img src="{{url_for('static',filename='assets/icons/android/icon-48-48.png')}}" class="bg-light bg-opacity-75"
-          alt="wb_icon" height="24" width="24">
-        <span class="text-warning">i</span>Water</a>
-      <button class="navbar-toggler py-0 px-1" type="button" data-bs-toggle="offcanvas"
-        data-bs-target="#offcanvasNavbar" aria-controls="offcanvasNavbar" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-      </button>
+      <div class="row p-0 m-0" style="width: 100%;">
+				<div class="col-auto p-0 me-auto align-self-center">
+					<a class="navbar-brand text-white fs-6" href="{{url_for('PWA.index')}}">
+						<img src="{{url_for('static',filename='assets/icons/android/icon-48-48.png')}}"
+							class="bg-light bg-opacity-75" alt="wb_icon" height="24" width="24">
+						<span class="text-warning">i</span>Water</a>
+				</div>
+				<div class="col-auto">
+					<div class="row">
+						<div class="col dropdown p-0">
+							<button class="btn btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown"
+								aria-expanded="false">
+								<i class="fa-solid fa-user fa-lg" style="color: white;"></i>
+							</button>
+							<ul class="dropdown-menu">
+								{%if current_user.is_authenticated%}
+								<li><a class="dropdown-item" href="{{url_for('admin.profile')}}">Profile</a></li>
+								<li><a class="dropdown-item" href="{{url_for('admin.change_password',id = current_user.id)}}">Change Pwd</a></li>
+								<li><a class="dropdown-item" href="{{url_for('admin.logout')}}">Logout</a></li>
+								{%else%}
+								<li><a class="dropdown-item" href="{{url_for('admin.login')}}">Login</a></li>
+								<li><a class="dropdown-item" href="{{url_for('admin.register')}}">Register</a></li>
+								{%endif%}
+							</ul>
+						</div>
+
+						<div class="col align-self-center p-0">
+							<button class="navbar-toggler py-0 px-1" type="button" data-bs-toggle="offcanvas"
+								data-bs-target="#offcanvasNavbar" aria-controls="offcanvasNavbar"
+								aria-label="Toggle navigation">
+								<span class="navbar-toggler-icon"></span>
+							</button>
+						</div>
+
+					</div>
+				</div>
+			</div>
       <div class="offcanvas offcanvas-start offcanvas-size-sm" tabindex="-1" id="offcanvasNavbar"
         aria-labelledby="offcanvasNavbarLabel">
         <div class="offcanvas-header">

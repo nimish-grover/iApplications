@@ -1,0 +1,1324 @@
+{% extends 'entry_base.html' %}
+{% block title %}Select{% endblock %}
+{% block content %}
+{{super()}}
+<!-- Dropdown Trigger -->
+<div class="container">
+    <form id="dropdownform" class="card shadow-sm mt-3" method="POST">
+        <div class="card-header text-center fw-semibold py-1 fs-7">Select State/District/Block/Village</div>
+        <div class="card-body">
+            <div class="mt-2">
+                <!-- <label for="ddStates" class="form-label fw-lighter fs-7 mb-0">Select a State</label> -->
+                <select class="form-select form-select-sm fs-7" aria-label="select states" id="ddStates"
+                    name="ddStates">
+                    <option value="-1" disabled selected>Select State</option>
+                    {% for state in states %}
+                    <option value="{{state['id'] | safe}}">{{ state["name"] | safe}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="mt-2">
+                <!-- <label for="ddDistricts" class="form-label fw-lighter fs-7 mb-0" >Select a District</label> -->
+                <select class="form-select form-select-sm fs-7" aria-label="select states" id="ddDistricts"
+                    name="ddDistricts" disabled>
+                    <option value="-1" disabled selected>Select District</option>
+                </select>
+            </div>
+            <div class="mt-2">
+                <!-- <label for="ddBlocks" class="form-label fw-lighter fs-7 mb-0" >Select a Block</label> -->
+                <select class="form-select form-select-sm fs-7" aria-label="select states" id="ddBlocks" name="ddBlocks"
+                    disabled>
+                    <option value="-1" disabled selected>Select Block</option>
+                </select>
+            </div>
+            <div class="mt-2">
+                <!-- <label for="ddVillages" class="form-label fw-lighter fs-7 mb-0" >Select a Village</label> -->
+                <select class="form-select form-select-sm fs-7" aria-label="select states" id="ddVillages"
+                    name="ddVillages" disabled>
+                    <option value="-1" disabled selected>Select Village</option>
+                </select>
+            </div>
+        </div>
+        <div class="d-grid gap-2">
+            <input type="submit" class="btn btn-primary m-2 disabled fs-7" id="btnSubmit" name="btnSubmit" />
+        </div>
+    </form>
+
+    <div class="d-flex justify-content-center mt-3 d-none" id="spinner">
+        <div class="spinner-grow" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+
+    <div class="entry-content d-none" id="entry-content">
+        <div class="row m-3">
+            <div class="col text-center align-self-center">
+                <div class="text text-primary fw-bold" id="texton">
+                    Demand
+                </div>
+            </div>
+            <div class="col d-grid justify-content-center">
+                <div id="toggleButton" class="toggle-btn" onclick="toggleButton()"></div>
+            </div>
+            <div class="col text-center align-self-center">
+                <div class="text" id="textoff">
+                    Supply
+                </div>
+            </div>
+        </div>
+        <!-- Content to display based on toggle button state -->
+        <div id="contentOn" class="content">
+            <div class="container mt-3 p-0">
+                <ul class="nav nav-tabs nav-pills nav-fill fs-7" id="myTab" role="tablist">
+                    <li class="nav-item m-0" role="presentation">
+                        <button class="nav-link active p-1" id="human-tab" data-bs-toggle="tab" data-bs-target="#human"
+                            type="button" role="tab" aria-controls="human" aria-selected="true">Human</button>
+                    </li>
+                    <li class="nav-item m-0" role="presentation">
+                        <button class="nav-link p-1" id="agriculture-tab" data-bs-toggle="tab"
+                            data-bs-target="#agriculture" type="button" role="tab" aria-controls="agriculture"
+                            aria-selected="false">Agriculture</button>
+                    </li>
+                    <li class="nav-item m-0" role="presentation">
+                        <button class="nav-link p-1" id="livestock-tab" data-bs-toggle="tab" data-bs-target="#livestock"
+                            type="button" role="tab" aria-controls="livestock" aria-selected="false">Livestock</button>
+                    </li>
+                </ul>
+                <div class="tab-content mt-3">
+                    <div class="tab-pane active" id="human" role="tabpanel" aria-labelledby="human-tab" tabindex="0">
+                        <div class="card my-2 shadow-sm">
+                            <div class="card-header text-center fw-bold py-1">
+                                <div class="fs-6 fw-bold mb-0">Water Consumption for Humans</div>
+                                <div class="fs-7 fw-normal text-center text-secondary mt-n2">Consumptions in Hectare
+                                    Metres
+                                </div>
+                            </div>
+                            <div class="card-body justify-content-center pt-2 p-1">
+                                <div class="row m-0" style="width: 100%;">
+                                    <div class="col">
+                                        <div class="container p-1">
+                                            <div class="row m-0">
+                                                <div class="col-2"></div>
+                                                <div class="col">
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="radio" name="genderradio"
+                                                            id="genderoption1" value="Male">
+                                                        <label class="form-check-label" for="genderoption1">
+                                                            Male
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                                <div class="col">
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="radio" name="genderradio"
+                                                            id="genderoption2" value="Female">
+                                                        <label class="form-check-label" for="genderoption2">
+                                                            Female
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-2"></div>
+                                            </div>
+                                            <div class="row m-0 mt-1 mb-1">
+                                                <div class="col d-grid align-items-center">
+                                                    <input type="text" class="form-control form-select-sm fs-7"
+                                                        id="human_population_size" aria-describedby="population"
+                                                        placeholder="Population Size">
+                                                </div>
+
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                    <div class="col-2 align-items-center d-grid">
+                                        <button type="submit" id="humanadd"
+                                            class="btn btn-outline-dark btn-sm mb-1 p-1">Add</button>
+                                    </div>
+
+                                </div>
+                                <div class="row m-0">
+                                    <div id="alertContainer-human" class="container mt-3 p-0" style="display: none;">
+
+                                        <div class="alert alert-success alert-dismissible fade show fs-7" role="alert"
+                                            id="successAlert-human" style="display: none;">
+                                            Data added successfully !!
+                                            <button type="button" class="btn-close" data-bs-dismiss="alert"
+                                                aria-label="Close"></button>
+                                        </div>
+
+                                        <div class="alert alert-danger alert-dismissible fade show fs-7" role="alert"
+                                            id="failAlert-human" style="display: none;">
+                                            Data cannot be added !! Please try again later .
+                                            <button type="button" class="btn-close" data-bs-dismiss="alert"
+                                                aria-label="Close"></button>
+                                        </div>
+
+                                    </div>
+                                    <div class="container mt-3" style="display: none;" id="humanContainer">
+                                        <table id="humanTable" class="table table-striped table-bordered table-sm">
+                                            <thead>
+                                                <tr>
+                                                    <th scope="col">Gender</th>
+                                                    <th scope="col" class="text-end">Population Size</th>
+                                                    <th scope="col" class="text-center">Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                            </tbody>
+                                        </table>
+                                        <div class="row ">
+                                            <div class="button justify-content-center d-grid">
+                                                <button type="button" id="submit-btn-human"
+                                                    class="btn btn-primary mb-1">Save to DB</button>
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+
+                            </div>
+
+                        </div>
+
+
+                    </div>
+
+
+                    <div class="tab-pane" id="agriculture" role="tabpanel" aria-labelledby="agriculture-tab"
+                        tabindex="0">
+                        <div class="card my-2 shadow-sm">
+                            <div class="card-header text-center fw-bold py-1">
+                                <div class="fs-6 fw-bold mb-0">Water Consumption for Agriculture</div>
+                                <div class="fs-7 fw-normal text-center text-secondary mt-n2">Consumptions in Hectare
+                                    Metres
+                                </div>
+                            </div>
+                            <div class="card-body justify-content-center pt-2 p-1">
+                                <div class="row m-0" style="width: 100%;">
+                                    <div class="col">
+                                        <div class="container p-1">
+                                            <div class="row m-0">
+                                                <div class="col-2"></div>
+                                                <div class="col">
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="radio" name="cropoption"
+                                                            id="cropoption1" value="Rabi">
+                                                        <label class="form-check-label" for="cropoption1">
+                                                            Rabi
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                                <div class="col">
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="radio" name="cropoption"
+                                                            id="cropoption2" value="Kharif">
+                                                        <label class="form-check-label" for="cropoption2">
+                                                            Kharif
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-2"></div>
+                                            </div>
+                                            <div class="row m-0 mt-1 mb-1">
+                                                <div class="col d-grid align-items-center p-0">
+                                                    <select class="form-select form-select-sm fs-7"
+                                                        aria-label="Select Crop" id="cropDropdown" name="cropDropdown">
+                                                        <option value="-1" disabled selected>Select Crop</option>
+
+                                                    </select>
+                                                </div>
+                                                <div class="col d-grid align-items-center">
+                                                    <input type="text" class="form-control form-select-sm fs-7"
+                                                        id="crop_area" aria-describedby="Crop Area" placeholder="Area">
+                                                </div>
+
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                    <div class="col-2 align-items-center d-grid">
+                                        <button type="submit" id="agricultureadd"
+                                            class="btn btn-outline-dark btn-sm mb-1 p-1">Add</button>
+                                    </div>
+
+                                </div>
+                                <div class="row m-0">
+                                    <div id="alertContainer-agriculture" class="container mt-3 p-0"
+                                        style="display: none;">
+
+                                        <div class="alert alert-success alert-dismissible fade show fs-7" role="alert"
+                                            id="successAlert-agriculture" style="display: none;">
+                                            Data added successfully !!
+                                            <button type="button" class="btn-close" data-bs-dismiss="alert"
+                                                aria-label="Close"></button>
+                                        </div>
+
+                                        <div class="alert alert-danger alert-dismissible fade show fs-7" role="alert"
+                                            id="failAlert-agriculture" style="display: none;">
+                                            Data cannot be added !! Please try again later .
+                                            <button type="button" class="btn-close" data-bs-dismiss="alert"
+                                                aria-label="Close"></button>
+                                        </div>
+
+                                    </div>
+                                    <div class="container mt-3" style="display: none;" id="agricultureContainer">
+                                        <table id="agricultureTable"
+                                            class="table table-striped table-bordered table-sm">
+                                            <thead>
+                                                <tr>
+                                                    <th scope="col">Type</th>
+                                                    <th scope="col">Name</th>
+                                                    <th scope="col" class="text-end">Area</th>
+                                                    <th scope="col" class="text-center">Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                            </tbody>
+                                        </table>
+                                        <div class="row ">
+                                            <div class="button justify-content-center d-grid">
+                                                <button type="button" id="submit-btn-agriculture"
+                                                    class="btn btn-primary mb-1">Save to DB</button>
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+
+                            </div>
+                        </div>
+
+                    </div>
+
+
+                    <div class="tab-pane" id="livestock" role="tabpanel" aria-labelledby="livestock-tab" tabindex="0">
+                        <div class="card my-2 shadow-sm">
+                            <div class="card-header text-center fw-bold py-1">
+                                <div class="fs-6 fw-bold mb-0">Water Consumption for LiveStocks</div>
+                                <div class="fs-7 fw-normal text-center text-secondary mt-n2">Consumptions in Hectare
+                                    Metres
+                                </div>
+                            </div>
+                            <div class="card-body justify-content-center pt-2 p-1">
+                                <div class="row m-0" style="width: 100%;">
+                                    <div class="col">
+                                        <div class="container p-1">
+                                            <div class="row m-0">
+                                                <div class="col-2"></div>
+                                                <div class="col">
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="radio"
+                                                            name="livestockradio" id="livestockoption1" value="Animal"
+                                                            checked="">
+                                                        <label class="form-check-label" for="livestockoption1">
+                                                            Animal
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                                <div class="col">
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="radio"
+                                                            name="livestockradio" id="livestockoption2" value="Bird"
+                                                            disabled="">
+                                                        <label class="form-check-label" for="livestockoption2">
+                                                            Bird
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-2"></div>
+                                            </div>
+                                            <div class="row m-0 mt-1 mb-1">
+                                                <div class="col d-grid align-items-center">
+                                                    <select class="form-select form-select-sm fs-7"
+                                                        aria-label="Select livestock" id="livestockDropdown"
+                                                        name="livestockDropdown">
+                                                        <option value="-1" disabled selected>Select Livestock</option>
+
+                                                    </select>
+                                                </div>
+                                                <div class="col d-grid align-items-center">
+                                                    <input type="text" class="form-control form-select-sm fs-7"
+                                                        id="livestock_population_size" aria-describedby="population"
+                                                        placeholder="Population Size">
+                                                </div>
+
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                    <div class="col-2 align-items-center d-grid">
+                                        <button type="submit" id="livestockadd"
+                                            class="btn btn-outline-dark btn-sm mb-1 p-1">Add</button>
+                                    </div>
+
+                                </div>
+                                <div class="row m-0">
+                                    <div id="alertContainer-livestock" class="container mt-3 p-0"
+                                        style="display: none;">
+
+                                        <div class="alert alert-success alert-dismissible fade show fs-7" role="alert"
+                                            id="successAlert-livestock" style="display: none;">
+                                            Data added successfully !!
+                                            <button type="button" class="btn-close" data-bs-dismiss="alert"
+                                                aria-label="Close"></button>
+                                        </div>
+
+                                        <div class="alert alert-danger alert-dismissible fade show fs-7" role="alert"
+                                            id="failAlert-livestock" style="display: none;">
+                                            Data cannot be added !! Please try again later .
+                                            <button type="button" class="btn-close" data-bs-dismiss="alert"
+                                                aria-label="Close"></button>
+                                        </div>
+
+                                    </div>
+                                    <div class="container mt-3" style="display: none;" id="livestockContainer">
+                                        <table id="livestockTable" class="table table-striped table-bordered table-sm">
+                                            <thead>
+                                                <tr>
+                                                    <th scope="col">Type</th>
+                                                    <th scope="col">Name</th>
+                                                    <th scope="col" class="text-end">Population Size</th>
+                                                    <th scope="col" class="text-center">Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                            </tbody>
+                                        </table>
+                                        <div class="row ">
+                                            <div class="button justify-content-center d-grid">
+                                                <button type="button" id="submit-btn-livestock"
+                                                    class="btn btn-primary mb-1">Save to DB</button>
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+
+                            </div>
+
+                        </div>
+
+                    </div>
+                </div>
+
+
+            </div>
+        </div>
+        <div id="contentOff" class="content active">
+            <div class="container mt-3 p-0">
+                <div class="card my-2 shadow-sm">
+                    <div class="card-header text-center fw-bold py-1">
+                        <div class="fs-6 fw-bold mb-0">Harvested Runoff</div>
+                        <div class="fs-7 fw-normal text-center text-secondary mt-n2">Water stored in harvesting
+                            structures
+                        </div>
+                    </div>
+                    <div class="card-body justify-content-center pt-2 p-1">
+                        <div class="row m-0" style="width: 100%;">
+                            <div class="col">
+                                <div class="container p-1">
+
+                                    <div class="row m-0 mt-1 mb-1">
+                                        <div class="col d-grid align-items-center p-0">
+                                            <select class="form-select form-select-sm fs-7"
+                                                aria-label="Select Water Body" id="waterbodyDropdown"
+                                                name="waterbodyDropdown">
+                                                <option value="-1" disabled selected>Select Water Body</option>
+                                                {%for water_body in water_bodies%}
+                                                <option value="{{water_body}}">{{water_body}}</option>
+                                                {%endfor%}
+                                            </select>
+                                        </div>
+                                        <div class="col-5 d-grid align-items-center">
+                                            <input type="text" class="form-control form-select-sm fs-7"
+                                                id="water_body_area" aria-describedby="Water Body Area"
+                                                placeholder="Area">
+                                        </div>
+
+                                    </div>
+
+                                </div>
+                            </div>
+                            <div class="col-2 align-items-center d-grid">
+                                <button type="submit" id="waterbodyadd"
+                                    class="btn btn-outline-dark btn-sm mb-1 p-1">Add</button>
+                            </div>
+
+                        </div>
+                        <div class="row m-0">
+                            <div id="alertContainer-waterbody" class="container mt-3 p-0" style="display: none;">
+
+                                <div class="alert alert-success alert-dismissible fade show fs-7" role="alert"
+                                    id="successAlert-waterbody" style="display: none;">
+                                    Data added successfully !!
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert"
+                                        aria-label="Close"></button>
+                                </div>
+
+                                <div class="alert alert-danger alert-dismissible fade show fs-7" role="alert"
+                                    id="nodataAlert-waterbody" style="display: none;">
+                                    Data doesn't exist in database.
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert"
+                                        aria-label="Close"></button>
+                                </div>
+
+                                <div class="alert alert-danger alert-dismissible fade show fs-7" role="alert"
+                                    id="failAlert-waterbody" style="display: none;">
+                                    Data cannot be added !! Please try again later .
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert"
+                                        aria-label="Close"></button>
+                                </div>
+
+                            </div>
+                            <div class="container mt-3" style="display: none;" id="waterbodyContainer">
+                                <table id="waterbodyTable" class="table table-striped table-bordered table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">Name</th>
+                                            <th scope="col" class="text-end">Area</th>
+                                            <th scope="col" class="text-center">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                    </tbody>
+                                </table>
+                                <div class="row ">
+                                    <div class="button justify-content-center d-grid">
+                                        <button type="button" id="submit-btn-waterbody"
+                                            class="btn btn-primary mb-1">Save to
+                                            DB</button>
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+{% endblock %}
+
+{% block script %}
+<script>
+    function toggleButton() {
+        var toggleBtn = document.getElementById("toggleButton");
+        var contentOn = document.getElementById("contentOn");
+        var contentOff = document.getElementById("contentOff");
+        var texton = document.getElementById("texton");
+        var textoff = document.getElementById("textoff");
+
+        toggleBtn.classList.toggle("active");
+        if (toggleBtn.classList.contains("active")) {
+            texton.classList.remove("fw-bold");
+            texton.classList.remove("text-primary");
+            texton.classList.add('text-secondary')
+            textoff.classList.remove('text-secondary')
+            textoff.classList.add("fw-bold");
+            textoff.classList.add("text-primary");
+
+            contentOn.classList.add("active");
+            contentOff.classList.remove("active");
+        } else {
+            textoff.classList.remove("fw-bold");
+            textoff.classList.remove("text-primary");
+            textoff.classList.add("text-secondary")
+            texton.classList.remove("text-secondary")
+            texton.classList.add("fw-bold");
+            texton.classList.add("text-primary");
+            contentOn.classList.remove("active");
+            contentOff.classList.add("active");
+        }
+    }
+</script>
+<script>
+    $(document).ready(function () {
+        // --DEFINE CONSTANTS--
+
+        // --DEFINE VARIABLES--
+        var dd_states = $("#ddStates");
+        var dd_districts = $("#ddDistricts");
+        var dd_blocks = $("#ddBlocks");
+        var dd_villages = $("#ddVillages");
+        var submit_button = $("#btnSubmit")
+
+        // --DEFINE METHODS
+        function fill_dropdown(data, dd_type) {
+            var dropdown_element = "";
+            var select_option = "";
+            switch (dd_type) {
+                case "districts":
+                    dd_districts.html("");
+                    dd_blocks.html("");
+                    dd_blocks.append('<option value="-1">Select Block</option>')
+                    dd_villages.html("");
+                    dd_villages.append('<option value="-1">Select Village</option>')
+                    dropdown_element = dd_districts;
+                    select_option = "Select District";
+                    // dropdown_element.disabled = false;
+                    break;
+                case "blocks":
+                    dd_blocks.html("");
+                    dd_villages.html("");
+                    dd_villages.append('<option value="-1">Select Village</option>')
+                    dropdown_element = dd_blocks;
+                    select_option = "Select Block";
+                    dropdown_element.disabled = false;
+                    break;
+                case "villages":
+                    dd_villages.html("");
+                    dropdown_element = dd_villages;
+                    select_option = "Select Village";
+                    dropdown_element.disabled = false;
+                    break;
+                case "submit":
+                    dd_type = "";
+                default:
+                    break;
+            }
+            // dropdown_element.html("");
+            dropdown_element.append('<option value="-1" disabled selected>' + select_option + '</option>')
+            for (let ndx = 0; ndx < data.length; ndx++) {
+                var item = data[ndx];
+                var html = '<option value="' + item['id'] + '">' + item['name'] + '</option>';
+                dropdown_element.append(html);
+            }
+            dropdown_element.removeAttr('disabled');
+        }
+
+        // --AJAX FUNCTION FOR API CALLS--
+        function ajax_call(dd_type, payload) {
+
+            $.ajax(
+                {
+                    url: "/iwater/" + dd_type,
+                    type: "post",
+                    contentType: 'application/json;charset=UTF-8',
+                    dataType: "json",
+                    data: JSON.stringify(payload),
+                    success: function (data) {
+                        fill_dropdown(data, dd_type);
+                    }
+                });
+        }
+
+        // --DROPDOWN CHANGE FUNCTIONS--
+        dd_states.change(function () {
+            dd_districts.attr('disabled', 'disabled');
+            dd_blocks.attr('disabled', 'disabled');
+            dd_villages.attr('disabled', 'disabled')
+            submit_button.addClass('disabled');
+            var payload = { "select_id": $(this).val() }
+            ajax_call("districts", payload)
+        });
+
+        dd_districts.change(function () {
+            dd_blocks.attr('disabled', 'disabled');
+            dd_villages.attr('disabled', 'disabled');
+
+            var payload = { "select_id": $(this).val() }
+
+            ajax_call("blocks", payload)
+        });
+
+        dd_blocks.change(function () {
+            dd_villages.attr('disabled', 'disabled')
+            submit_button.removeClass('disabled');
+            var payload = { "select_id": $(this).val() }
+            ajax_call("villages", payload)
+        });
+
+        // --SUBMIT FUNCTION--
+        // submit_button.click(function () {
+        //     payload = {
+        //         'state_id': dd_states.val(),
+        //         'district_id': dd_districts.val(),
+        //         'block_id': dd_blocks.val(),
+        //         'village_id': dd_villages.val()
+        //     }
+        //     ajax_call('index', payload)
+        // });
+
+        function toggleSelect(element) {
+
+            // Toggle the 'disabled' attribute
+            element.disabled = !element.disabled;
+
+            // Optional: You can also change the color to indicate the state
+            if (element.disabled) {
+                element.style.backgroundColor = "#dddddd"; // Disabled color
+            } else {
+                element.style.backgroundColor = "#ffffff"; // Enabled color
+            }
+        }
+
+    });
+
+</script>
+<script>
+    document.getElementById("dropdownform").addEventListener("submit", function (event) {
+        event.preventDefault(); // Prevent the form from submitting the traditional way
+
+        // Collect form data
+        const villageDropdown = document.getElementById("ddVillages");
+        const village_id = villageDropdown.value;  // Get the selected value (text)
+
+        // Create the data object to send
+        const data = {
+            village_id: village_id  // Include the id of the selected village
+        };
+
+        // Send the data via an AJAX request (using Fetch API)
+        fetch('/iwater/get_village_id', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        })
+            .then(response => response.json())
+            .then(data => {
+                
+                    // Initially show the spinner
+                    document.getElementById("entry-content").classList.add("d-none");
+                    document.getElementById("spinner").classList.remove("d-none");
+                    // After 1 second, hide the spinner and show the content
+                    setTimeout(function () {
+                        document.getElementById("spinner").classList.add("d-none");
+                        document.getElementById("entry-content").classList.remove("d-none");
+                    }, 1000); // 1000ms = 1 second
+                
+                // Handle the response from the server
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+                // Handle any errors
+            });
+    });
+</script>
+
+<!-- human script -->
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var tableData = []; // Array to store table data as JSON objects
+        // Event listener for state dropdown change
+
+        // Function to enable or disable the submit button based on table rows
+        function toggleSubmitButton() {
+            var submitBtn = document.getElementById('submit-btn-human');
+            submitBtn.disabled = document.getElementById('humanTable').getElementsByTagName('tbody')[0].rows.length === 0;
+        }
+
+        document.getElementById('humanadd').addEventListener('click', function () {
+            var radioInputs = document.getElementsByName('genderradio');
+            var radioValue;
+            for (var i = 0; i < radioInputs.length; i++) {
+                if (radioInputs[i].checked) {
+                    radioValue = radioInputs[i].value;
+                    break;
+                }
+            }
+            var textInput = document.getElementById('human_population_size').value;
+
+            if (textInput.trim() !== '' && radioValue !== undefined) {
+                var table = document.getElementById('humanTable');
+                var tbody = table.getElementsByTagName('tbody')[0];
+
+                // Check if there's already a row with the same gender
+                var existingRowIndex = -1;
+                for (var i = 0; i < tbody.rows.length; i++) {
+                    var row = tbody.rows[i];
+                    if (row.cells[0].textContent === radioValue) {
+                        existingRowIndex = i;
+                        break;
+                    }
+                }
+
+                if (existingRowIndex !== -1) {
+                    // Update existing row
+                    var existingRow = tbody.rows[existingRowIndex];
+                    existingRow.cells[1].textContent = textInput;
+
+                    // Update corresponding entry in tableData array
+                    tableData[existingRowIndex] = {
+                        gender: radioValue,
+                        populationSize: textInput
+                    };
+                } else {
+                    // Add new row
+                    var newRow = tbody.insertRow();
+                    var cell1 = newRow.insertCell(0);
+                    var cell2 = newRow.insertCell(1);
+                    var cell3 = newRow.insertCell(2);
+
+                    cell1.textContent = radioValue;
+                    cell2.textContent = textInput;
+                    cell3.innerHTML = '<i class="fas fa-trash delete-icon"></i>';
+                    cell2.style.textAlign = 'right'; // Right-align the content in the second column
+                    cell3.style.textAlign = 'center'; // Center-align the content in the third column
+
+                    // Store data in JSON format
+                    var rowData = {
+                        gender: radioValue,
+                        populationSize: textInput
+                    };
+                    tableData.push(rowData); // Add rowData to tableData array
+
+                    // Add event listener to delete icon
+                    cell3.querySelector('.delete-icon').addEventListener('click', function () {
+                        var rowIndex = newRow.rowIndex - 1; // Adjust for header row
+                        tbody.deleteRow(rowIndex);
+                        tableData.splice(rowIndex, 1); // Remove corresponding entry from tableData array
+                        toggleSubmitButton(); // Check if submit button should be disabled
+                    });
+                }
+
+                document.getElementById('humanContainer').style.display = ''; // Make the parent container of the table visible
+                toggleSubmitButton(); // Check if submit button should be disabled
+
+                document.getElementById('human_population_size').value = '';
+                for (var i = 0; i < radioInputs.length; i++) {
+                    radioInputs[i].checked = false;
+                }
+            } else {
+                alert('Please select a radio option and enter some text');
+            }
+        });
+
+        document.getElementById('submit-btn-human').addEventListener('click', function () {
+            // Send tableData array as JSON to the API endpoint
+            var xhr = new XMLHttpRequest();
+            var url = '/iwater/add_human_to_db';
+            xhr.open('POST', url, true);
+            xhr.setRequestHeader('Content-Type', 'application/json');
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4) {
+                    if (xhr.status === 200) {
+                        console.log('Data sent successfully');
+                        // Show success alert
+                        document.getElementById('alertContainer-human').style.display = '';
+                        document.getElementById('successAlert-human').style.display = 'block';
+                        // Hide container
+                        document.getElementById('humanContainer').style.display = 'none';
+                        // Optionally reset tableData array and table display
+                        tableData = [];
+                        document.getElementById('humanTable').getElementsByTagName('tbody')[0].innerHTML = '';
+                        toggleSubmitButton(); // Ensure submit button state is updated
+
+                        setTimeout(function () {
+                            document.getElementById('alertContainer-human').style.display = 'none';
+                            document.getElementById('successAlert-human').style.display = 'none';
+                        }, 5000);
+                    } else {
+                        document.getElementById('alertContainer').style.display = '';
+                        document.getElementById('failAlert').style.display = 'block';
+                        console.error('Failed to send data');
+                        // Handle error scenario if needed
+                        setTimeout(function () {
+                            document.getElementById('alertContainer').style.display = 'none';
+                            document.getElementById('failAlert').style.display = 'none';
+                        }, 5000);
+                    }
+                }
+            };
+            xhr.send(JSON.stringify(tableData));
+        });
+
+        // Initial check and setup of submit button state
+        toggleSubmitButton();
+    });
+</script>
+<!-- agriculture script -->
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var radioInputs = document.getElementsByName('cropoption');
+        var tableData = []; // Array to store table data as JSON objects
+        // Event listener for state dropdown change
+
+        // Function to enable or disable the submit button based on table rows
+        function toggleSubmitButton() {
+            var submitBtn = document.getElementById('submit-btn-livestock');
+            submitBtn.disabled = document.getElementById('agricultureTable').getElementsByTagName('tbody')[0].rows.length === 0;
+        }
+
+        radioInputs.forEach(function (radio) {
+            radio.addEventListener('change', function () {
+                var selectedValue = this.value;
+                fetchCrops(selectedValue);
+            });
+        });
+
+        function fetchCrops(cropType) {
+            var xhr = new XMLHttpRequest();
+            var url = '/iwater/get_crops/' + cropType;
+            xhr.open('GET', url, true);
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4 && xhr.status === 200) {
+                    var crops = JSON.parse(xhr.responseText);
+                    populateDropdown(crops);
+                }
+            };
+            xhr.send();
+        }
+
+        function populateDropdown(crops) {
+            var cropdropdown = document.getElementById('cropDropdown');
+            cropdropdown.innerHTML = '<option value="">Select Crop</option>'; // Clear existing options
+            crops.forEach(function (crop) {
+                var option = document.createElement('option');
+                option.value = crop.name;
+                option.textContent = crop.name;
+                cropdropdown.appendChild(option);
+            });
+        }
+        document.getElementById('agricultureadd').addEventListener('click', function () {
+            var radioInputs = document.getElementsByName('cropoption');
+            var radioValue;
+            for (var i = 0; i < radioInputs.length; i++) {
+                if (radioInputs[i].checked) {
+                    radioValue = radioInputs[i].value;
+                    break;
+                }
+            }
+
+            var cropName = document.getElementById('cropDropdown').value;
+            var textInput = document.getElementById('crop_area').value;
+
+
+            if (textInput.trim() !== '' && radioValue !== undefined) {
+                var table = document.getElementById('agricultureTable');
+                var tbody = table.getElementsByTagName('tbody')[0];
+
+                // Check if there's already a row with the same gender
+                var existingRowIndex = -1;
+                for (var i = 0; i < tbody.rows.length; i++) {
+                    var row = tbody.rows[i];
+                    if (row.cells[0].textContent === radioValue && row.cells[1].textContent === cropName) {
+                        existingRowIndex = i;
+                        break;
+                    }
+                }
+
+                if (existingRowIndex !== -1) {
+                    // Update existing row
+                    var existingRow = tbody.rows[existingRowIndex];
+                    existingRow.cells[2].textContent = textInput;
+
+                    // Update corresponding entry in tableData array
+                    tableData[existingRowIndex] = {
+                        cropType: radioValue,
+                        cropName: cropName,
+                        area: textInput
+                    };
+                } else {
+                    // Add new row
+                    var newRow = tbody.insertRow();
+                    var cell1 = newRow.insertCell(0);
+                    var cell2 = newRow.insertCell(1);
+                    var cell3 = newRow.insertCell(2);
+                    var cell4 = newRow.insertCell(3);
+
+                    cell1.textContent = radioValue;
+                    cell2.textContent = cropName;
+                    cell3.textContent = textInput;
+                    cell4.innerHTML = '<i class="fas fa-trash delete-icon"></i>';
+                    cell3.style.textAlign = 'right'; // Right-align the content in the second column
+                    cell4.style.textAlign = 'center'; // Center-align the content in the third column
+
+                    // Store data in JSON format
+                    var rowData = {
+                        cropType: radioValue,
+                        cropName: cropName,
+                        area: textInput
+                    };
+                    tableData.push(rowData); // Add rowData to tableData array
+
+                    // Add event listener to delete icon
+                    cell4.querySelector('.delete-icon').addEventListener('click', function () {
+                        var rowIndex = newRow.rowIndex - 1; // Adjust for header row
+                        tbody.deleteRow(rowIndex);
+                        tableData.splice(rowIndex, 1); // Remove corresponding entry from tableData array
+                        toggleSubmitButton(); // Check if submit button should be disabled
+                    });
+                }
+
+                document.getElementById('agricultureContainer').style.display = ''; // Make the parent container of the table visible
+                toggleSubmitButton(); // Check if submit button should be disabled
+
+                document.getElementById('crop_area').value = '';
+                for (var i = 0; i < radioInputs.length; i++) {
+                    radioInputs[i].checked = false;
+                }
+            } else {
+                alert('Please select a radio option and enter some text');
+            }
+        });
+
+        document.getElementById('submit-btn-agriculture').addEventListener('click', function () {
+            // Send tableData array as JSON to the API endpoint
+            var xhr = new XMLHttpRequest();
+            var url = '/iwater/add_agriculture_to_db';
+            xhr.open('POST', url, true);
+            xhr.setRequestHeader('Content-Type', 'application/json');
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4) {
+                    if (xhr.status === 200) {
+                        console.log('Data sent successfully');
+                        // Show success alert
+                        document.getElementById('alertContainer-agriculture').style.display = '';
+                        document.getElementById('successAlert-agriculture').style.display = 'block';
+                        // Hide container
+                        document.getElementById('agricultureContainer').style.display = 'none';
+                        // Optionally reset tableData array and table display
+                        tableData = [];
+                        document.getElementById('agricultureTable').getElementsByTagName('tbody')[0].innerHTML = '';
+                        toggleSubmitButton(); // Ensure submit button state is updated
+
+                        setTimeout(function () {
+                            document.getElementById('alertContainer-agriculture').style.display = 'none';
+                            document.getElementById('successAlert-agriculture').style.display = 'none';
+                        }, 5000);
+                    } else {
+                        document.getElementById('alertContainer').style.display = '';
+                        document.getElementById('failAlert-agriculture').style.display = 'block';
+                        console.error('Failed to send data');
+                        // Handle error scenario if needed
+                        setTimeout(function () {
+                            document.getElementById('alertContainer').style.display = 'none';
+                            document.getElementById('failAlert-agriculture').style.display = 'none';
+                        }, 5000);
+                    }
+                }
+            };
+            xhr.send(JSON.stringify(tableData));
+        });
+
+        // Initial check and setup of submit button state
+        toggleSubmitButton();
+    });
+
+</script>
+<!-- livestock script -->
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+
+        var tableData = []; // Array to store table data as JSON objects
+        // Event listener for state dropdown change
+        var radioInputs = document.getElementsByName('livestockradio');
+        var radioValue;
+        for (var i = 0; i < radioInputs.length; i++) {
+            if (radioInputs[i].checked) {
+                radioValue = radioInputs[i].value;
+                break;
+            }
+        }
+        // Function to enable or disable the submit button based on table rows
+        function toggleSubmitButton() {
+            var submitBtn = document.getElementById('submit-btn-livestock');
+            submitBtn.disabled = document.getElementById('livestockTable').getElementsByTagName('tbody')[0].rows.length === 0;
+        }
+
+        radioInputs.forEach(function (radio) {
+            radio.addEventListener('change', function () {
+                var selectedValue = this.value;
+                fetchLivestock(selectedValue);
+            });
+        });
+        fetchLivestock('Animal');
+        function fetchLivestock(livestockType) {
+            var xhr = new XMLHttpRequest();
+            var url = '/iwater/get_livestocks/' + livestockType;
+            xhr.open('GET', url, true);
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4 && xhr.status === 200) {
+                    var livestocks = JSON.parse(xhr.responseText);
+                    populateDropdown(livestocks);
+                }
+            };
+            xhr.send();
+        }
+
+        function populateDropdown(livestocks) {
+            var livestockDropdown = document.getElementById('livestockDropdown');
+            livestockDropdown.innerHTML = '<option value="">Select Livestock</option>'; // Clear existing options
+            livestocks.forEach(function (livestock) {
+                var option = document.createElement('option');
+                option.value = livestock.name;
+                option.textContent = livestock.name;
+                livestockDropdown.appendChild(option);
+            });
+        }
+        document.getElementById('livestockadd').addEventListener('click', function () {
+
+            var radioInputs = document.getElementsByName('livestockradio');
+            var radioValue;
+            for (var i = 0; i < radioInputs.length; i++) {
+                if (radioInputs[i].checked) {
+                    radioValue = radioInputs[i].value;
+                    break;
+                }
+            }
+            var livestockName = document.getElementById('livestockDropdown').value;
+            var textInput = document.getElementById('livestock_population_size').value;
+
+
+            if (textInput.trim() !== '') {
+                var table = document.getElementById('livestockTable');
+                var tbody = table.getElementsByTagName('tbody')[0];
+
+                // Check if there's already a row with the same gender
+                var existingRowIndex = -1;
+                for (var i = 0; i < tbody.rows.length; i++) {
+                    var row = tbody.rows[i];
+                    if (row.cells[0].textContent === livestockName) {
+                        existingRowIndex = i;
+                        break;
+                    }
+                }
+
+                if (existingRowIndex !== -1) {
+                    // Update existing row
+                    var existingRow = tbody.rows[existingRowIndex];
+                    existingRow.cells[1].textContent = textInput;
+
+                    // Update corresponding entry in tableData array
+                    tableData[existingRowIndex] = {
+                        livestockType: radioValue,
+                        livestockName: livestockName,
+                        populationSize: textInput
+                    };
+                } else {
+                    // Add new row
+                    var newRow = tbody.insertRow();
+                    var cell1 = newRow.insertCell(0);
+                    var cell2 = newRow.insertCell(1);
+                    var cell3 = newRow.insertCell(2);
+                    var cell4 = newRow.insertCell(3);
+
+
+                    cell1.textContent = radioValue;
+                    cell2.textContent = livestockName;
+                    cell3.textContent = textInput;
+                    cell4.innerHTML = '<i class="fas fa-trash delete-icon"></i>';
+                    cell3.style.textAlign = 'right'; // Right-align the content in the second column
+                    cell4.style.textAlign = 'center'; // Center-align the content in the third column
+
+                    // Store data in JSON format
+                    var rowData = {
+                        livestockType: radioValue,
+                        livestockName: livestockName,
+                        populationSize: textInput
+
+                    };
+                    tableData.push(rowData); // Add rowData to tableData array
+
+                    // Add event listener to delete icon
+                    cell4.querySelector('.delete-icon').addEventListener('click', function () {
+                        var rowIndex = newRow.rowIndex - 1; // Adjust for header row
+                        tbody.deleteRow(rowIndex);
+                        tableData.splice(rowIndex, 1); // Remove corresponding entry from tableData array
+                        toggleSubmitButton(); // Check if submit button should be disabled
+                    });
+                }
+
+                document.getElementById('livestockContainer').style.display = ''; // Make the parent container of the table visible
+                toggleSubmitButton(); // Check if submit button should be disabled
+
+                document.getElementById('livestock_population_size').value = '';
+
+            } else {
+                alert('Please select a radio option and enter some text');
+            }
+        });
+
+        document.getElementById('submit-btn-livestock').addEventListener('click', function () {
+            // Send tableData array as JSON to the API endpoint
+            var xhr = new XMLHttpRequest();
+            var url = '/iwater/add_livestock_to_db';
+            xhr.open('POST', url, true);
+            xhr.setRequestHeader('Content-Type', 'application/json');
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4) {
+                    if (xhr.status === 200) {
+                        console.log('Data sent successfully');
+                        // Show success alert
+                        document.getElementById('alertContainer-livestock').style.display = '';
+
+                        document.getElementById('successAlert-livestock').style.display = 'block';
+                        // Hide container
+                        document.getElementById('livestockContainer').style.display = 'none';
+                        // Optionally reset tableData array and table display
+                        tableData = [];
+                        document.getElementById('livestockTable').getElementsByTagName('tbody')[0].innerHTML = '';
+                        toggleSubmitButton(); // Ensure submit button state is updated
+
+                        setTimeout(function () {
+                            document.getElementById('alertContainer').style.display = 'none';
+
+                            document.getElementById('successAlert-livestock').style.display = 'none';
+                        }, 5000);
+                    } else {
+                        document.getElementById('alertContainer').style.display = '';
+
+                        document.getElementById('failAlert-livestock').style.display = 'block';
+                        console.error('Failed to send data');
+                        // Handle error scenario if needed
+                        setTimeout(function () {
+                            document.getElementById('alertContainer').style.display = 'none';
+
+                            document.getElementById('failAlert-livestock').style.display = 'none';
+                        }, 5000);
+                    }
+                }
+            };
+            xhr.send(JSON.stringify(tableData));
+        });
+
+        // Initial check and setup of submit button state
+        toggleSubmitButton();
+    });
+
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var tableData = []; // Array to store table data as JSON objects
+
+        // Function to enable or disable the submit button based on table rows
+        function toggleSubmitButton() {
+            var submitBtn = document.getElementById('submit-btn-waterbody');
+            submitBtn.disabled = document.getElementById('waterbodyTable').getElementsByTagName('tbody')[0].rows.length === 0;
+        }
+
+        document.getElementById('waterbodyadd').addEventListener('click', function () {
+            var waterbodyDropdown = document.getElementById('waterbodyDropdown');
+            var waterbodyName = waterbodyDropdown.options[waterbodyDropdown.selectedIndex].text;
+            var textInput = document.getElementById('water_body_area').value;
+
+            if (textInput.trim() !== '') {
+                var table = document.getElementById('waterbodyTable');
+                var tbody = table.getElementsByTagName('tbody')[0];
+
+                // Check if there's already a row with the same waterbody name
+                var existingRowIndex = -1;
+                for (var i = 0; i < tbody.rows.length; i++) {
+                    var row = tbody.rows[i];
+                    if (row.cells[0].textContent === waterbodyName) {
+                        existingRowIndex = i;
+                        break;
+                    }
+                }
+
+                if (existingRowIndex !== -1) {
+                    // Update existing row
+                    var existingRow = tbody.rows[existingRowIndex];
+                    existingRow.cells[1].textContent = textInput;
+
+                    // Update corresponding entry in tableData array
+                    tableData[existingRowIndex] = {
+                        waterbodyName: waterbodyName,
+                        area: textInput
+                    };
+                } else {
+                    // Add new row
+                    var newRow = tbody.insertRow();
+                    var cell1 = newRow.insertCell(0);
+                    var cell2 = newRow.insertCell(1);
+                    var cell3 = newRow.insertCell(2);
+
+                    cell1.textContent = waterbodyName;
+                    cell2.textContent = textInput;
+                    cell3.innerHTML = '<i class="fas fa-trash delete-icon"></i>';
+                    cell2.style.textAlign = 'right'; // Right-align the content in the second column
+                    cell3.style.textAlign = 'center'; // Center-align the content in the third column
+
+                    // Store data in JSON format
+                    var rowData = {
+                        waterbodyName: waterbodyName,
+                        area: textInput
+                    };
+                    tableData.push(rowData); // Add rowData to tableData array
+
+                    // Add event listener to delete icon
+                    cell3.querySelector('.delete-icon').addEventListener('click', function () {
+                        var rowIndex = newRow.rowIndex - 1; // Adjust for header row
+                        tbody.deleteRow(rowIndex);
+                        tableData.splice(rowIndex, 1); // Remove corresponding entry from tableData array
+                        toggleSubmitButton(); // Check if submit button should be disabled
+                    });
+                }
+
+                document.getElementById('waterbodyContainer').style.display = ''; // Make the parent container of the table visible
+                toggleSubmitButton(); // Check if submit button should be disabled
+
+                document.getElementById('water_body_area').value = '';
+            } else {
+                alert('Please select a waterbody and enter some text');
+            }
+        });
+
+        document.getElementById('submit-btn-waterbody').addEventListener('click', function () {
+            // Send tableData array as JSON to the API endpoint
+            var xhr = new XMLHttpRequest();
+            var url = '/iwater/add_waterbody_to_db';
+            xhr.open('POST', url, true);
+            xhr.setRequestHeader('Content-Type', 'application/json');
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4) {
+                    var responseText = xhr.responseText;
+                    if (xhr.status === 200) {
+                        console.log('Data sent successfully');
+                        // Show success alert
+                        document.getElementById('alertContainer-waterbody').style.display = '';
+                        document.getElementById('successAlert-waterbody').style.display = 'block';
+                        // Hide container
+                        document.getElementById('waterbodyContainer').style.display = 'none';
+                        // Optionally reset tableData array and table display
+                        tableData = [];
+                        document.getElementById('waterbodyTable').getElementsByTagName('tbody')[0].innerHTML = '';
+                        toggleSubmitButton(); // Ensure submit button state is updated
+
+                        setTimeout(function () {
+                            document.getElementById('alertContainer-waterbody').style.display = 'none';
+                            document.getElementById('successAlert-waterbody').style.display = 'none';
+                        }, 5000);
+                    } else {
+                        if (responseText.includes("Data doesn't exist")) {
+                            document.getElementById('alertContainer-waterbody').style.display = '';
+                            document.getElementById('nodataAlert-waterbody').style.display = 'block';
+                            console.error('Failed to send data');
+                            // Handle error scenario if needed
+                            setTimeout(function () {
+                                document.getElementById('alertContainer-waterbody').style.display = 'none';
+                                document.getElementById('failAlert-waterbody').style.display = 'none';
+                            }, 5000);
+                        } else {
+                            document.getElementById('alertContainer-waterbody').style.display = '';
+                            document.getElementById('failAlert-waterbody').style.display = 'block';
+                            console.error('Failed to send data');
+                            // Handle error scenario if needed
+                            setTimeout(function () {
+                                document.getElementById('alertContainer-waterbody').style.display = 'none';
+                                document.getElementById('failAlert-waterbody').style.display = 'none';
+                            }, 5000);
+                        }
+
+                    }
+                }
+            };
+            xhr.send(JSON.stringify(tableData));
+        });
+
+        // Initial check and setup of submit button state
+        toggleSubmitButton();
+    });
+</script>
+
+
+{% endblock %}

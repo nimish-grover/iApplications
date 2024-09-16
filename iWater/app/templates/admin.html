@@ -1,0 +1,75 @@
+{% extends 'entry_base.html' %}
+{% block title %}New Records{% endblock %}
+{% block content %}
+{{super()}}
+<div class="container">
+    <div class="row justify-content-center mt-2">
+        <div class="text fs-4 fw-bold text-center">Add New Records</div>
+    </div>
+    <div class="container mt-3">
+        <a href="{{url_for('village_water_budget.add_new_crops')}}" style="text-decoration: none;">
+            <div class="card mt-2 rounded-pill">
+                <div class="card-body py-1 m-1">
+                    <div class="row align-items-center">
+                        <div class="col-3">
+                            <div class="container profile">
+                                <i class="fa-solid fa-tree fa-xl" style="color: #ffffff;"></i>
+                            </div>
+                        </div>
+                        <div class="col-1">
+                            <div class="vertical-line bg-light"></div>
+                        </div>
+                        <div class="col align-items-center d-grid">
+                            <div class="text fs-5 fw-semibold">
+                                Add New Crops
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </a>
+        <a href="{{url_for('village_water_budget.add_new_livestocks')}}" style="text-decoration: none;">
+            <div class="card mt-2 rounded-pill">
+                <div class="card-body py-1 m-1">
+                    <div class="row align-items-center">
+                        <div class="col-3">
+                            <div class="container profile">
+                                <i class="fa-solid fa-paw fa-xl" style="color: #ffffff;"></i>
+                            </div>
+                        </div>
+                        <div class="col-1">
+                            <div class="vertical-line bg-light"></div>
+                        </div>
+                        <div class="col align-items-center d-grid">
+                            <div class="text fs-5 fw-semibold">
+                                Add New Livestock
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </a>
+        <a href="{{url_for('village_water_budget.add_new_waterbody')}}" style="text-decoration: none;">
+            <div class="card mt-2 rounded-pill">
+                <div class="card-body py-1 m-1">
+                    <div class="row align-items-center">
+                        <div class="col-3">
+                            <div class="container profile">
+                                <i class="fa-solid fa-water fa-xl" style="color: #ffffff;"></i>
+                            </div>
+                        </div>
+                        <div class="col-1">
+                            <div class="vertical-line bg-light"></div>
+                        </div>
+                        <div class="col align-items-center d-grid">
+                            <div class="text fs-5 fw-semibold">
+                                Add New Waterbody
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </a>
+    </div>
+</div>
+{% endblock %}
