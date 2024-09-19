@@ -4,6 +4,7 @@ from werkzeug.middleware.dispatcher import DispatcherMiddleware # use to combine
 from iTraining import app as Training
 from iWater import app as Water
 from iCore import app as Core
+from iAuth import app as Auth
 from iFinance import app as Finance
 from iBot import app as Waterbot
 from iLand import app as Land
@@ -13,6 +14,7 @@ from eSaksham import app as eSaksham
 from eSaksham_1 import app as eSaksham_1
 
 application = DispatcherMiddleware(Core, {
+    '/iauth': Auth,
     '/iwater': Water,
     '/itraining': Training,
     '/ifinance': Finance,

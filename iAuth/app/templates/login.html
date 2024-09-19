@@ -1,0 +1,53 @@
+{%extends 'admin_base.html'%}
+{% block title %}
+Account - Login
+{%endblock%}
+{%block content%}
+{{super()}}
+
+<div class="container mt-3">
+    <div class="card my-2 shadow-sm">
+        <div class="card-header text-center fw-bold py-1">
+            <div class="fs-6 fw-bold mb-0">Login</div>
+            <div class="fs-7 fw-normal text-center text-secondary mt-n4">Login to access content</div>
+        </div>
+        <div class="card-body justify-content-center pt-2 p-1">
+            <div class="row m-0" style="width: 100%;">
+                <div class="col">
+                    <div class="container p-1">
+                        {% with messages = get_flashed_messages() %}
+                        {% if messages %}
+                        <div class="alert alert-{% if 'Successfully' in messages[0] %}success{%else%}danger{%endif%} text-center" role="alert">
+                        {{ messages[0] }}
+                        </div>
+                        {% endif %}
+                        {% endwith %}
+                        <form action="{{url_for('admin.login')}}" method="post">
+                            <fieldset>
+
+                                <div>
+                                    <input type="email" class="form-control mt-2" id="exampleInputEmail1"
+                                        aria-describedby="emailHelp" name="email" placeholder="Enter email">
+                                </div>
+                                <div>
+                                    <input type="password" class="form-control mt-2" id="exampleInputPassword1"
+                                        placeholder="Password" name="password" autocomplete="off">
+                                </div>
+                                <div class="row justify-content-center mx-1 mt-3">
+                                    <button type="submit" class="btn btn-primary">Login</button>
+                                    <p class="text-secondary text-center mt-1">Not a member yet? <a href="{{url_for('admin.register')}}">Register</a></p>
+                                </div>
+                                
+                            </fieldset>
+                        </form>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</div>
+
+
+{%endblock%}

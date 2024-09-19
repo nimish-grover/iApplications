@@ -1,0 +1,82 @@
+{%extends 'admin_base.html'%}
+{% block title %}
+Account - Verify OTP
+{%endblock%}
+{%block content%}
+{{super()}}
+
+<div class="container mt-3">
+    <div class="card my-2 shadow-sm">
+        <div class="card-header text-center fw-bold py-1">
+            <div class="fs-6 fw-bold mb-0">Verify OTP</div>
+        </div>
+        <div class="card-body justify-content-center pt-2 p-1">
+            <div class="row m-0" style="width: 100%;">
+                <div class="col">
+                    <div class="container p-1">
+                        {% with messages = get_flashed_messages() %}
+                        {% if messages %}
+                        <div class="alert alert-{% if 'cannot' in messages[0] %}danger{%else%}success{%endif%} text-center" role="alert">
+                        {{ messages[0] }}
+                        </div>
+                        {% endif %}
+                        {% endwith %}
+                        <form action="{{url_for('admin.verify_email')}}" method="post">
+                            <fieldset>
+
+                                <div>
+                                    <input type="text" class="form-control mt-2" id="exampleInputEmail1"
+                                        aria-describedby="emailHelp" name="otp" placeholder="Enter OTP">
+                                </div>
+                                
+                                <div class="row">
+                                    <div class="btn-toolbar justify-content-center" role="toolbar" aria-label="Toolbar with button groups">
+                                        <div class="btn-group me-2" role="group" aria-label="First group">
+                                            <a id="resendLink"><button type="button" id="resendButton" class="btn btn-secondary mt-3 form-size" disabled>Resend OTP</button></a>
+                                        </div>&nbsp;&nbsp;&nbsp;&nbsp;
+                                        <div class="btn-group me-2" role="group" aria-label="First group">
+                                            <button type="submit" class="btn btn-primary mt-3 form-size">Verify OTP</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                            </fieldset>
+                        </form>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</div>
+
+
+{%endblock%}
+{% block script %}
+<script>
+    // Function to start the countdown timer
+    function startTimer(duration, button, anchor) {
+        var timer = duration;
+        button.setAttribute("disabled", "true"); // Disable the button initially
+        var interval = setInterval(function () {
+            button.textContent = "Resend OTP in " + timer + " sec";
+            if (--timer < 0) {
+                clearInterval(interval);
+                button.removeAttribute("disabled"); // Enable the button when timer ends
+                button.textContent = "Resend OTP";
+                anchor.setAttribute("href", "{{url_for('admin.resend_otp')}}"); // Add URL to anchor
+            }
+        }, 1000);
+    }
+
+    window.onload = function () {
+    // For desktop
+    var button = document.getElementById('resendButton');
+    var anchor = document.getElementById('resendLink');
+    var twoMinutes = 120;
+    startTimer(twoMinutes, button, anchor);
+    
+};
+</script>
+{%endblock%}
