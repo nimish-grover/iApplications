@@ -1,0 +1,188 @@
+{% extends 'mobile/base.html' %}
+{% block title %} Water Budget {% endblock %}
+{% from 'mobile/components.html' import toggle_button, chart %}
+{% block content %}
+<div id="cardCarousel" class="carousel slide">
+    <div class="carousel-inner">
+      <div class="carousel-item active">        
+        {{chart()}}
+      </div>
+      <div class="carousel-item">
+        <h6>Water Budget</h6>
+        <table class="table table-bordered table-sm fs-7 mb-0">
+          <thead class="text-center">
+              <tr class="bg-light">
+                  <th>Description</th>
+                  <th>Value</th>
+              </tr>
+          </thead>
+          <tbody>
+              <tr>
+                  <td colspan="2" class="fw-bold bg-danger bg-opacity-50 p-0">Demand</td>
+              </tr>
+              {% for row in demand_side %}
+              <tr>
+                  <td class="text-start">{{row.category | title}}</td>
+                  <td class="text-end">{{'%0.2f'|format(row.value|float)}}</td>
+              </tr>
+              {% endfor %}
+              <tr>
+                  <td colspan="2" class="fw-bold bg-success bg-opacity-50 p-0">Supply</td>
+              </tr>
+              {% for row in supply_side %}
+              {% if row.category %}
+              <tr>
+                  <td class="text-start">{{row.category | title}}</td>
+                  <td class="text-end">{{'%0.2f'|format(row.value|float)}}</td>
+              </tr>
+              {% endif %}
+              {% endfor %}
+              <tr>
+                  <td colspan="2" class="fw-bold bg-info bg-opacity-50 text-center p-0">Water Budget</td>
+              </tr>
+              {% for row in budget_side %}
+              {% if loop.index == 1%}
+              <tr>
+                  <td class="text-start">{{row.description | title}}</td>
+                  <td class="text-end">{{'%0.2f'|format(row.value|float)}}</td>
+              </tr>
+              {% endif %}
+              {% endfor %}
+          </tbody>
+      </table>
+      </div>
+      <div class="carousel-item">
+        <div class="h-25">
+          Slide 2
+        </div>
+      </div>
+    </div>
+  </div>
+  <input type="hidden" name="chartData" id="chartData" value="{{chart_data}}"> 
+{% endblock %}
+{% block scripts %}
+<script>
+// echart
+var chartDom = document.getElementById('main');
+    var myChart = echarts.init(chartDom);
+    let chart_data = JSON.parse(document.getElementById('chartData').value);
+    var option;
+    const data = chart_data;        
+    option = {
+        title:{
+            text: data[0]['title'],
+            left: 'center',
+        },
+        xAxis: {
+            type: 'category',
+            data: getCategories(data[0]['data']),
+            axisLabel: {
+                show: true,
+                rotate: 45,
+                textStyle: {
+                fontSize: 8
+                }
+            }
+        },
+        yAxis: {
+            type: 'value'
+        },
+        series: [
+            {
+            label: {
+                show: true,
+                position: 'inside',
+                formatter: function (params){
+                if (params.value > 0 ) {
+                    return params.value + '%'
+                } 
+                else {return ''} 
+                
+                },
+                textStyle:{
+                fontSize: 8,
+                }
+            },
+            data: transformArray(data[0]['data']),
+            type: 'bar'
+            }
+        ]
+        };
+
+        idx = 0
+        setInterval(() => {
+        myChart.setOption({
+            title:{
+                text: data[idx]['title'],
+                left: 'center',
+            },
+            xAxis: {
+            type: 'category',
+            data: getCategories(data[idx]['data']),
+            axisLabel: {
+                show: true,
+                rotate: 45,
+                textStyle: {
+                fontSize: 8
+                }
+            }
+            },
+            yAxis: {
+            type: 'value',
+            min: 0,
+            max: 100,
+            },
+            series: [
+            {
+                
+                label: {
+                show: true,
+                position: 'inside',
+                formatter:function (params){
+                if (params.value > 0 ) {
+                    return params.value + '%'
+                } 
+                else {return ''} 
+                
+                },
+                textStyle:{
+                fontSize: 8,
+                }
+                },
+                data: transformArray(data[idx]['data']),
+                type: 'bar'
+            }
+            ]
+        });
+        idx=idx+1;
+        if (idx==3) { idx=0 }
+        }, 5000);
+
+
+
+        function transformArray(input_array) {
+            let output_array = [];
+            input_array.forEach((value, idx) => {
+                object = {
+                value: value['value'],
+                itemStyle: {
+                    color: value['color']
+                }
+                }
+                output_array.push(object);
+            });
+            return output_array;
+            }
+
+        function getCategories(input_array) {
+        output_array=[];
+        input_array.forEach((element, idx)=>{
+            output_array.push(element['category'])
+        });
+        return output_array;
+        }
+
+    option && myChart.setOption(option);
+
+</script>
+{% endblock %}

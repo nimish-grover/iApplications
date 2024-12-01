@@ -1,0 +1,81 @@
+{% extends 'mobile/base.html' %}
+{% block title %} Livestock {% endblock %}
+{% from 'mobile/components.html' import select, block_button, chart %}
+{% block content %}
+<div id="cardCarousel" class="carousel slide">
+    <div class="carousel-inner">
+      <div class="carousel-item active">        
+        {{chart()}}
+      </div>
+      <div class="carousel-item">
+        <h6>Livestocks Consumption</h6>
+        <table class="table table-bordered table-sm fs-7 mb-0">
+            <thead>
+                <tr>
+                    <th>S.No.</th>
+                    <th>Livestock</th>
+                    <th>Count</th>
+                    <th>Consumption</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for livestock in livestocks %}
+                <tr>
+                    <td class="text-center">{{loop.index}}</td>
+                    <td class="text-start">{{livestock.name}}</td>
+                    <td class="text-end">{{livestock.count}}</td>
+                    <td class="text-end">{{livestock.consumption}}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <input type="hidden" name="chartData" id="chartData" value="{{chart_data}}">
+{% endblock %}
+{% block scripts %}
+<script>
+    var chartDom = document.getElementById('main');
+    var myChart = echarts.init(chartDom);
+    let chart_data = JSON.parse(document.getElementById('chartData').value)
+    var option;
+
+    // This example requires ECharts v5.5.0 or later
+    option = {
+        title: {
+            text: 'Livestock Population',
+            show: false,
+        },
+        tooltip: {
+            trigger: 'item'
+        },
+        legend: {
+            orient: 'horizontal',
+            bottom: '5%',
+            left: 'center',
+            show: true
+        },
+        textStyle: {
+            fontSize: 10,
+        },
+        series: [
+            {
+            name: 'Access From',
+            type: 'pie',
+            radius: ['70%', '100%'],
+            center: ['50%', '70%'],
+            label: {
+                show: false,
+            },
+            // adjust the start and end angle
+            startAngle: 180,
+            endAngle: 360,
+            data: chart_data
+        }
+        ]
+    };
+
+    option && myChart.setOption(option);
+</script>
+{% endblock %}

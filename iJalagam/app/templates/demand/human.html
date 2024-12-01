@@ -1,0 +1,152 @@
+{% extends 'base.html' %}
+{% block title %} Human {% endblock %}
+{% from 'components/macros.html' import menu_link, display_card, card_header, menu_white_bg %}
+{% block content %}
+<nav style="--bs-breadcrumb-divider: '|';" aria-label="breadcrumb">
+    <ol class="breadcrumb fs-7">
+    {% for breadcrumb in breadcrumbs %}
+      <li class="breadcrumb-item "><a class=" link-underline link-underline-opacity-0 {% if loop.index == breadcrumbs | length %} link-dark {% endif %}" href="{{breadcrumb.href}}">{{breadcrumb.name}}</a></li>
+    {% endfor %}
+    </ol>
+</nav>
+<div class="card rounded-1 shadow  mb-3">
+    <div class="card-header">
+        {{card_header(title='Human', subtitle='Population (in Thousands)')}}
+    </div>
+    <div class="card-body"> 
+        <div class="row mb-3">
+            {% for item in human %}
+            <div class="col">
+                <div class="d-flex {% if loop.index%2 == 1 %} justify-content-end mt-0 {% else %} justify-content-start mt-3 {% endif %}">
+                    {% if item.name.lower() == 'male' %}
+                        {{ display_card(isImage=False, content='fa-solid fa-person', 
+                        label=item.name|title, title='%0.2f' | format(item.count/1000|float), subtitle='Thousands', background=item.background) }}
+                    {% else %}
+                        {{ display_card(isImage=False, content='fa-solid fa-person-dress', 
+                        label=item.name|title, title='%0.2f' | format(item.count/1000|float), subtitle='Thousands', background=item.background)  }}
+                    {% endif %}
+                </div>
+            </div>   
+            {% endfor %}
+        </div>
+
+    </div>
+  </div>
+<div class="card rounded-1 shadow mb-3">
+    <div class="card-header">
+        {{card_header(title='Consumption', subtitle='Water Consumption (in Ha M)')}}
+    </div>
+    <div class="card-body">
+        <div id="main" style="width: 100%;height:150px;"></div>
+    </div>    
+</div>
+<div class="card rounded-1 shadow mb-3">
+    <div class="card-header">
+        {{card_header(title='Tabular Data', subtitle='Detail Matrix')}}
+    </div>
+    <div class="card-body">
+        <table class="table table-bordered table-sm fs-7 mb-0">
+            <thead class="text-center">
+                <tr>
+                    <th>S.No.</th>
+                    <th>Description</th>
+                    <th>Population</th>
+                    <th>Consumption</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in human %}
+                <tr>
+                    <td class="text-center">{{loop.index}}</td>
+                    <td>{{row['name'] | title}}</td>
+                    <td class="text-end">{{row['count']}}</td>
+                    <td class="text-end">{{row['consumption']}}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+<!--FOOTER-->
+
+
+<nav class="fixed-bottom bg-dark">
+    <div class="d-flex justify-content-between aligh-items-center px-3"> 
+            {{menu_link(route=url_for('routes.human'), icon='fa-solid fa-people-roof',  name='human')}}
+            {{menu_link(route=url_for('routes.livestock'), icon='fa-solid fa-paw',  name='livestock')}}
+            {{menu_white_bg(route=url_for('entries.budget'), font_content='fa-solid fa-scale-unbalanced-flip')}}
+            {{menu_link(route=url_for('routes.crops'), icon='fa-brands fa-pagelines',  name='crops')}}
+            {{menu_link(route=url_for('routes.industry'), icon='fa-solid fa-industry',  name='industry')}}
+    </div>
+</nav>
+<input type="hidden" name="chartData" id="chartData" value="{{chart_data}}">
+{% endblock %}
+{% block scripts %}
+<script>
+    let chart_data = JSON.parse(document.getElementById('chartData').value);
+    var chartDom = document.getElementById('main');
+    var myChart = echarts.init(chartDom);
+    var option;
+
+    option = {
+    // title: {
+    //    text: 'Human Population'
+    // },
+    tooltip: {
+        trigger: 'axis',
+        axisPointer: {
+        type: 'shadow'
+        }
+    },
+    legend: {
+        orient: 'horizontal',
+        right: 10,
+        top: 'upper'
+    },
+    grid: {
+        left: '3%',
+        right: '4%',
+        bottom: '3%',
+        containLabel: true
+    },
+    xAxis: {
+        type: 'value',
+        boundaryGap: [0, 0.01]
+    },
+    yAxis: {
+        type: 'category',
+        data: ['' ]
+    },
+    series: [
+        {
+        name: chart_data[0]['category'],
+        type: 'bar',
+        data: [chart_data[0]['value']],
+        label:{
+            show: true,
+            // position: 'center',
+            // align: 'center',
+            verticalAlign:'middle',
+            formatter:'{c} Ha M'
+        },
+        color:['#dd6b66']
+        },
+        {
+        name: chart_data[1]['category'],
+        type: 'bar',
+        data: [chart_data[1]['value']],
+        label:{
+            show: true,
+            // position: [50, 10],
+            // align: 'center',
+            verticalAlign:'middle',
+            formatter:'{c} Ha M'
+        },
+        color:['#37A2DA']
+        }
+    ]
+    };
+
+    option && myChart.setOption(option);
+</script>
+{% endblock %}

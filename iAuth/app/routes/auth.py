@@ -7,13 +7,27 @@ from passlib.hash import pbkdf2_sha256
 from flask_login import current_user, login_required, login_user, logout_user
 from iAuth.app.routes.email_helper import *
 from iAuth.app.models.inrole import inRoleModel
+import uuid
+import requests
 
 blp = Blueprint("admin", "admin", description="User Authentication")
 
-
+BASE_URL = 'https://training.wasca.in'
 @blp.route('/profile')
 def profile():
     return('profile')
+
+
+@blp.route('/get_auth_json')
+def get_auth_json():
+    session_id = session.get('session_id', None)  # Will return None if 'session_id' is not in the session
+    user_id = session.get('user_id', None)   
+    if user_id and session_id:
+        return jsonify({'message':'logged in','user_id':user_id,'session_id':session_id})
+    else:
+        return jsonify({'message':'Not Authenticated'})
+    
+
 
 
 # Route for login
@@ -30,13 +44,12 @@ def login():
             hash_check = pbkdf2_sha256.verify(password, db_pass)        
             if db_email == email and hash_check:
                 login_user(user)
-                token = create_access_token(identity=user.id)
-                session['jwt_token'] = token
+                session['user_id'] = user.id
+                session_id = (uuid.uuid4())
+                session['session_id'] = session_id
+                return redirect('/')
                 
-                response =make_response(redirect('/'))
-                set_access_cookies(response,token)
-                
-                return response
+                # return {"message":"Error generating JWT Token"}
             else:
                 flash('Incorrect Credentials.')
                 return redirect(url_for('admin.login'))
@@ -133,12 +146,13 @@ def resend_otp():
 @blp.route('/logout')
 @login_required
 def logout():
-    session.pop('jwt_token', None)
     logout_user()
+    session.pop('session_id', None)  # 'None' ensures no error if key is absent
+    session.pop('user_id', None)
     session['logged_out'] = True
-    response = make_response(redirect(url_for('admin.login')))  # Redirect to login page or any other URL
-    unset_access_cookies(response)  # Clear the JWT cookie
-    return response
+    # Redirect to login page or any other URL
+    # Clear the JWT cookie
+    return redirect(url_for('admin.login'))
 
 # Route for changing password
 @blp.route('/change_password/<id>', methods=['GET', 'POST'])

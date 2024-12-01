@@ -9,6 +9,7 @@ from iSaksham.app.models.feedback import Feedback  # Importing Feedback model
 from iSaksham.app.models.user import User  # Importing User model
 from iSaksham.app.models.chapters import Chapters
 from iSaksham.app.models.modules import Modules
+from flask_mail import Mail
 # File path to store visit count
 current_directory = os.getcwd()
 VISIT_COUNT_FILE = current_directory + '/iSaksham/app/static/visit_count.txt'
@@ -33,7 +34,12 @@ def convert_to_seven_digits(number):
 # Creating the Flask application
 def create_app():
     app = Flask(__name__)  # Initializing Flask app
-
+    app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+    app.config['MAIL_PORT'] = 587
+    app.config['MAIL_USE_TLS'] = True
+    app.config['MAIL_USERNAME'] = 'your_email@gmail.com'  # Your email address
+    app.config['MAIL_PASSWORD'] = 'your_password'  # Your email password
+    app.config['MAIL_DEFAULT_SENDER'] = 'your_email@gmail.com'  # Default sender
     # Configuring Flask app
     app.config['SECRET_KEY'] = 'your_secret_key_here'  # Replace with your actual secret key
     # app.config['API_TITLE'] = 'pwa'
@@ -45,7 +51,7 @@ def create_app():
     app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://xgmkxzsp:CsB1HfTbEfktRnrL-0hcByzS7iyh1qkL@rain.db.elephantsql.com/xgmkxzsp'  # Replace with your actual database URI
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config['PROPAGATE_EXCEPTIONS'] = True
-
+    mail = Mail(app)
     db.init_app(app)  # Initializing the database with the Flask app
     # migrations_directory = current_directory + '/iSaksham/migrations'
     migrate = Migrate(app, db)  # Initializing Flask-Migrate with the Flask app

@@ -1,0 +1,237 @@
+{% extends 'base.html' %}
+{% block title %} Rainfall {% endblock %}
+{% block content %}
+{% macro div_card(name='Cattle', population=0, unit='millions', background='bg-light', index=0) -%}
+<div class="mt-3">
+    <div class="card shadow rounded-1 bg-{{background}} bg-opacity-25 border-{{background}} mb-1" style="width:100px">
+        <div class="p-3">
+            <div class="text-center">
+                <div class="display-1">
+                    {% if name=='normal' %} <i class="fa-solid fa-cloud-rain"></i> {% else %} <i class="fa-solid fa-cloud-showers-heavy"></i> {% endif %}
+                </div>                
+                <div class="fs-7 text-{{background}}-emphasis mt-n5 mb-1">{{name | title}}</div>
+                <div class="fs-6">
+                    {{population}}
+                </div>
+                <div class="text-muted mt-n5"><small class="fs-7 fw-lighter">{{unit}}</small></div>                
+            </div>
+            
+        </div>
+    </div>
+</div>
+{%- endmacro %}
+<nav style="--bs-breadcrumb-divider: '|';" aria-label="breadcrumb">
+    <ol class="breadcrumb fs-7 ms-2">
+    {% for breadcrumb in breadcrumbs %}
+      <li class="breadcrumb-item "><a class=" link-underline link-underline-opacity-0 {% if loop.index == breadcrumbs | length %} link-dark {% endif %}" href="{{breadcrumb.href}}">{{breadcrumb.name}}</a></li>
+    {% endfor %}
+    </ol>
+</nav>
+<div class="card rounded-1 shadow mb-3">
+    <div class="card-header">
+        <div class="text-center">
+            <div class="fs-5">Rainfall</div>
+            <div class="fs-7 fw-lighter mt-n5"> in mm</div>
+        </div>
+    </div>
+    <div class="card-body"> 
+        <div class="row mb-3">
+            {% for rainfall in rainfalls %}
+            <div class="col">
+                <div class="d-flex {% if loop.index%2 == 1 %} justify-content-end mt-0 {% else %} justify-content-start mt-3 {% endif %}">
+                    {{div_card(name=rainfall.name, population=rainfall.precipitation, unit=rainfall.unit, background=rainfall.background)}}
+                </div>
+            </div>   
+            {% endfor %}
+        </div>
+
+    </div>
+  </div>
+<div class="card rounded-1 shadow mb-3">
+    <div class="card-header">
+        <div class="text-center">
+            <div class="fs-5">Chart Illustration</div>
+            <div class="fs-7 fw-lighter mt-n5"> Actual/Normal (in mm)</div>
+        </div>
+    </div>
+    <div class="card-body p-0">
+      <div id="main" style="width: 100%; height: 300px;"></div> <!-- Adjust height to take up the full card-body -->
+  </div>      
+</div>
+<div class="card rounded-1 shadow mb-3">
+    <div class="card-header">
+        <div class="text-center">
+            <div class="fs-5">Month Wise Rainfall</div>
+            <div class="fs-7 fw-lighter mt-n5"> Tabular Data</div>
+        </div>
+    </div>
+    <div class="card-body">
+        <table class="table table-bordered table-sm fs-7 mb-0">
+            <thead class="text-center">
+                <tr>
+                    <th>Observation Month</th>
+                    <th>Normal</th>
+                    <th>Actual</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for rainfall in monthwise_rainfall %}
+                <tr>
+                    <td >{{rainfall.month}}</td>
+                    <td class="text-end">{{rainfall.normal}}</td>
+                    <td class="text-end">{{rainfall.actual}}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+<input type="hidden" name="chartData" id="chartData" value="{{chart_data}}">
+{% endblock %}
+{% block scripts %}
+<script>
+    let chart_data = JSON.parse(document.getElementById('chartData').value);
+    var chartDom = document.getElementById('main');
+    var myChart = echarts.init(chartDom);
+    var option;
+    y_axis_max = Math.ceil(Math.max(...chart_data['actual'])/100)*100
+    console.log(y_axis_max);
+    option = {
+      title:{
+        text: "Annual Rainfall - Actual vs Normal",
+        left: 'center',
+      },
+      tooltip: {
+        trigger: 'axis',
+        axisPointer: {
+          type: 'cross',
+          crossStyle: {
+            color: '#999'
+          }
+        }
+      },
+      toolbox: {
+        feature: {
+          dataView: { show: false, readOnly: false },
+          magicType: { show: false, type: ['line', 'line'] },
+          restore: { show: false },
+          saveAsImage: { show: false }
+        }
+      },
+      legend: {
+        show: false,
+        data: ['Month', 'Rainfall']
+      },
+      xAxis: [
+        {
+          type: 'category',
+          data: chart_data['months'],
+          // data: [
+          //   'Jan-23',
+          //   'Feb-23',
+          //   'Mar-23',
+          //   'Apr-23',
+          //   'May-23',
+          //   'Jun-23',
+          //   'Jul-23',
+          //   'Aug-23',
+          //   'Sep-23',
+          //   'Oct-23',
+          //   'Nov-23',
+          //   'Dec-23'
+          // ],
+          axisPointer: {
+            type: 'shadow'
+          },
+          axisLabel: {
+            fontSize: 8
+          }
+        }
+      ],
+      yAxis: [
+        {
+          type: 'value',
+          color: 'red',
+          name: 'Actual (in mm)',
+          show: false,
+          min: 0,
+          max: y_axis_max,
+          interval: 25,
+          itemStyle: {
+            color: 'red'
+          },
+          axisLabel: {
+            formatter: '{value}'
+          }
+        },
+        {
+          type: 'value',
+          name: 'Normal (in mm)',
+          show: false,
+          min: 0,
+          max: y_axis_max,
+          interval: 25,
+          axisLabel: {
+            formatter: '{value}'
+          }
+        }
+      ],
+      series: [
+        {
+          name: 'Normal',
+          type: 'line',
+          lineStyle: {
+            normal: {
+              color: 'blue',
+              width: 2,
+              type: 'solid'
+            }
+          },
+          smooth: true,
+          tooltip: {
+            valueFormatter: function (value) {
+              return value + ' mm';
+            }
+          },
+          data: chart_data['normal'],
+          // data: [
+          //   1.0, 2.0, 4.9, 17.4, 54.4, 49.1, 60.7, 71.7, 128.3, 102.3, 33.9, 9.9
+          // ]
+        },
+        {
+          name: 'Actual',
+          type: 'line',
+          lineStyle: {
+            normal: {
+              color: 'red',
+              width: 2,
+              type: 'solid'
+            }
+          },
+          itemStyle: {
+            normal: {
+              color: 'red',
+              width: 2,
+              type: 'solid'
+            }
+          },
+          smooth: true,
+          yAxisIndex: 1,
+          tooltip: {
+            valueFormatter: function (value) {
+              return value + ' mm';
+            }
+          },
+          data: chart_data['actual'],
+          // data: [
+          //   0.0, 0.0, 26.96, 21.13, 88.4, 57.68, 66.65, 21.57, 165.94, 7.83, 34.56,
+          //   15.22
+          // ]
+        }
+      ]
+    };
+
+
+    option && myChart.setOption(option);
+</script>
+{% endblock %}

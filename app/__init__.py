@@ -12,6 +12,7 @@ from iCarbon import app as Carbon
 from iSaksham import app as Saksham
 from eSaksham import app as eSaksham
 from eSaksham_1 import app as eSaksham_1
+from iJalagam import app as iJalagam
 
 application = DispatcherMiddleware(Core, {
     '/iauth': Auth,
@@ -23,7 +24,8 @@ application = DispatcherMiddleware(Core, {
     '/icarbon':Carbon,
     '/isaksham':Saksham,
     '/esaksham':eSaksham,
-    '/esaksham_1':eSaksham_1
+    '/esaksham_1':eSaksham_1,
+    '/ijalagam':iJalagam
 })
 
 # application = iCore

@@ -1,0 +1,118 @@
+{% extends 'mobile/base.html' %}
+{% block title %} Crops {% endblock %}
+{% from 'mobile/components.html' import select, block_button,chart %}
+{% block content %}
+<div id="cardCarousel" class="carousel slide">
+    <div class="carousel-inner">
+      <div class="carousel-item active">        
+        {{chart()}}
+      </div>
+      <div class="carousel-item">
+        <h6>Crops Consumption</h6>
+        <table class="table table-bordered table-sm fs-7 mb-0">
+            <thead>
+                <tr>
+                    <th>S.No.</th>
+                    <th>Crop Name</th>
+                    <th>Area</th>
+                    <th>Consumption</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for crop in crops %}
+                <tr>
+                    <td class="text-center">{{loop.index}}</td>
+                    <td class="text-start">{{crop.crop_name}}</td>
+                    <td class="text-end">{{'%0.2f'|format(crop.crop_area|float)}}</td>
+                    <td class="text-end">{{'%0.2f'|format(crop.crop_consumption|float)}}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <input type="hidden" name="chartData" id="chartData" value="{{chart_data}}">
+{% endblock %}
+{% block scripts %}
+<script>
+    var chartDom = document.getElementById('main');
+    var myChart = echarts.init(chartDom);
+    let chart_data = JSON.parse(document.getElementById('chartData').value)
+    var option;
+
+    option = {
+        // Global palette:
+        color: [
+            '#c23531',
+            '#2f4554',
+            '#61a0a8',
+            '#d48265',
+            '#91c7ae',
+            '#749f83',
+            '#ca8622',
+            '#bda29a',
+            '#6e7074',
+            '#546570',
+            '#c4ccd3'
+        ],
+        // title: [
+        //     {
+        //     text: 'Top 5 Crops'
+        //     }
+        // ],
+        polar: {
+            radius: [30, '80%']
+        },
+        angleAxis: {
+            max: 100,
+            startAngle: 90
+        },
+        radiusAxis: {
+            type: 'category',
+            show: false,
+            data: chart_data['category'],
+        },
+        tooltip: {},
+        series: {
+            type: 'bar',
+            data: transformArray(chart_data['data'], [
+            '#c23531',
+            '#2f4554',
+            '#61a0a8',
+            '#d48265',
+            '#91c7ae',
+            '#749f83',
+            '#ca8622',
+            '#bda29a',
+            '#6e7074',
+            '#546570',
+            '#c4ccd3'
+        ]),
+            coordinateSystem: 'polar',
+            label: {
+                show: true,
+                position: 'start',
+                formatter: '{b}',
+                fontSize: 8
+                }
+        }
+    };
+
+option && myChart.setOption(option);
+
+function transformArray(input_array, color) {
+    let output_array = [];
+    input_array.forEach((value, idx) => {
+        object = {
+        value: value,
+        itemStyle: {
+            color: color[idx]
+        }
+        }
+        output_array.push(object);
+    });
+    return output_array;
+    }
+</script>
+{% endblock %}

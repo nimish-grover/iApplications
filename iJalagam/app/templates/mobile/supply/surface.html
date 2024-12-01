@@ -1,0 +1,109 @@
+{% extends 'mobile/base.html' %}
+{% block title %} Surface Water {% endblock %}
+{% from 'mobile/components.html' import select, block_button, chart %}
+{% block content %}
+<div id="cardCarousel" class="carousel slide">
+    <div class="carousel-inner">
+      <div class="carousel-item active">        
+        {{chart()}}
+      </div>
+      <div class="carousel-item">
+        <h6>Surface Water Supply</h6>
+        <table class="table table-bordered table-sm fs-7 mb-0">
+            <thead>
+                <tr>
+                    <th>S.No.</th>
+                    <th>Waterbody</th>
+                    <th>Count</th>
+                    <th>Area</th>
+                    <th>Storage</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for waterbody in sorted_waterbodies %}
+                <tr>
+                    <td class="text-center">{{loop.index}}</td>
+                    <td class="text-start">{{waterbody.waterbody_type}}</td>
+                    <td class="text-end">{{waterbody.count}}</td>
+                    <td class="text-end">{{waterbody.spread_area}}</td>
+                    <td class="text-end">{{waterbody.storage_capacity}}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <input type="hidden" name="chartData" id="chartData" value="{{chart_data}}">
+{% endblock %}
+{% block scripts %}
+<script>
+    var chartDom = document.getElementById('main');
+    var myChart = echarts.init(chartDom);
+    let chart_data = JSON.parse(document.getElementById('chartData').value)
+    var option;
+
+    option = {
+        grid:{
+            left: 50,
+        },
+        title:{
+            text:'Waterbody Storage',
+            left:'center'
+        },
+        xAxis: {
+            // max: 'dataMax'
+        },
+        yAxis: {
+            type: 'category',
+            data: chart_data['category'],
+            axisLabel: {
+                fontSize: 8
+            }
+        },
+        series: [
+            {
+            name: 'Storage',
+            type: 'bar',
+            data: transformArray(chart_data['data'], [
+                '#c23531',
+                '#2f4554',
+                '#61a0a8',
+                '#d48265',
+                '#91c7ae',
+                '#749f83',
+                '#ca8622',
+                '#bda29a',
+                '#6e7074',
+                '#546570',
+                '#c4ccd3'
+            ]),
+            // label: {
+            //     show: true,
+            //     position: 'right',
+            //     valueAnimation: true
+            // }
+            }
+        ],
+        legend: {
+            show: false
+        },
+    };
+
+    option && myChart.setOption(option);
+
+    function transformArray(input_array, color) {
+    let output_array = [];
+    input_array.forEach((value, idx) => {
+        object = {
+        value: value,
+        itemStyle: {
+            color: color[idx]
+        }
+        }
+        output_array.push(object);
+    });
+    return output_array;
+    }
+</script>
+{% endblock %}

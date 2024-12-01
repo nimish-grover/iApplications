@@ -1,0 +1,48 @@
+{% extends 'entries/user_base.html' %}
+{% block title %} Welcome{% endblock %}
+{% block content %}
+<div class="card fixed-bottom h-80 border-0 rounded-0 rounded-top-5 overflow-y-scroll">
+    {{super()}}
+    <div class="container-fluid mt-2 mb-5">
+        <div class="display-5">Welcome</div>
+        <p class="text-body-secondary mt-4">
+            The water budget application presents the demand and supply of water at block level. 
+            To view the water budget, please enter the following data (<em>Periodcity: Annual</em>):
+        </p>
+        <ol class="list-group list-group-numbered my-4">
+            <li class="list-group-item d-flex border-0">
+            <div class="ms-2 me-auto text-body-secondary">
+                <div class="fw-bold text-dark">Industry</div>
+                Annual Industry Water Allocation 
+            </div>
+            </li>
+            <li class="list-group-item d-flex border-0">
+            <div class="ms-2 me-auto text-body-secondary">
+                <div class="fw-bold text-dark">External</div>
+                Water INSOURCED from others
+            </div>
+            </li>
+            <li class="list-group-item d-flex border-0">
+            <div class="ms-2 me-auto text-body-secondary">
+                <div class="fw-bold text-dark">Transfer</div>
+                Water Transferred OUT of block
+            </div>
+            </li>
+        </ol>
+        <h5 class="mt-3">Navigation Keys:</h5>
+        <ul class="list-group list-group-flush mb-5">
+            <li class="list-group-item fs-7">
+                <strong><i class="fa-solid fa-chevron-left"></i></strong> : Use the arrow key to go to previous page (located at the top-left corner)
+            </li>
+            <li class="list-group-item fs-7">
+                <span class="btn btn-dark btn-sm">Next</span> : Use the 'Next' button to move forward (located at the bottom)
+            </li>
+            <li class="list-group-item fs-7">
+                <span class="btn btn-outline-primary btn-sm">More details...</span> : Use the 'More details...' key to view addtitional details. 
+            </li>
+          </ul>
+        <a type="button" class="btn btn-dark fixed-bottom m-3"
+        href="{{url_for('entries.industry')}}" onclick="toggleSpinner()">Next</a>
+    </div>
+</div>
+{% endblock %}

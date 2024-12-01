@@ -1,0 +1,129 @@
+{% extends 'base.html' %}
+{% block title %} Groundwater {% endblock %}
+{% from 'components/macros.html' import menu_link, display_card, card_header, menu_white_bg %}
+{% block content %}
+<nav style="--bs-breadcrumb-divider: '|';" aria-label="breadcrumb">
+    <ol class="breadcrumb fs-7">
+    {% for breadcrumb in breadcrumbs %}
+      <li class="breadcrumb-item "><a class=" link-underline link-underline-opacity-0 {% if loop.index == breadcrumbs | length %} link-dark {% endif %}" href="{{breadcrumb.href}}">{{breadcrumb.name}}</a></li>
+    {% endfor %}
+    </ol>
+</nav>
+<div class="card rounded-1 shadow mb-3">
+    <div class="card-header">
+        {{card_header(title='Groundwater Parameters', subtitle='in Ha M')}}
+    </div>
+    <div class="card-body">
+        <div class="row mb-3">
+            {% for item in gw_data %}
+            <div class="col">
+                <div class="d-flex {% if loop.index%2 == 1 %} justify-content-end mt-0 {% else %} justify-content-start mt-3 {% endif %}">
+                    {{ display_card(isImage=False, content=item.content, 
+                        label=item.name|title, title=item.value, subtitle='Ha M', background=item.background) }}
+                </div>
+            </div>   
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+
+<div class="card mb-3 rounded-1 shadow ">
+    <div class="card-header">
+        {{card_header(title='Chart Illustration', subtitle='(in Thousand Ha M)')}}
+    </div>
+    <div class="card-body">
+        <div class="containerpy-3">
+            <div id="main" style="width: 100%;height:35vh;"></div>
+        </div>
+    </div>
+</div>
+
+<div class="card mb-5 rounded-1 shadow ">
+    <div class="card-header">
+        {{card_header(title='Tabular Data', subtitle='Detail Matrix')}}
+    </div>
+    <div class="card-body">
+        <div class="container py-3">
+            <table class="table table-bordered table-sm fs-7 mb-0">
+                <thead>
+                    <tr>
+                        {% for row in table_data %}
+                        <th>{{row.name | title}}</th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>                  
+                    <tr>
+                        {% for row in table_data %}
+                        <td class="text-end">{{row.value}}</td>
+                        {% endfor %}
+                    </tr>                    
+                </tbody>
+            </table>
+        </div>        
+    </div>
+</div>
+<!--FOOTER-->
+<nav class="fixed-bottom bg-dark">
+    <div class="d-flex justify-content-between aligh-items-center px-3"> 
+        {{menu_link(route=url_for('routes.surface'), icon='fa-solid fa-water',  name='Surface')}}
+        {{menu_link(route=url_for('routes.ground'), icon='fa-solid fa-arrow-up-from-ground-water',  name='Ground')}}
+        {{menu_white_bg(route=url_for('entries.budget'), font_content='fa-solid fa-scale-unbalanced-flip')}}
+        {{menu_link(route=url_for('routes.runoff'), icon='fa-solid fa-cloud-showers-water',  name='Runoff')}}       
+        {{menu_link(route=url_for('routes.external'), icon='fa-solid fa-right-from-bracket',  name='External')}}
+    </div>
+</nav>
+<input type="hidden" name="chartData" id="chartData" value="{{chart_data}}">
+{% endblock %}
+{% block scripts %}
+<script>
+    var chartDom = document.getElementById('main');
+    var myChart = echarts.init(chartDom);
+    let chart_data = JSON.parse(document.getElementById('chartData').value)
+    var option;
+
+    option = {
+    tooltip: {
+        trigger: 'item'
+    },
+    legend: {
+        show:true,
+        orient:'vertical',
+        bottom: '5%',
+        left: 'center',
+        top: 'center'
+    },
+    series: [
+        {
+        name: 'Access From',
+        type: 'pie',
+        radius: ['60%', '90%'],
+        avoidLabelOverlap: false,
+        itemStyle: {
+            borderRadius: 10,
+            borderColor: '#fff',
+            borderWidth: 2
+        },
+        label: {
+            show: false,
+            position: 'center'
+        },
+        emphasis: {
+            label: {
+            show: true,
+            fontSize: 40,
+            fontWeight: 'bold'
+            }
+        },
+        labelLine: {
+            show: false
+        },
+        data: chart_data
+        }
+    ]
+    };
+
+    option && myChart.setOption(option);
+</script>
+{% endblock %}

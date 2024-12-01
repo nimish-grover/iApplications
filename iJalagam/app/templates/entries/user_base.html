@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> Jalagam - {% block title %} {% endblock %}</title>
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='css/bootstrap.min.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='scss/styles.css')}}">
+</head>
+<body class="fade-in">
+    <!--Overlay-->
+    <div id="loading-spinner" class="overlay">
+        <!--Spinner-->
+        <div id="loading-wrapper">
+          <div id="loading-text">LOADING</div>
+          <div id="loading-content"></div>
+        </div>
+      </div>
+    <div class="container-fluid">
+        <div class="clearfix">
+            <button class=" btn text-light float-start"><i class="fa-solid fa-chevron-left"></i></button>
+            <div class="btn-group float-end">
+                <button type="button" class="btn text-white dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="fa-solid fa-user"></i>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    <li><a class="dropdown-item" href="{{url_for('auth.change_password')}}">Change Password</a></li>
+                    <li><a class="dropdown-item" href="{{url_for('auth.logout')}}">Logout</a></li>
+                </ul>
+              </div>
+            <!-- <button class="btn text-light float-end"><i class="fa-solid fa-bars"></i></button> -->
+        </div>
+        <div class="d-flex text-white mt-2 align-items-center">
+            <div class="flex-shrink-0 d-flex justify-content-end align-items-center display-5 me-0">
+                <i class="fa-solid fa-chart-simple"></i>
+            </div>
+            <div class="flex-grow-1 ms-3">
+                <div class="display-1">Jalagam</div>
+                <div class="fs-6 fw-light text-light mt-n2">Water Budget Application</div>
+            </div>
+        </div>
+    </div>    
+    {% block content %}
+        {% if breadcrumbs %}
+        <div class="container-fluid mt-2 ms-3">
+        <nav style="--bs-breadcrumb-divider: '|';" aria-label="breadcrumb">
+            <ol class="breadcrumb fs-7">
+                <!-- <li class="breadcrumb-item "><a class=" link-underline link-underline-opacity-0" href="/home"><strong>Home</strong></a></li> -->
+            {% for breadcrumb in breadcrumbs %}
+            <li class="breadcrumb-item">
+                <a class="link-underline link-underline-opacity-0 {% if loop.index == breadcrumbs | length %} link-dark {% endif %}" href="{{breadcrumb.href}}">
+                    {{breadcrumb.name}}
+                </a>
+            </li>
+            {% endfor %}
+            </ol>
+        </nav> 
+        </div>
+        {% endif %}    
+    {% endblock %}
+    <div class="toast-container position-fixed bottom-0 end-0 p-3">
+        <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header">
+                <span class="border border-1 border-dark rounded p-1 me-2"><i class="fa-solid fa-person-digging"></i></span>
+                <strong class="me-auto">Jalagam says...</strong>
+                <small></small>
+                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body" id="flashMesssageDiv">
+                {{flash_message}}
+            </div>
+        </div>
+    </div>            
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.1/dist/echarts.min.js"></script>
+    <script src="{{url_for('static', filename='js/popper.min.js')}}"></script>
+    <script src="{{url_for('static', filename='js/bootstrap.min.js')}}"></script>
+    <script>
+    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
+    const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
+    const toastDiv = document.getElementById('liveToast');
+    const flash_message = document.getElementById('flashMesssageDiv').innerText
+
+    const setCardHeight = ()=>{
+        screen_height = document.documentElement.clientHeight;
+        title_card_height = document.querySelector('div.container-fluid').offsetHeight;
+        client_card = document.querySelector('.card.fixed-bottom');
+        available_height = screen_height - title_card_height;
+        if (available_height < client_card.offsetHeight) {
+            client_card.classList.remove('.h-80');
+            client_card.offsetHeight = available_height;
+        }
+    }
+
+    if (flash_message.trim() !== 'false' && flash_message.trim() !== '') {
+        const toastBootstrap = bootstrap.Toast.getOrCreateInstance(toastDiv);
+        toastBootstrap.show();
+    }
+    document.addEventListener('DOMContentLoaded', ()=>{
+      document.body.classList.add('loaded');
+      setCardHeight();
+    });
+    function toggleSpinner() {
+            const spinner = document.getElementById('loading-spinner');
+            spinner.style.display = (spinner.style.display === 'none' || spinner.style.display === '') ? 'block' : 'none';
+        }
+    </script>
+    {% block scripts %}
+    {% endblock %}
+</body>
+</html>
