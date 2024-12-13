@@ -1,0 +1,233 @@
+from flask import Blueprint, json, jsonify, redirect, render_template, request, session, url_for
+from flask_login import current_user, login_required
+
+from iJal.app.classes.block_data import BlockData
+from iJal.app.classes.budget_data import BudgetData
+from iJal.app.classes.helper import HelperClass
+from iJal.app.models import BlockTerritory
+from iJal.app.models.block_pop import BlockPop
+
+
+blp = Blueprint('desktop','desktop')
+
+@blp.route('/status')
+def status():
+    session_data = session.get('payload')
+    if not session_data:
+        return redirect(url_for('mobile.index'))
+    else:
+        payload = json.loads(session_data)
+
+    progress_status = [{'id':1,'category':'Human','status':True,'url':url_for('.human')},
+                       {'id':2,'category':'Livestock','status':False,'url':url_for('.livestocks')},
+                       {'id':3,'category':'Crops','status':False,'url':url_for('.crops')},
+                       {'id':4,'category':'Industry','status':False,'url':url_for('.industries')},
+                       {'id':5,'category':'Surface','status':True,'url':url_for('.surface')},
+                       {'id':6,'category':'Ground','status':False,'url':url_for('.ground')},
+                       {'id':7,'category':'LULC','status':False,'url':url_for('.lulc')},
+                       {'id':8,'category':'Rainfall','status':True,'url':url_for('.rainfall')},
+                       {'id':9,'category':'Transfer','status':False, 'url':url_for('.transfer')}]
+    return render_template('desktop/home.html',
+                           progress = progress_status,
+                           breadcrumbs=HelperClass.get_breadcrumbs(payload),
+                           menu= HelperClass.get_main_menu())
+
+
+@blp.route('/human', methods=['POST','GET'])
+@login_required
+def human():
+    if request.method=='POST':
+        json_data = request.json
+        BlockData.update_human(json_data, current_user.id)
+        return jsonify({'redirect_url': url_for('.status')})
+    session_data = session.get('payload')
+    if not session_data:
+        return redirect(url_for('mobile.index'))
+    else:
+        payload = json.loads(session_data)
+    human = BlockData.get_human_consumption(block_id=payload['block_id'], 
+                                            district_id=payload['district_id'], 
+                                            state_id=payload['state_id'],
+                                            user_id=current_user.id)
+    is_approved = all(row['is_approved'] for row in human)
+    return render_template('desktop/demand/human.html', 
+                           human=human, 
+                           human_data=json.dumps(human), 
+                           is_approved=is_approved,
+                           breadcrumbs=HelperClass.get_breadcrumbs(payload),
+                           menu= HelperClass.get_demand_menu())
+
+@blp.route('/livestocks', methods=['POST','GET'])
+@login_required
+def livestocks():
+    if request.method=='POST':
+        json_data = request.json
+        BlockData.update_livestock(json_data, current_user.id)
+        return jsonify({'redirect_url': url_for('.status')})
+    session_data = session.get('payload')
+    if not session_data:
+        return redirect(url_for('mobile.index'))
+    else:
+        payload = json.loads(session_data)
+    livestocks = BlockData.get_livestock_consumption(block_id=payload['block_id'], 
+                                            district_id=payload['district_id'], 
+                                            state_id=payload['state_id'],
+                                            user_id=current_user.id)
+    is_approved = all(row['is_approved'] for row in livestocks)
+    return render_template('desktop/demand/livestock.html', 
+                           livestock=livestocks, 
+                           livestock_data=json.dumps(livestocks), 
+                           is_approved=is_approved,
+                           breadcrumbs=HelperClass.get_breadcrumbs(payload),
+                           menu= HelperClass.get_demand_menu())
+
+@blp.route('/crops', methods=['POST','GET'])
+@login_required
+def crops():
+    if request.method=='POST':
+        json_data = request.json
+        BlockData.update_crops(json_data, current_user.id)
+        return jsonify({'redirect_url': url_for('.status')})
+    session_data = session.get('payload')
+    if not session_data:
+        return redirect(url_for('mobile.index'))
+    else:
+        payload = json.loads(session_data)
+    crops = BlockData.get_crops_consumption(block_id=payload['block_id'], 
+                                            district_id=payload['district_id'], 
+                                            state_id=payload['state_id'],
+                                            user_id=current_user.id)
+    is_approved = all(row['is_approved'] for row in crops)
+    return render_template('desktop/demand/crops.html', 
+                           crops=crops, 
+                           crops_data=json.dumps(crops), 
+                           is_approved=is_approved,
+                           breadcrumbs=HelperClass.get_breadcrumbs(payload),
+                           menu= HelperClass.get_demand_menu())
+
+@blp.route('/industries', methods=['POST','GET'])
+@login_required
+def industries():
+    # if request.method=='POST':
+    #     json_data = request.json
+    #     BlockData.update_industries(json_data, current_user.id)
+    #     return jsonify({'redirect_url': url_for('.status')})
+    session_data = session.get('payload')
+    if not session_data:
+        return redirect(url_for('mobile.index'))
+    else:
+        payload = json.loads(session_data)
+    industries = BlockData.get_industries()
+    # is_approved = all(row['is_approved'] for row in industries)
+    return render_template('desktop/demand/industry.html', 
+                           industries=industries, 
+                           industry_data=json.dumps(industries), 
+                        #    is_approved=is_approved,
+                           breadcrumbs=HelperClass.get_breadcrumbs(payload),
+                           menu= HelperClass.get_demand_menu())
+@blp.route('/surface', methods=['POST','GET'])
+def surface():
+    session_data = session.get('payload')
+    if not session_data:
+        return redirect(url_for('mobile.index'))
+    else:
+        payload = json.loads(session_data)
+    if request.method=='POST':
+        json_data = request.json
+        BlockData.update_surface(json_data, current_user.id)
+        return jsonify({'redirect_url': url_for('.status')})    
+    surface_supply = BlockData.get_surface_supply(block_id=payload['block_id'], 
+                                            district_id=payload['district_id'], 
+                                            state_id=payload['state_id'],
+                                            user_id=current_user.id)
+    # is_approved = all(row.is_approved for row in surface_supply)
+    return render_template('desktop/supply/surface.html',
+                        waterbodies = surface_supply,
+                        waterbody_data = json.dumps(surface_supply),
+                        # is_approved = is_approved,
+                        breadcrumbs=HelperClass.get_breadcrumbs(payload),
+                        menu= HelperClass.get_supply_menu())
+
+@blp.route('/rainfall', methods=['POST', 'GET'])
+def rainfall():
+    if request.method=='POST':
+        json_data = request.json
+        BlockData.update_rainfall(json_data, current_user.id)
+        return jsonify({'redirect_url': url_for('.status')})
+    session_data = session.get('payload')
+    if not session_data:
+        return redirect(url_for('mobile.index'))
+    else:
+        payload = json.loads(session_data)
+    rainfall = BlockData.get_rainfall_data(block_id=payload['block_id'], 
+                                            district_id=payload['district_id'], 
+                                            state_id=payload['state_id'],
+                                            user_id=current_user.id)
+    is_approved = all(row['is_approved'] for row in rainfall)
+    return render_template('desktop/supply/rainfall.html', 
+                            rainfall=rainfall, 
+                            rainfall_data=json.dumps(rainfall), 
+                            is_approved=is_approved,
+                            breadcrumbs=HelperClass.get_breadcrumbs(payload),
+                            menu= HelperClass.get_supply_menu())
+
+@blp.route('/lulc', methods=['POST', 'GET'])
+def lulc():
+    if request.method=='POST':
+        json_data = request.json
+        BlockData.update_lulc(json_data, current_user.id)
+        return jsonify({'redirect_url': url_for('.status')})
+    session_data = session.get('payload')
+    if not session_data:
+        return redirect(url_for('mobile.index'))
+    else:
+        payload = json.loads(session_data)
+    lulc = BlockData.get_lulc_supply(block_id=payload['block_id'], 
+                                            district_id=payload['district_id'], 
+                                            state_id=payload['state_id'],
+                                            user_id=current_user.id)
+    is_approved = all(row['is_approved'] for row in lulc)
+    return render_template('desktop/supply/lulc.html', 
+                        lulc=lulc, 
+                        lulc_data=json.dumps(lulc), 
+                        is_approved=is_approved,
+                        breadcrumbs=HelperClass.get_breadcrumbs(payload),
+                        menu= HelperClass.get_supply_menu())
+
+@blp.route('/ground', methods=['POST','GET'])
+def ground():
+    if request.method=='POST':
+        json_data = request.json
+        BlockData.update_ground(json_data, current_user.id)
+        return jsonify({'redirect_url': url_for('.status')})
+    session_data = session.get('payload')
+    if not session_data:
+        return redirect(url_for('mobile.index'))
+    else:
+        payload = json.loads(session_data)
+    ground_supply = BlockData.get_groundwater_supply(block_id=payload['block_id'], 
+                                            district_id=payload['district_id'], 
+                                            state_id=payload['state_id'],
+                                            user_id=current_user.id)
+    is_approved = all(row['is_approved'] for row in ground_supply)
+    return render_template('desktop/supply/ground.html',
+                           ground_supply = ground_supply,
+                           groundwater_data = json.dumps(ground_supply),
+                           is_approved = is_approved,
+                           breadcrumbs=HelperClass.get_breadcrumbs(payload),
+                           menu= HelperClass.get_supply_menu())
+
+@blp.route('/transfer')
+def transfer():
+    session_data = session.get('payload')
+    if not session_data:
+        return redirect(url_for('mobile.index'))
+    else:
+        payload = json.loads(session_data)
+    transfer_data = [{'id':1, 'transfer_name':'Inward', 'count':0},
+                     {'id':2, 'transfer_name':'Outward', 'count':0}]
+    return render_template('desktop/transfer.html',
+                           water_transfer = transfer_data,
+                           transfer_data=json.dumps(transfer_data),
+                           breadcrumbs=HelperClass.get_breadcrumbs(payload),
+                           menu= HelperClass.get_main_menu())

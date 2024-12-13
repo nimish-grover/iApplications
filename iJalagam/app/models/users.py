@@ -1,5 +1,5 @@
 from flask_login import UserMixin
-from iJalagam.app import db
+from iJalagam.app.db import db
 from passlib.hash import pbkdf2_sha256
 
 class User(UserMixin, db.Model):

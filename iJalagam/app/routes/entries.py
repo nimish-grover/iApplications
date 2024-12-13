@@ -103,8 +103,8 @@ def industry():
         payload = session['payload']
     else:
         return redirect(url_for('routes.index'))
-    district_id = payload['district_id']
-    block_id = payload['block_id']
+    district_id = 1
+    block_id = 1
     if request.method =='POST':
         json_data = request.json
         # fixed_json_data = json_data.replace("'",'"')
@@ -126,7 +126,7 @@ def industry():
                                     block_id, district_id)
                 industry.save_to_db()
         return json.dumps({'redirect_to':url_for('entries.external')})
-    return render_template('entries/industry.html', breadcrumbs = get_breadcrumbs(payload))
+    return render_template('entries/industry.html')
 
 @blp.route("/external", methods=['POST', 'GET'])
 @login_required

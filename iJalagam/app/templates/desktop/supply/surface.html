@@ -1,0 +1,373 @@
+{% extends 'desktop/base.html' %}
+{% block title %}Surface{% endblock %}
+{% from 'desktop/components.html' import select, block_button, chart,checkbox,steps %}
+{% from 'components/user_macros.html' import floating_input, step, select %}
+
+{% block content %}
+
+<section id="section1" class="">
+    {{steps(progress=progress)}}
+
+  <div class="row">
+    <div class="col-2"></div>
+    <div class="col">
+      <h5 class="card-title text-center fw-bold">Surface Data</h5>
+    </div>
+    <div class="col-2 text-end">
+      <a type="button" id="btnNewRow" href="" class="btn btn-sm btn-outline-dark mb-2 btnChangeSection" data-target="section2"><i class="fa-solid fa-plus"></i></a>
+    </div>
+  </div>
+  <table class="table table-bordered table-sm fs-7 mb-0">
+    <thead class="text-center">
+      <tr>
+        <th>S.No.</th>
+        <th>Waterbody</th>
+        <th>Count</th>
+        <th>Capacity</th>
+        <th class="hidden">id</th>
+        <!-- <th clsss="hidden">b_territory_id</th> -->
+        <th></th>
+        <!-- <th></th> -->
+      </tr>
+    </thead>
+    <tbody id="tableBody">
+      {% for row in waterbodies %}
+      <tr data-id="{{loop.index0}}">
+        <td class="text-center">{{loop.index}}</td>
+        <td class="text-start">{{row['waterbody']}}</td>
+        <td class="text-end">{{row['count']}}</td>
+        <td class="text-end">{{row['storage']}}</td>
+        <td class="hidden">{{row['id']}}</td>
+        <td class="hidden">{{row['b_territory_id']}}</td>
+        <td class="text-center"><a href="" class="btnEdit btnChangeSection" data-target="section2" style="text-decoration: none;"><i
+              class="fa-solid fa-lg fa-pencil"></i></a></td>
+        <!-- <td class="text-center"><button class="btn text-danger p-0 btnDelete"><i class="fa-solid fa-xmark"></i></button></td> -->
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% if isApproved %}
+
+  {{checkbox(id='checkBox',label='I declare that above information is correct.')}}
+  <div class="d-flex mt-4 mb-2">
+    <div class="d-grid gap-2 flex-grow-1 ms-2">
+      <button type="button" id="btnSubmit" onclick="toggleSpinner()" class="btn btn-success mb-3 disabled btnSubmit">Update</button>
+    </div>
+  </div>
+  {%else%}
+  {{checkbox(id='checkBox',label ='I declare that above data has been validated and updated.')}}
+
+  <div class="d-flex mt-4 mb-2">
+    <div class="d-grid gap-2 flex-grow-1 ms-2">
+      <button type="button" id="btnSubmit" class="btn btn-success mb-3 disabled btnSubmit">Approve</button>
+    </div>
+  </div>
+  {%endif%}
+</section>
+<section id="section2" class="hidden">
+  <form class="card-body" id="formId">
+    <h5 class="card-title text-center fw-bold">Human Data</h5>
+    {{select(id='waterbody_type', label='Select Waterbody Type', dd_array=dropdown_data)}}
+    {{floating_input(id='count', label='Count')}}
+    {{floating_input(id='storage', label='Storage')}}
+    <!-- <input type="hidden" waterbody="formData" value=""> -->
+    <div class="d-flex">
+      <div class="d-grid gap-2 flex-grow-1">
+        <a type="button" id="btnCancel" href="" class="btn btn-outline-dark mb-3 btnChangeSection" data-target="section1">Cancel</a>
+      </div>
+      <div class="d-grid gap-2 flex-grow-1 ms-2">
+        <button type="button" id="btnAdd" class="btn btn-primary mb-3 disabled btnChangeSection">Add</button>
+      </div>
+    </div>
+  </form>
+</section>
+
+{% endblock %}
+{% block scripts %}
+
+
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    // DOM Elements
+    const tableBody = document.getElementById('tableBody');
+    const waterbodyType = document.getElementById('select_waterbody_type');
+    const waterbodyCount = document.getElementById('input_count');
+    const waterbodyStorage = document.getElementById('input_storage');
+    const addButton = document.getElementById('btnAdd');
+    const approveButton = document.getElementById('btnSubmit');
+    const cancelButton = document.getElementById('btnCancel');
+    const checkBox = document.getElementById('checkBox');
+    
+    // State Variables
+    let rows = [];
+    let editingRowId = null;
+
+    // Initialize table rows
+    function initializeRows() {
+        const tableRows = Array.from(tableBody.querySelectorAll("tr"));
+        rows = tableRows.map(row => {
+            const id = row.getAttribute("data-id");
+            const cells = row.querySelectorAll("td");
+            return {
+                id: parseInt(id),
+                waterbody: cells[1].innerText,
+                count: parseInt(cells[2].innerText, 10),
+                storage: parseFloat(cells[3].innerText).toFixed(2),
+                db_id: parseInt(cells[4].innerText, 10),
+                b_territory_id: parseInt(cells[5].innerText,10)
+            };
+        });
+        console.log(rows);
+    }
+
+    // Render Table
+    function renderTable() {
+        console.log('Rendering table with rows:', rows);  // Log to see rows before rendering
+
+        tableBody.innerHTML = rows.map((row, index) => `
+            <tr data-id="${index}">
+                <td class="text-center">${index + 1}</td>
+                <td class="text-start">${row.waterbody}</td>
+                <td class="text-end">${row.count}</td>
+                <td class="text-end">${row.storage}</td>
+                <td class="hidden">${row.db_id}</td>
+                <td class="hidden">${row.b_territory_id}</td>
+                <td class="text-center">
+                    <a href="#" class="btnEdit btnChangeSection" style="text-decoration: none;">
+                        <i class="fa-solid fa-lg fa-pencil"></i>
+                    </a>
+                </td>
+
+            </tr>
+        `).join("");
+        attachEditListeners();
+        // attachDeleteListeners();
+    }
+
+    // Attach Edit Button Listeners
+    function attachEditListeners() {
+        const editButtons = document.querySelectorAll('.btnEdit');
+        editButtons.forEach(button => {
+            button.removeEventListener('click', handleEdit); // Remove existing listener to avoid duplication
+            button.addEventListener('click', handleEdit); // Add the click event listener for edit button
+        });
+    }
+
+    // Attach Delete Button Listeners
+    // function attachDeleteListeners() {
+    //     const deleteButtons = document.querySelectorAll('.btnDelete');
+    //     deleteButtons.forEach(button => {
+    //         button.removeEventListener('click', handleDelete); // Remove existing listener to avoid duplication
+    //         button.addEventListener('click', handleDelete); // Add the click event listener for delete button
+    //     });
+    // }
+
+    // Handle Edit
+    function handleEdit(event) {
+        event.preventDefault();
+        const row = this.closest('tr');
+        const rowId = parseInt(row.getAttribute('data-id'), 10);
+        const selectedRow = rows[rowId];
+
+        // Populate form with row data
+        const matchingOption = Array.from(waterbodyType.options).find(option => option.text === selectedRow.waterbody);
+        if (matchingOption) {
+            waterbodyType.value = matchingOption.value;
+        } else {
+            waterbodyType.selectedIndex = 0;
+        }
+
+        waterbodyCount.value = selectedRow.count;
+        waterbodyStorage.value = selectedRow.storage;
+        editingRowId = rowId;
+
+        // Validate and update Add button state
+        validateForm();
+        updateAddButton();
+        initializeSectionSwitching();
+        switchSection('section2');
+    }
+
+    // Handle Delete
+    // function handleDelete(event) {
+    //     event.preventDefault();
+    //     const row = this.closest('tr');
+    //     const rowId = parseInt(row.getAttribute('data-id'), 10);
+
+    //     // Remove the row from the array
+    //     rows = rows.filter((_, index) => index !== rowId);
+
+    //     // Log rows to check if the array is updated
+    //     console.log('Rows after delete:', rows);
+
+    //     // Re-render the table
+    //     renderTable();
+    //     updateApproveButton();
+    // }
+
+    // Add or Update Row
+    function handleAdd() {
+        const waterbody = waterbodyType.options[waterbodyType.selectedIndex].text;
+        const count = parseInt(waterbodyCount.value, 10);
+        const storage = parseFloat(waterbodyStorage.value).toFixed(2)
+        const db_id = editingRowId !== null ? rows[editingRowId].db_id : null;
+        const b_territory_id = editingRowId !== null ? rows[editingRowId].b_territory_id : null;
+
+        // Check for duplicates by population type waterbody (update the waterbodyCount of the row if exists)
+        const existingRow = rows.find((row, index) => row.waterbody === waterbody && index !== editingRowId);
+        if (existingRow) {
+            console.log('Updating existing row with waterbody:', waterbody);
+            existingRow.count = count;  // Update the waterbodyCount of the existing row
+            existingRow.storage = storage;
+        } else {
+            console.log('Adding new row:', waterbody);
+            if (editingRowId !== null) {
+                // Update existing row
+                rows[editingRowId] = {id:editingRowId, waterbody, count,storage,db_id,b_territory_id };
+                editingRowId = null;
+            } else {
+                // Add new row
+                rows.push({id:rows.length, waterbody, count,storage,db_id,b_territory_id });
+            }
+        }
+
+        // Log rows to check if the array is updated
+        console.log('Rows after add/edit:', rows);
+
+        renderTable();
+        resetForm();
+        updateApproveButton();
+        initializeSectionSwitching();
+        switchSection('section1');
+    }
+
+    function handleApprove() {
+    if (checkBox.checked && rows.length > 0) {
+        const payload = rows;
+        console.log('Sending data to server:', payload);
+
+        toggleSpinner(true); // Show spinner before sending the request
+
+        fetch('{{url_for("desktop.surface")}}', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`Request failed with status ${response.status}`);
+                }
+                return response.json(); // Expecting a JSON response
+            })
+            .then(data => {
+                console.log('Data submitted successfully:', data);
+
+                // Clear the table and reset the form
+                // renderTable();
+                // resetForm();
+                // updateApproveButton();
+
+                // Perform redirection
+                if (data.redirect_url) {
+                    console.log('Redirecting to:', data.redirect_url);
+                    window.location.href = data.redirect_url; // Redirect to the provided URL
+                } else {
+                    console.warn('No redirect URL provided in the response.');
+                }
+            })
+            .catch(error => console.error('Error:', error))
+            .finally(() => {
+                toggleSpinner(false); // Hide spinner regardless of success or failure
+            });
+    } else {
+        console.log('Cannot submit, either checkbox is unchecked or no rows available');
+    }
+}
+
+
+
+    // Reset Form
+    function resetForm() {
+        waterbodyType.selectedIndex = 0;
+        waterbodyCount.value = "";
+        waterbodyStorage.value = "";
+        waterbodyType.classList.remove('is-valid', 'is-invalid');
+        waterbodyCount.classList.remove('is-valid', 'is-invalid');
+        waterbodyStorage.classList.remove('is-valid', 'is-invalid');
+        editingRowId = null;
+        updateAddButton();
+    }
+
+    // Validation Functions
+    function validatePopulationType() {
+        const isValid = waterbodyType.value !== "";
+        waterbodyType.classList.toggle('is-valid', isValid);
+        waterbodyType.classList.toggle('is-invalid', !isValid);
+        return isValid;
+    }
+
+    function validateCount() {
+        const count = parseInt(waterbodyCount.value, 10);
+        const isValid = !isNaN(count) && count >= 0;
+        waterbodyCount.classList.toggle('is-valid', isValid);
+        waterbodyCount.classList.toggle('is-invalid', !isValid);
+        return isValid;
+    }
+
+    function validateStorage() {
+        const storage = parseFloat(waterbodyStorage.value);
+        const isValid = !isNaN(storage) && storage >= 0;
+        waterbodyStorage.classList.toggle('is-valid', isValid);
+        waterbodyStorage.classList.toggle('is-invalid', !isValid);
+        return isValid;
+    }
+
+    function validateForm() {
+        return validatePopulationType() && validateCount() && validateStorage();
+    }
+
+    function updateAddButton() {
+        const isValid = validateForm();
+        addButton.disabled = !isValid;
+        addButton.classList.toggle('disabled', !isValid);
+    }
+
+    function updateApproveButton() {
+        const hasRows = rows.length > 0;
+        const isCheckboxChecked = checkBox.checked;
+        approveButton.disabled = !(isCheckboxChecked && hasRows);
+        approveButton.classList.toggle('disabled', !(isCheckboxChecked && hasRows));
+    }
+
+    // Event Listeners
+    waterbodyType.addEventListener('change', updateAddButton);
+    waterbodyCount.addEventListener('input', updateAddButton);
+    waterbodyStorage.addEventListener('input',updateAddButton);
+    addButton.addEventListener('click', (e) => {
+        e.preventDefault();
+        handleAdd();
+    });
+    cancelButton.addEventListener('click', (e) => {
+        e.preventDefault();
+        resetForm();
+        initializeSectionSwitching();
+        switchSection('section1');
+    });
+    checkBox.addEventListener('change', updateApproveButton);
+    approveButton.addEventListener('click', handleApprove);
+
+    // Initial Setup
+    initializeRows();
+    renderTable();
+});
+
+
+</script>
+
+
+
+
+
+
+{%endblock%}

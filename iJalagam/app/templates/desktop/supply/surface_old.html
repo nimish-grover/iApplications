@@ -1,0 +1,304 @@
+{% extends 'desktop/base.html' %}
+{% block title %}Human{% endblock %}
+{% from 'desktop/components.html' import select, block_button, chart %}
+{% from 'components/user_macros.html' import floating_input, step, select %}
+{% block content %}
+<section id="section1" class="">
+    <h5 class="card-title text-center fw-bold">Surface Water Supply</h5>
+    <table class="table table-bordered table-sm fs-7 mb-0">
+        <thead class="text-center">
+            <tr>
+                <th>S.No.</th>
+                <th>Waterbody</th>
+                <th>Count</th>
+                <th>Area</th>
+                <th>Storage</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for waterbody in sorted_waterbodies %}
+            <tr>
+                <td class="text-center">{{loop.index}}</td>
+                <td class="text-start">{{waterbody.waterbody_type}}</td>
+                <td class="text-end">{{waterbody.count}}</td>
+                <td class="text-end">{{waterbody.spread_area}}</td>
+                <td class="text-end">{{waterbody.storage_capacity}}</td>
+                <td class="text-center"><a href="" class="btnChangeSection" style="text-decoration: none;"><i
+                            class="fa-solid fa-pen-to-square"></i></a></i></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</section>
+<section id="section2" class="hidden">
+    <form class="card-body" id="formId">
+        <h5 class="card-title text-center fw-bold">Surface Water Supply</h5>
+        {{select(id='waterbody_type', label='Select Waterbody Type', dd_array=dropdown_data)}}
+        {{floating_input(id='waterbody_count', label='Waterbody Count')}}
+        {{floating_input(id='waterbody_area', label='Waterbody Area')}}
+        {{floating_input(id='waterbody_storage', label='Waterbody Storage')}}
+        <div class="text-center">
+            <button type="button" class="btn btn-outline-dark mb-3" id="btnAdd" disabled>Add</button>
+        </div>
+        <table class="table table-bordered table-sm fs-7">
+            <thead>
+                <tr class="text-center">
+                    <th>S.No.</th>
+                    <th>Waterbody</th>
+                    <th>Count</th>
+                    <th>Area</th>
+                    <th>Storage</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody id="table-body">
+            <!--Placeholder for dynamic table-->
+            </tbody>
+            <tfoot>
+                <tr>
+                  <td colspan="2">Total</td>
+                  <td id="total-waterbody" class="text-end">0</td>
+                  <td id="total-waterbody-area" class="text-end">0</td>
+                  <td id="total-waterbody-storage" class="text-end">0</td>
+                  <td></td>
+                </tr>
+              </tfoot>
+        </table>
+        <!-- <input type="hidden" name="formData" value=""> -->
+        <div class="d-flex">
+            <div class="d-grid gap-2">
+                <a type="button" href="" class="btn btn-outline-dark mb-3 btnChangeSection">Cancel</a>
+            </div>
+            <div class="d-grid gap-2 flex-grow-1 ms-2">
+                <button type="button" id="btnSubmit" class="btn btn-primary mb-3 disabled btnChangeSection">Submit</button>
+            </div>
+       </div>        
+      </form>
+</section>
+
+{% endblock %}
+{% block scripts %}
+<script>
+
+    // Select all buttons with the class 'btnChangeSection'
+    const buttons = document.querySelectorAll('.btnChangeSection');
+
+    buttons.forEach(button => {
+        button.addEventListener('click', function(event) {
+            event.preventDefault();
+            toggleSpinner(); // Show spinner before transition
+
+            const section1 = document.getElementById('section1');
+            const section2 = document.getElementById('section2');
+
+            // Simulate a delay for the transition (e.g., for animations)
+            setTimeout(() => {
+                // Toggle visibility of sections
+                if (section1.classList.contains('hidden')) {
+                    section1.classList.remove('hidden');
+                    section2.classList.add('hidden');
+                } else {
+                    section1.classList.add('hidden');
+                    section2.classList.remove('hidden');
+                }
+                toggleSpinner(); // Hide spinner after transition
+            }, 500); // Adjust the timeout duration as needed
+        });
+    });
+</script>
+<script>
+    const tableBody = document.getElementById("table-body");
+    const totalWaterbodyElement = document.getElementById("total-waterbody");
+    const waterbodyType = document.getElementById("select_waterbody_type");
+    const waterbodyCount = document.getElementById("input_waterbody_count");
+    const waterbodyArea = document.getElementById("input_waterbody_area");
+    const waterbodyStorage = document.getElementById("input_waterbody_storage");
+    const addButton = document.getElementById("btnAdd");
+    const submitButtom = document.getElementById("btnSubmit");
+
+    const rows = [];
+    waterbodyType.focus();
+
+    function validateField(input, condition) {
+        if (condition) {
+            input.classList.remove("is-invalid");
+            input.classList.add("is-valid");
+            enableAddButton();
+            return true;
+        } else {
+            input.classList.add("is-invalid");
+            input.classList.remove("is-valid");
+            enableAddButton();
+            return false;
+        }
+    }
+
+    function enableAddButton() {
+        const waterbody = waterbodyType.selectedIndex;
+        const count = parseInt(waterbodyCount.value);
+        const area = parseFloat(waterbodyArea.value);
+        const storage = parseFloat(waterbodyStorage.value);
+
+        if (waterbody === 0 || count <= 0 || isNaN(count) || area <= 0 || isNaN(area) || storage <= 0 || isNaN(storage)) {
+            addButton.setAttribute('disabled', 'disabled');
+        } else {
+            addButton.removeAttribute('disabled');
+        }
+    }
+
+    function validateWaterbodyType() {
+        return validateField(waterbodyType, waterbodyType.selectedIndex !== 0);
+    }
+
+    function validateCount() {
+        const count = parseInt(waterbodyCount.value);
+        return validateField(waterbodyCount, !isNaN(count) && count > 0);
+    }
+
+    function validateArea() {
+        const area = parseFloat(waterbodyArea.value);
+        return validateField(waterbodyArea, !isNaN(area) && area > 0);
+    }
+
+    function validateStorage() {
+        const storage = parseFloat(waterbodyStorage.value);
+        return validateField(waterbodyStorage, !isNaN(storage) && storage > 0);
+    }
+
+    function enablesubmitButtom(rows) {
+        if (rows.length > 0) {
+            submitButtom.classList.remove('disabled');
+        } else {
+            submitButtom.classList.add('disabled');
+        }
+    }
+
+    function updateTotalCount() {
+    const totalCount = rows.reduce((sum, row) => sum + parseInt(row.count), 0);
+    const totalArea = rows.reduce((sum, row) => sum + parseFloat(row.area), 0);
+    const totalStorage = rows.reduce((sum, row) => sum + parseFloat(row.storage), 0);
+
+    // Update the table footer values
+    document.getElementById("total-waterbody").textContent = totalCount.toFixed(0);
+    document.getElementById("total-waterbody-area").textContent = totalArea.toFixed(2);
+    document.getElementById("total-waterbody-storage").textContent = totalStorage.toFixed(2);
+}
+
+
+    function resetInputs() {
+        waterbodyType.selectedIndex = 0;
+        waterbodyCount.value = "";
+        waterbodyArea.value = "";
+        waterbodyStorage.value = "";
+        waterbodyType.classList.remove("is-valid", "is-invalid");
+        waterbodyCount.classList.remove("is-valid", "is-invalid");
+        waterbodyArea.classList.remove("is-valid", "is-invalid");
+        waterbodyStorage.classList.remove("is-valid", "is-invalid");
+    }
+
+    function addRowToTable(row) {
+        const existingRow = [...tableBody.children].find(
+            (tr) => tr.querySelector("td:nth-child(2)").textContent === row.waterbody_type
+        );
+        if (existingRow) {
+            existingRow.querySelector("td:nth-child(3)").textContent = row.count;
+            existingRow.querySelector("td:nth-child(4)").textContent = row.area.toFixed(2);
+            existingRow.querySelector("td:nth-child(5)").textContent = row.storage.toFixed(2);
+        } else {
+            const tr = document.createElement("tr");
+
+            tr.innerHTML = `
+                <td class="text-center">${row.serial + 1}</td>
+                <td>${row.waterbody_type}</td>
+                <td class="text-end">${row.count}</td>
+                <td class="text-end">${row.area.toFixed(2)}</td>
+                <td class="text-end">${row.storage.toFixed(2)}</td>
+                <td class="text-center"><button class="btn text-danger p-0" data-index="${row.serial}"><i class="fa-regular fa-circle-xmark"></i></button></td>
+            `;
+
+            tableBody.appendChild(tr);
+        }
+    }
+
+    addButton.addEventListener("click", () => {
+        const waterbodyOption = waterbodyType.options[waterbodyType.selectedIndex];
+        const waterbody_text = waterbodyOption.text;
+        const waterbody_value = waterbodyOption.value;
+        const count = parseInt(waterbodyCount.value);
+        const area = parseFloat(waterbodyArea.value);
+        const storage = parseFloat(waterbodyStorage.value);
+
+        const existing = rows.find((row) => row.waterbody_type === waterbody_text);
+
+        if (existing) {
+            existing.count = count;
+            existing.area = area;
+            existing.storage = storage;
+            addRowToTable(existing);
+        } else {
+            const newRow = {
+                serial: rows.length,
+                waterbody_type: waterbody_text,
+                count: count,
+                area: area,
+                storage: storage,
+                waterbody_id: waterbody_value
+            };
+            rows.push(newRow);
+            addRowToTable(newRow);
+        }
+
+        updateTotalCount();
+        resetInputs();
+        enablesubmitButtom(rows);
+    });
+
+    tableBody.addEventListener("click", (e) => {
+        if (e.target.closest(".btn.text-danger")) {
+            const deleteButton = e.target.closest(".btn.text-danger");
+            const index = parseInt(deleteButton.dataset.index, 10);
+
+            rows.splice(index, 1);
+            tableBody.innerHTML = "";
+            rows.forEach((row, idx) => {
+                row.serial = idx;
+                addRowToTable(row);
+            });
+
+            updateTotalCount();
+            enablesubmitButtom(rows);
+        }
+    });
+
+    waterbodyType.addEventListener("change", validateWaterbodyType);
+    waterbodyCount.addEventListener("input", validateCount);
+    waterbodyArea.addEventListener("input", validateArea);
+    waterbodyStorage.addEventListener("input", validateStorage);
+
+    submitButtom.addEventListener("click", (event) => {
+        event.preventDefault();
+        toggleSpinner();
+        const url = "{{url_for('desktop.surface')}}";
+        const payload = rows;
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
+        }).then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        }).then(data => {
+            window.location.href = data['redirect_to'];
+        }).catch(error => {
+            toggleSpinner();
+            console.error('Error:', error);
+        });
+    });
+</script>
+
+{%endblock%}

@@ -1,0 +1,57 @@
+{% extends 'desktop/base.html' %}
+{% block title %}Crops{% endblock %}
+{%block style%}
+<link rel="stylesheet" type="text/css" href="{{url_for('static', filename='css/steps.css')}}">
+
+{%endblock%}
+
+{% block content %}
+
+<div class="main-container">
+    <div class="steps-container">
+        <div class="step {%if isApproved %} completed {%else%} in-progress {%endif%}">
+            {%if isApproved %}
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                <path d="M20.285 2l-11.285 11.567-5.286-5.011-3.714 3.716 9 8.728 15-15.285z" />
+            </svg>
+            {%else%}
+            <div class="preloader"></div>
+            {%endif%}
+            <div class="label {%if isApproved %} completed {%else%} loading {%endif%}">
+                Human
+            </div>
+            <div class="icon {%if isApproved %} completed {%else%} in-progress {%endif%}">
+                <i class="fa-solid fa-people-roof"></i>
+            </div>
+        </div>
+        <div class="line"></div>
+        <div class="step">
+            <div class="label ">
+                Livestock
+            </div>
+            <div class="icon ">
+                <i class="fa-solid fa-paw"></i>
+            </div>
+        </div>
+        <div class="line {%if not isApproved %} prev-step-in-progress {%endif%}">
+        </div>
+        <div class="step">
+            <div class="label">
+                Crops
+            </div>
+            <div class="icon">
+                <i class="fa-brands fa-pagelines"></i>
+            </div>
+        </div>
+        <div class="line"></div>
+        <div class="step">
+            <div class="label">
+                Industry
+            </div>
+            <div class="icon">
+                <i class="fa-solid fa-industry"></i>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

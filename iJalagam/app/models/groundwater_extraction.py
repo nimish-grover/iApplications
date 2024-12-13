@@ -1,4 +1,4 @@
-from iJalagam.app import db
+from iJalagam.app.db import db
 from iJalagam.app.models import Block, District	
 
 class GroundwaterExtraction(db.Model):
@@ -15,9 +15,11 @@ class GroundwaterExtraction(db.Model):
 
     block_id = db.Column(db.ForeignKey('blocks.id'), nullable=False)
     district_id = db.Column(db.ForeignKey('districts.id'), nullable=False)
+    tj_id = db.Column(db.ForeignKey('territory_joins.id'), nullable=False)
 
-    block = db.relationship('Block')
-    district = db.relationship('District')
+    block = db.relationship('Block', backref=db.backref("groundwater_extractions", lazy="dynamic"))
+    district = db.relationship('District', backref=db.backref("groundwater_extractions", lazy="dynamic"))
+    territory_join = db.relationship("TerritoryJoin", backref=db.backref("groundwater_extractions", lazy="dynamic"))
 
     def __init__(self, stage_of_extraction, rainfall, recharge, 
                  discharge, extractable, extraction, category, 
@@ -46,47 +48,25 @@ class GroundwaterExtraction(db.Model):
         }
     
     @classmethod
-    def get_gw_by_block_id(cls, block_id, district_id):
-        # SELECT id, stage_of_extraction, rainfall, recharge, discharge, extractable, extraction, category, block_id, district_id
-        # FROM public.groundwater_extractions;
+    def get_groundwater_by_block(cls, block_id, district_id):
         query = db.session.query(
-                cls.stage_of_extraction,
-                cls.rainfall,
-                cls.recharge, 
-                cls.discharge,
                 cls.extractable,
                 cls.extraction,
+                cls.stage_of_extraction,
                 cls.category,
-                Block.name.label('block_name'),
-                District.name.label('district_name')
+                cls.block_id.label('block_id')
         ).join(Block, Block.id==cls.block_id
         ).join(District, District.id==cls.district_id
-        ).filter(cls.block_id==block_id)
+        ).filter(cls.block_id==block_id,District.id==district_id)
 
-        result = query.first()
-        if result:
-            result = {
-                'stage_of_extraction':round(result[0],2),
-                'rainfall': round(result[1],2),
-                'recharge': round(result[2],2),
-                'discharge': round(result[3],2),
-                'extractable': round(result[4],2),
-                'extraction': round(result[5],2),
-                'category': result[6],
-                'block_name': result[7],
-                'district_name':result[8]
-            }
-        else:
-            result = {
-                'stage_of_extraction':'NA',
-                'rainfall': 0,
-                'recharge': 0,
-                'discharge': 0,
-                'extractable': 0,
-                'extraction': 0,
-                'category': 'NA',
-                'block_name': 'NA',
-                'district_name':'NA'
-            }
-        
-        return result
+        results = query.all()
+
+        if results:
+            json_data = [{
+                'extractable': round(row.extractable, 2),
+                'extraction': round(row.extraction, 2),
+                'stage_of_extraction': round(row.stage_of_extraction,2),
+                'category': row.category
+            } for row in results]
+            return json_data
+        return None

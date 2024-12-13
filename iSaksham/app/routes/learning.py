@@ -3,7 +3,7 @@ from flask_smorest import Blueprint
 from flask_login import login_required
 from iSaksham.app.models.chapters import Chapters
 from iSaksham.app.models.modules import Modules
-
+from flask_login import login_required
 from iSaksham.app.models.feedback import Feedback  # Importing login_required decorator
 
 blp = Blueprint("learning","learning","Routes to LMS")
@@ -63,6 +63,7 @@ def course_2018():
     return render_template('course_2018.html',accordion_content = accordion_content,accordion_title= accordion_title)
 
 # Route for the course page, accessible only to logged-in users
+@login_required
 @blp.route('/course_2024')
 # @login_required
 def course_2024():

@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jalagam - {% block title %} {% endblock %}</title>
+    <link rel="icon" type="image/png" href="{{url_for('static', filename='assets/drop.png')}}">
+    <link rel="stylesheet" type="text/css"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
+        integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='css/bootstrap.min.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='css/steps.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='scss/styles.css')}}">
+    {%block style%}
+    {%endblock%}
+    <style>
+        .center-center {
+            position: absolute;
+            left: 0;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        :root {
+            --primary-color: #fff;
+            --secondary-color: #f564ff;
+        }
+
+        *,
+        *:after,
+        *:before {
+            box-sizing: border-box;
+        }
+
+        .tabs {
+            display: flex;
+            position: relative;
+            background-color: #fff;
+            box-shadow: 0 0 1px 0 rgba(#185ee0, 0.15), 0 6px 12px 0 rgba(#185ee0, 0.15);
+            padding: 0.75rem;
+            border-radius: 99px;
+
+            /* just a high number to create pill effect*/
+            * {
+                z-index: 2;
+            }
+        }
+
+        input[type="radio"] {
+            display: none;
+        }
+
+
+
+        .tab {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 54px;
+            width: 200px;
+            font-size: 1.25rem;
+            font-weight: 500;
+            border-radius: 0px;
+            /* just a high number to create pill effect*/
+            cursor: pointer;
+            transition: color 0.15s ease-in;
+        }
+
+        .notification {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 2rem;
+            height: 2rem;
+            margin-left: 0.75rem;
+            border-radius: 50%;
+            background-color: var(--secondary-color);
+            transition: 0.15s ease-in;
+        }
+
+        input[type="radio"] {
+            &:checked {
+                &+label {
+                    color: var(--primary-color);
+
+                    &>.notification {
+                        background-color: var(--primary-color);
+                        color: #fff;
+                    }
+                }
+            }
+        }
+
+        input[id="radio-1"] {
+            &:checked {
+                &~.glider {
+                    transform: translateX(0);
+                }
+            }
+        }
+
+        input[id="radio-2"] {
+            &:checked {
+                &~.glider {
+                    transform: translateX(100%);
+                }
+            }
+        }
+
+        .glider {
+            position: absolute;
+            display: flex;
+            height: 54px;
+            width: 200px;
+            background-color: var(--secondary-color);
+            z-index: 1;
+            border-radius: 99px;
+            /* just a high number to create pill effect*/
+            transition: 0.25s ease-out;
+        }
+
+        @media (max-width: 700px) {
+            .tabs {
+                transform: scale(0.6);
+            }
+        }
+
+        /*Bottom Menu*/
+        .bottom-menu {
+            &.fade-in {
+                width: 1px;
+                opacity: 0;
+                transition: all .75s ease;
+
+                &.show {
+                    opacity: 1;
+                    width: 100%;
+                }
+            }
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        @media (max-width: 576px) {
+            .full-sm {
+                width: 100%;
+                /* Adjust as needed */
+                margin: 0 auto;
+                /* Optional: Center the content */
+            }
+        }
+
+        /*End Bottom Menu*/
+    </style>
+</head>
+
+<body>
+    <!--Overlay-->
+    <div id="loading-spinner" class="overlay">
+        <!--Spinner-->
+        <div id="loading-wrapper">
+            <div id="loading-text">LOADING</div>
+            <div id="loading-content"></div>
+        </div>
+    </div>
+    <nav class="navbar fixed-top bg-primary">
+        <div class="container-fluid">
+            <a class="navbar-brand text-white" href="#">Jalagam</a>
+        </div>
+    </nav>
+
+    <div class="center-center">
+        <div class="col-lg-5 col-md-7 col-sm-12 full-sm">
+            {%block progress%}
+            {%endblock%}
+            <div class="card border-primary text-center mx-2">
+                <div class="card-header bg-primary p-1">
+                </div>
+                <div class="card-body">
+                    {% if breadcrumbs %}
+                    <div class="container-fluid">
+                        <nav style="--bs-breadcrumb-divider: '|';" aria-label="breadcrumb">
+                            <ol class="breadcrumb fs-7">
+                                <!-- <li class="breadcrumb-item "><a class=" link-underline link-underline-opacity-0" href="/home"><strong>Home</strong></a></li> -->
+                                {% for breadcrumb in breadcrumbs %}
+                                <li class="breadcrumb-item">
+                                    <a class="link-underline link-underline-opacity-0 {% if loop.index == breadcrumbs | length %} link-dark {% endif %}"
+                                        href="{{breadcrumb.href}}">
+                                        {{breadcrumb.name}}
+                                    </a>
+                                </li>
+                                {% endfor %}
+                            </ol>
+                        </nav>
+                    </div>
+                    {% endif %}
+                    {% block content %}
+                    {% endblock %}
+                </div>
+                <div class="card-footer bg-primary p-1">
+                </div>
+            </div>
+        </div>
+    </div>
+    {% from 'mobile/components.html' import bottom_menu, toggle_button %}
+    <div class="fixed-bottom">
+        {{ bottom_menu(menu_array=menu|default([])) }}
+    </div>
+    <!--SCRIPTs -->
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.1/dist/echarts.min.js"></script>
+    <script src="{{url_for('static', filename='js/bootstrap.min.js')}}"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const bottomMenu = document.querySelector('.fixed-bottom.bg-dark.bottom-menu.fade-in');
+            if (bottomMenu) { bottomMenu.classList.add('show') }
+        });
+        function toggleSpinner() {
+            const spinner = document.getElementById('loading-spinner');
+            spinner.style.display = (spinner.style.display === 'none' || spinner.style.display === '') ? 'block' : 'none';
+        }
+        const carousel = document.querySelector("#cardCarousel");
+        const radio1 = document.querySelector("#radio-1");
+        const radio2 = document.querySelector("#radio-2");
+        if (carousel) {
+            document.querySelectorAll('.tab').forEach((label, index) => {
+                label.addEventListener('click', () => {
+                    // Update the carousel slide using Bootstrap's API
+                    const carousel = new bootstrap.Carousel('#cardCarousel');
+                    carousel.to(index);
+                });
+            });
+            // Add event listener for the carousel slide
+            if (radio1) {
+                carousel.addEventListener("slid.bs.carousel", function (event) {
+                    const activeIndex = [...carousel.querySelectorAll(".carousel-item")].indexOf(
+                        carousel.querySelector(".carousel-item.active")
+                    );
+
+                    if (activeIndex === 0) {
+                        radio1.checked = true;
+                    } else if (activeIndex === 1) {
+                        radio2.checked = true;
+                    }
+                });
+            }
+        }   
+    </script>
+    <script>
+
+        // Function to switch sections
+        function switchSection(targetSection) {
+          const section1 = document.getElementById('section1');
+          const section2 = document.getElementById('section2');
+          let currentSection = section1.classList.contains('hidden') ? 'section2' : 'section1'; // Determine the current section
+        
+          if (targetSection === currentSection) return; // Prevent unnecessary switching
+        
+          toggleSpinner(); // Show spinner
+          setTimeout(() => {
+            // Hide all sections
+            section1.classList.add('hidden');
+            section2.classList.add('hidden');
+        
+            // Show the target section
+            if (targetSection === 'section1') {
+              section1.classList.remove('hidden');
+            } else if (targetSection === 'section2') {
+              section2.classList.remove('hidden');
+            }
+        
+            currentSection = targetSection; // Update the current section
+            toggleSpinner(); // Hide spinner
+          }, 250); // Spinner delay
+        }
+        
+        // Function to initialize section buttons
+        function initializeSectionSwitching() {
+          const buttons = document.querySelectorAll('.btnChangeSection');
+        
+          buttons.forEach(button => {
+            button.addEventListener('click', function (event) {
+              event.preventDefault();
+              const targetSection = this.getAttribute('data-target');
+              if (targetSection) {
+                switchSection(targetSection);
+              }
+            });
+          });
+        }
+        
+        // Initialize section switching on DOMContentLoaded
+        document.addEventListener('DOMContentLoaded', function () {
+          initializeSectionSwitching();
+          // Set the initial section visibility on page load
+          switchSection('section1');
+        });
+        
+        </script> 
+    {% block scripts %}
+    {% endblock %}
+    <!--END SCRIPTS-->
+</body>
+
+</html>

@@ -1,0 +1,258 @@
+{% extends 'desktop/base.html' %}
+{% block title %}Runoff{% endblock %}
+{% from 'desktop/components.html' import select, block_button, chart %}
+{% from 'components/user_macros.html' import floating_input, step, select %}
+{% block content %}
+<section id="section1" class="">
+    <h5 class="card-title text-center fw-bold">Runoff</h5>
+    <table class="table table-bordered table-sm fs-7 mb-0">
+        <thead class="text-center">
+            <tr>
+                <th>Catchment</th>
+                <th>Area</th>
+                <th>% Runoff</th>
+                <th>Runoff</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in catchments %}
+            <tr>
+                <td class="text-start">{{row.name | title}}</td>
+                <td class="text-end">{{row.area}}</td>
+                <td class="text-end">{{row.percent_runoff}}</td>
+                <td class="text-end">{{row.runoff}}</td>
+                <td class="text-center"><a href="" class="btnChangeSection" style="text-decoration: none;"><i
+                    class="fa-solid fa-pen-to-square"></i></a></i></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</section>
+<section id="section2" class="hidden">
+    <form class="card-body" id="formId">
+        <h5 class="card-title text-center fw-bold">Runoff</h5>
+        {{select(id='area_type', label='Select Area', dd_array=dropdown_data)}}
+        {{floating_input(id='area', label='Area')}}
+        <div class="text-center">
+            <button type="button" class="btn btn-outline-dark mb-3" id="btnAdd" disabled>Add</button>
+        </div>
+        <table class="table table-bordered table-sm fs-7">
+            <thead>
+                <tr class="text-center">
+                    <th>S.No.</th>
+                    <th>Type</th>
+                    <th>Area</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody id="table-body">
+            <!--Placeholder for dynamic table-->
+            </tbody>
+            <tfoot>
+                <tr>
+                  <td colspan="2">Total Area</td>
+                  <td id="total-area" class="text-end">0</td>
+                  <td></td>
+                </tr>
+              </tfoot>
+        </table>
+        <!-- <input type="hidden" name="formData" value=""> -->
+        <div class="d-flex">
+            <div class="d-grid gap-2">
+                <a type="button" href="" class="btn btn-outline-dark mb-3 btnChangeSection">Cancel</a>
+            </div>
+            <div class="d-grid gap-2 flex-grow-1 ms-2">
+                <button type="button" id="btnSubmit" class="btn btn-primary mb-3 disabled btnChangeSection">Submit</button>
+            </div>
+       </div>        
+      </form>
+</section>
+
+{% endblock %}
+{% block scripts %}
+<script>
+
+    // Select all buttons with the class 'btnChangeSection'
+    const buttons = document.querySelectorAll('.btnChangeSection');
+
+    buttons.forEach(button => {
+        button.addEventListener('click', function(event) {
+            event.preventDefault();
+            toggleSpinner(); // Show spinner before transition
+
+            const section1 = document.getElementById('section1');
+            const section2 = document.getElementById('section2');
+
+            // Simulate a delay for the transition (e.g., for animations)
+            setTimeout(() => {
+                // Toggle visibility of sections
+                if (section1.classList.contains('hidden')) {
+                    section1.classList.remove('hidden');
+                    section2.classList.add('hidden');
+                } else {
+                    section1.classList.add('hidden');
+                    section2.classList.remove('hidden');
+                }
+                toggleSpinner(); // Hide spinner after transition
+            }, 500); // Adjust the timeout duration as needed
+        });
+    });
+</script>
+<script>
+const tableBody = document.getElementById("table-body");
+const totalAreaElement = document.getElementById("total-area");
+const areaType = document.getElementById("select_area_type");
+const areaInput = document.getElementById("input_area");
+const addButton = document.getElementById("btnAdd");
+const submitButton = document.getElementById("btnSubmit");
+
+const rows = [];
+
+areaType.focus();
+
+function validateField(input, condition) {
+    if (condition) {
+        input.classList.remove("is-invalid");
+        input.classList.add("is-valid");
+        return true;
+    } else {
+        input.classList.add("is-invalid");
+        input.classList.remove("is-valid");
+        return false;
+    }
+}
+
+function enableAddButton() {
+    const isAreaTypeValid = validateAreaType();
+    const isAreaValid = validateArea();
+    if (isAreaTypeValid && isAreaValid) {
+        addButton.removeAttribute("disabled");
+    } else {
+        addButton.setAttribute("disabled", "disabled");
+    }
+}
+
+function validateAreaType() {
+    return validateField(areaType, areaType.selectedIndex !== 0);
+}
+
+function validateArea() {
+    const areaValue = parseFloat(areaInput.value);
+    return validateField(areaInput, !isNaN(areaValue) && areaValue > 0);
+}
+
+function enablesubmitButton(rows) {
+    if (rows.length > 0) {
+        submitButton.classList.remove("disabled");
+    } else {
+        submitButton.classList.add("disabled");
+    }
+}
+
+function updateTotalArea() {
+    const total = rows.reduce((sum, row) => sum + parseFloat(row.area), 0);
+    totalAreaElement.textContent = total.toFixed(0);
+}
+
+function resetInputs() {
+    areaType.selectedIndex = 0;
+    areaInput.value = "";
+    areaType.classList.remove("is-valid", "is-invalid");
+    areaInput.classList.remove("is-valid", "is-invalid");
+    addButton.setAttribute("disabled", "disabled");
+}
+
+function addRowToTable(row) {
+    const existingRow = [...tableBody.children].find(
+        (tr) => tr.querySelector("td:nth-child(2)").textContent === row.area_type
+    );
+    if (existingRow) {
+        existingRow.querySelector("td:nth-child(3)").textContent = row.area;
+    } else {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+            <td class="text-center">${row.serial + 1}</td>
+            <td>${row.area_type}</td>
+            <td class="text-end">${row.area}</td>
+            <td class="text-center"><button class="btn text-danger p-0" data-index="${row.serial}"><i class="fa-regular fa-circle-xmark"></i></button></td>
+        `;
+        tableBody.appendChild(tr);
+    }
+}
+
+addButton.addEventListener("click", () => {
+    const areaOption = areaType.options[areaType.selectedIndex];
+    const areaText = areaOption.text;
+    const areaValue = areaOption.value;
+    const area = parseFloat(areaInput.value);
+
+    const existing = rows.find((row) => row.area_type === areaText);
+
+    if (existing) {
+        existing.area = area;
+        addRowToTable(existing);
+    } else {
+        const newRow = { serial: rows.length, area_type: areaText, area: area, area_id: areaValue };
+        rows.push(newRow);
+        addRowToTable(newRow);
+    }
+
+    updateTotalArea();
+    resetInputs();
+    enablesubmitButton(rows);
+});
+
+tableBody.addEventListener("click", (e) => {
+    if (e.target.closest(".btn.text-danger")) {
+        const deleteButton = e.target.closest(".btn.text-danger");
+        const index = parseFloat(deleteButton.dataset.index, 10);
+
+        rows.splice(index, 1);
+
+        tableBody.innerHTML = "";
+        rows.forEach((row, idx) => {
+            row.serial = idx;
+            addRowToTable(row);
+        });
+
+        updateTotalArea();
+        enablesubmitButton(rows);
+    }
+});
+
+// Event listeners for real-time validation
+areaType.addEventListener("change", enableAddButton);
+areaInput.addEventListener("input", enableAddButton);
+
+// Submit button logic
+submitButton.addEventListener("click", (event) => {
+    event.preventDefault();
+    toggleSpinner();
+    const url = "{{url_for('desktop.runoff')}}";
+    const payload = rows;
+
+    fetch(url, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(payload)
+    })
+        .then((response) => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then((data) => {
+            window.location.href = data["redirect_to"];
+        })
+        .catch((error) => {
+            toggleSpinner();
+            console.error("Error:", error);
+        });
+});
+
+</script>
+{%endblock%}

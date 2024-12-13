@@ -1,149 +1,96 @@
 from sqlalchemy import func
-from iJalagam.app import db
-from iJalagam.app.models.waterbody_type import WaterbodyType
-
+from iJalagam.app.db import db
+from iJalagam.app.models.territory import TerritoryJoin
+from iJalagam.app.models.waterbody import WaterbodyType
 
 class WaterbodyCensus(db.Model):
-    __tablename__ = "waterbodies_census"
+    __tablename__ = 'waterbodies_census'
 
-    id = db.Column(db.Integer, primary_key=True)
-    spread_area = db.Column(db.Float, nullable=False, default=0)
-    storage_capacity = db.Column(db.Float, nullable=False, default=0)
-    max_depth = db.Column(db.Float, nullable=False, default=0)
-    longitude = db.Column(db.String(80))
-    latitude = db.Column(db.String(80))
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True, nullable=False)
+    spread_area = db.Column(db.Float, nullable=False)
+    storage_capacity = db.Column(db.Float, nullable=False)
+    max_depth = db.Column(db.Float, nullable=False)
+    longitude = db.Column(db.String(80), nullable=True)
+    latitude = db.Column(db.String(80), nullable=True)
+    waterbody_id = db.Column(db.Integer, db.ForeignKey("waterbody_types.id"), nullable=False)
+    village_code = db.Column(db.Integer, db.ForeignKey("villages.lgd_code"), nullable=False)
+    # block_code = db.Column(db.Integer, db.ForeignKey("blocks.lgd_code"), nullable=True)
+    district_code = db.Column(db.Integer, db.ForeignKey("districts.lgd_code"), nullable=False)
+    tj_id = db.Column(db.Integer, db.ForeignKey("territory_joins.id"), nullable=False)
 
-    waterbody_type_id = db.Column(db.ForeignKey('waterbody_types.id'), nullable=False)
-    village_id = db.Column(db.ForeignKey('villages.id'), nullable=False)
-    block_id = db.Column(db.ForeignKey('blocks.id'), nullable=False)
-    district_id = db.Column(db.ForeignKey('districts.id'), nullable=False)  
+    village = db.relationship("Village", backref=db.backref("waterbodies_census", lazy="dynamic"))
+    # block = db.relationship("Block", backref=db.backref("waterbodies_census", lazy="dynamic"))
+    district = db.relationship("District", backref=db.backref("waterbodies_census", lazy="dynamic"))
+    territory_join = db.relationship("TerritoryJoin", backref=db.backref("waterbodies_census", lazy="dynamic"))
+    waterbody_type = db.relationship("WaterbodyType", backref=db.backref("waterbodies_census", lazy="dynamic"))
 
-    waterbody = db.relationship('WaterbodyType')
-    village = db.relationship('Village')
-    block = db.relationship('Block')
-    district = db.relationship('District')
-
-    def __init__(self, spread_area, storage_capacity, max_depth, longitude, latitude, waterbody_type_id, village_id, block_id, district_id):
+    def __init__(self, spread_area, storage_capacity, max_depth, longitude=None, latitude=None, 
+                 waterbody_id=None, village_code=None, block_code=None, district_code=None, 
+                 tj_id=None):
+        """
+        Initialize the WaterbodiesCensus instance with the provided attributes.
+        """
         self.spread_area = spread_area
         self.storage_capacity = storage_capacity
         self.max_depth = max_depth
         self.longitude = longitude
         self.latitude = latitude
-        self.waterbody_type_id = waterbody_type_id
-        self.village_id = village_id
-        self.block_id = block_id
-        self.district_id = district_id
+        self.waterbody_id = waterbody_id
+        self.village_code = village_code
+        self.block_code = block_code
+        self.district_code = district_code
+        self.tj_id = tj_id
+
+    def __repr__(self):
+        """
+        Provides a string representation of the WaterbodiesCensus instance.
+        """
+        return (f"<WaterbodiesCensus(id={self.id}, spread_area={self.spread_area}, "
+                f"storage_capacity={self.storage_capacity}, max_depth={self.max_depth}, "
+                f"longitude='{self.longitude}', latitude='{self.latitude}', "
+                f"waterbody_id={self.waterbody_id}, village_code={self.village_code}, "
+                f"block_code={self.block_code}, district_code={self.district_code}, "
+                f"village_id={self.tj_id})>")
 
     def json(self):
+        """
+        Returns a JSON serializable dictionary representation of the WaterbodiesCensus instance.
+        """
         return {
-            'spread_area': self.spread_area,
-            'storage_capacity': self.storage_capacity,
-            'max_depth': self.max_depth,
-            'longitude': self.longitude,
-            'latitude': self.latitude,
-            'waterbody_type_id': self.waterbody_type_id,
-            'village_id': self.village_id,
-            'block_id': self.block_id,
-            'district_id': self.district_id
+            "id": self.id,
+            "spread_area": self.spread_area,
+            "storage_capacity": self.storage_capacity,
+            "max_depth": self.max_depth,
+            "longitude": self.longitude,
+            "latitude": self.latitude,
+            "waterbody_id": self.waterbody_id,
+            "village_code": self.village_code,
+            "block_code": self.block_code,
+            "district_code": self.district_code,
+            "tj_id": self.tj_id
         }
-
-    @classmethod
-    def get_waterbody_by_panchayat_id(cls, village_id):
-        print('hello classmethod')
-        return cls.json(cls.query.filter_by(village_id = village_id).first())
     
     @classmethod
-    def get_waterbodies_by_village_id(cls, village_id):
+    def get_waterbody_by_block(cls, block_id, district_id):
         query = db.session.query(
-            cls.id,
-            cls.district_id,
-            cls.block_id,
-            cls.village_id,
-            cls.spread_area,
-            cls.storage_capacity,
-            cls.max_depth,
-            cls.longitude,
-            cls.latitude,
-            WaterbodyType.id.label('waterbody_type_id'),
-            WaterbodyType.waterbody_type
-        ).join(WaterbodyType, WaterbodyType.id == cls.waterbody_type_id
-        ).filter(cls.village_id == village_id)
-
+                func.sum(cls.storage_capacity).label('storage_capacity'),
+                func.count(cls.waterbody_id).label('waterbody_count'),
+                WaterbodyType.id.label('waterbody_id'),
+                WaterbodyType.waterbody_name
+            ).join(WaterbodyType, WaterbodyType.id==cls.waterbody_id
+            ).join(TerritoryJoin, TerritoryJoin.id==cls.tj_id
+            ).filter(
+                TerritoryJoin.block_id == block_id,
+                TerritoryJoin.district_id == district_id
+            ).group_by(
+                WaterbodyType.id,WaterbodyType.waterbody_name
+            )
         results = query.all()
-
         if results:
-            result = [{
-                'id':item.id,
-                'spread_area': item.spread_area,
-                'storage_capacity': item.storage_capacity,
-                'max_depth': item.max_depth,
-                'longitude': item.longitude,
-                'latitude': item.latitude,
-                'waterbody_type': item.waterbody_type
-            } for item in results]
-            return result
-        else:
-            return None
-    
-    # select wt.waterbody_type, count(waterbody_type_id), sum(spread_area), 
-    # sum(storage_capacity), avg(max_depth) 
-    # from waterbodies_census wc 
-    # inner join waterbody_types wt on wt.id = wc.waterbody_type_id
-    # where village_id = 930 
-    # group by wt.waterbody_type
-
-    @classmethod
-    def get_count_by_id(cls, _id):
-        query = db.session.query(
-            WaterbodyType.id.label('waterbody_type_id'),
-            WaterbodyType.waterbody_type.label('waterbody_type'),
-            func.coalesce(func.count(cls.village_id).label('count'),0),
-            func.coalesce(func.sum(cls.spread_area).label('spread_area'),0),
-            func.coalesce(func.sum(cls.storage_capacity).label('storage_capacity'),0),
-            func.coalesce(func.avg(cls.max_depth).label('max_depth'),0)
-        ).outerjoin(
-            cls, (WaterbodyType.id == cls.waterbody_type_id) & (cls.village_id==_id)
-        ).group_by(WaterbodyType.waterbody_type, WaterbodyType.id)
-
-        results = query.all()
-
-        if results: 
-            json_data =  [{
-                'waterbody_type_id': result[0],
-                'waterbody_type': result[1],
-                'count': result[2],
-                'spread_area': round(result[3],2),
-                'storage_capacity': round(result[4],2),
-                'depth': round(result[5],2)            
-            } for result in results]
+            json_data = [{'entity_id':row.waterbody_id,
+                          'entity_name': row.waterbody_name,
+                          'entity_count': row.waterbody_count,
+                          'entity_value': row.storage_capacity}
+                         for row in results]
             return json_data
-        else:
-            return None
-
-    @classmethod   
-    def get_count_by_block_id(cls, block_id, district_id):
-        query=db.session.query(
-            WaterbodyType.id.label('waterbody_type_id'),
-            WaterbodyType.waterbody_type.label('waterbody_type'),
-            func.coalesce(func.count(cls.village_id).label('count'),0),
-            func.coalesce(func.sum(cls.spread_area).label('spread_area'),0),
-            func.coalesce(func.sum(cls.storage_capacity).label('storage_capacity'),0),
-            func.coalesce(func.avg(cls.max_depth).label('max_depth'),0)
-        ).outerjoin(
-            cls, (WaterbodyType.id == cls.waterbody_type_id) & (cls.block_id==block_id)
-        ).group_by(WaterbodyType.waterbody_type, WaterbodyType.id)
-
-        results = query.all()
-
-        if results: 
-            json_data =  [{
-                'waterbody_type_id': result[0],
-                'waterbody_type': result[1],
-                'count': result[2],
-                'spread_area': round(result[3],2),
-                'storage_capacity': round(result[4],2),
-                'depth': round(result[5],2)            
-            } for result in results]
-            return json_data
-        else:
-            return None
+        return None

@@ -1,0 +1,237 @@
+{% extends 'desktop/base.html' %}
+{% block title %}Ground Water{% endblock %}
+{% from 'desktop/components.html' import select, block_button, chart %}
+{% from 'components/user_macros.html' import floating_input, step, select %}
+{% block content %}
+<section id="section1" class="">
+    <h5 class="card-title text-center fw-bold">Ground Water Supply</h5>
+    <table class="table table-bordered table-sm fs-7 mb-0">
+      <thead>
+          <tr>
+              {% for row in table_data %}
+              <th>{{row.name | title}}</th>
+              {% endfor %}
+              <th></th>
+          </tr>
+      </thead>
+      <tbody>                  
+          <tr>
+              {% for row in table_data %}
+              <td class="text-end">{{row.value}}</td>
+              {% endfor %}
+              <td class="text-center"><a href="" class="btnChangeSection" style="text-decoration: none;"><i
+                class="fa-solid fa-pen-to-square"></i></a></i></td>
+          </tr>                    
+      </tbody>
+  </table>
+</section>
+<section id="section2" class="hidden">
+    <form class="card-body" id="formId">
+        <h5 class="card-title text-center fw-bold">Ground Water Supply</h5>
+        {{floating_input(id='extraction', label='Extraction')}}
+        <div class="text-center">
+            <button type="button" class="btn btn-outline-dark mb-3" id="btnAdd" disabled>Add</button>
+        </div>
+        <table class="table table-bordered table-sm fs-7">
+            <thead>
+                <tr class="text-center">
+                    <th>S.No.</th>
+                    <th>Extraction</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody id="table-body">
+            <!--Placeholder for dynamic table-->
+            </tbody>
+            <tfoot>
+                <tr>
+                  <td colspan="1">Total Extraction</td>
+                  <td id="total-extraction" class="text-end">0</td>
+                  <td></td>
+                </tr>
+              </tfoot>
+        </table>
+        <!-- <input type="hidden" name="formData" value=""> -->
+        <div class="d-flex">
+            <div class="d-grid gap-2">
+                <a type="button" href="" class="btn btn-outline-dark mb-3 btnChangeSection">Cancel</a>
+            </div>
+            <div class="d-grid gap-2 flex-grow-1 ms-2">
+                <button type="button" id="btnSubmit" class="btn btn-primary mb-3 disabled btnChangeSection">Submit</button>
+            </div>
+       </div>        
+      </form>
+</section>
+
+{% endblock %}
+{% block scripts %}
+<script>
+
+    // Select all buttons with the class 'btnChangeSection'
+    const buttons = document.querySelectorAll('.btnChangeSection');
+
+    buttons.forEach(button => {
+        button.addEventListener('click', function(event) {
+            event.preventDefault();
+            toggleSpinner(); // Show spinner before transition
+
+            const section1 = document.getElementById('section1');
+            const section2 = document.getElementById('section2');
+
+            // Simulate a delay for the transition (e.g., for animations)
+            setTimeout(() => {
+                // Toggle visibility of sections
+                if (section1.classList.contains('hidden')) {
+                    section1.classList.remove('hidden');
+                    section2.classList.add('hidden');
+                } else {
+                    section1.classList.add('hidden');
+                    section2.classList.remove('hidden');
+                }
+                toggleSpinner(); // Hide spinner after transition
+            }, 500); // Adjust the timeout duration as needed
+        });
+    });
+</script>
+<script>
+  const tableBody = document.getElementById("table-body");
+  const totalExtractionElement = document.getElementById("total-extraction");
+  const extractionInput = document.getElementById("input_extraction");
+  const addButton = document.getElementById("btnAdd");
+  const submitButton = document.getElementById("btnSubmit");
+
+  const rows = []; // To store table rows data
+
+  // Validate input field
+  function validateField(input) {
+      const value = parseFloat(input.value);
+      if (!isNaN(value) && value > 0) {
+          input.classList.remove("is-invalid");
+          input.classList.add("is-valid");
+          return true;
+      } else {
+          input.classList.add("is-invalid");
+          input.classList.remove("is-valid");
+          return false;
+      }
+  }
+
+  // Enable or disable the Add button based on validation
+  function toggleAddButton() {
+      if (validateField(extractionInput)) {
+          addButton.removeAttribute("disabled");
+      } else {
+          addButton.setAttribute("disabled", "disabled");
+      }
+  }
+
+  // Update total extraction
+  function updateTotalExtraction() {
+      const totalExtraction = rows.reduce((sum, row) => sum + parseFloat(row.extraction), 0);
+      totalExtractionElement.textContent = totalExtraction.toFixed(2);
+  }
+
+  // Add row to the table
+  function addRowToTable(row) {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+          <td class="text-center">${row.serial + 1}</td>
+          <td class="text-end">${row.extraction.toFixed(2)}</td>
+          <td class="text-center">
+              <button class="btn text-danger p-0" data-index="${row.serial}">
+                  <i class="fa-regular fa-circle-xmark"></i>
+              </button>
+          </td>
+      `;
+      tableBody.appendChild(tr);
+  }
+
+  // Reset input field
+  function resetInput() {
+      extractionInput.value = "";
+      extractionInput.classList.remove("is-valid", "is-invalid");
+      addButton.setAttribute("disabled", "disabled");
+      extractionInput.focus();
+  }
+
+  // Enable/Disable submit button
+  function toggleSubmitButton() {
+      if (rows.length > 0) {
+          submitButton.classList.remove("disabled");
+      } else {
+          submitButton.classList.add("disabled");
+      }
+  }
+
+  // Handle Add button click
+  addButton.addEventListener("click", () => {
+      const extractionValue = parseFloat(extractionInput.value);
+
+      if (!isNaN(extractionValue) && extractionValue > 0) {
+          const newRow = { serial: rows.length, extraction: extractionValue };
+          rows.push(newRow);
+          addRowToTable(newRow);
+          updateTotalExtraction();
+          resetInput();
+          toggleSubmitButton();
+      }
+  });
+
+  // Handle Delete button click
+  tableBody.addEventListener("click", (e) => {
+      if (e.target.closest(".btn.text-danger")) {
+          const deleteButton = e.target.closest(".btn.text-danger");
+          const index = parseInt(deleteButton.dataset.index, 10);
+
+          // Remove row from data
+          rows.splice(index, 1);
+
+          // Re-render table
+          tableBody.innerHTML = "";
+          rows.forEach((row, idx) => {
+              row.serial = idx; // Update serial numbers
+              addRowToTable(row);
+          });
+
+          updateTotalExtraction();
+          toggleSubmitButton();
+      }
+  });
+
+  // Real-time validation and Add button toggle
+  extractionInput.addEventListener("input", toggleAddButton);
+
+  // Handle Submit button click
+  submitButton.addEventListener("click", (event) => {
+      event.preventDefault();
+      if (!submitButton.classList.contains("disabled")) {
+          toggleSpinner();
+          const url = "{{url_for('desktop.ground')}}";
+          const payload = rows;
+
+          fetch(url, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(payload)
+          })
+              .then(response => {
+                  if (!response.ok) {
+                      throw new Error(`HTTP error! Status: ${response.status}`);
+                  }
+                  return response.json();
+              })
+              .then(data => {
+                  toggleSpinner();
+                  window.location.href = data["redirect_to"];
+              })
+              .catch(error => {
+                  toggleSpinner();
+                  console.error("Error:", error);
+              });
+      }
+  });
+
+</script>
+
+
+{%endblock%}

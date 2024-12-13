@@ -1,4 +1,4 @@
-from iJalagam.app.models import Block, CensusData, CropCensus, GroundwaterExtraction, LivestockCensus, RainfallDatum, StrangeRunoff, WaterbodyCensus
+from iJalagam.app.models import Block, CropCensus, GroundwaterExtraction, LivestockCensus, WaterbodyCensus
 # from app.models.census_data import CensusData
 # from app.models.coefficients import Coefficient
 # from app.models.crop_census import CropCensus

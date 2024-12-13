@@ -1,0 +1,272 @@
+{% extends 'desktop/base.html' %}
+{% block title %}Livestocks{% endblock %}
+{% from 'desktop/components.html' import select, block_button, chart %}
+{% from 'components/user_macros.html' import floating_input, step, select %}
+{% block content %}
+<section id="section1" class="">
+    <h5 class="card-title text-center fw-bold">Livestocks Consumption</h5>
+    <table class="table table-bordered table-sm fs-7 mb-0">
+        <thead class="text-center">
+            <tr>
+                <th>S.No.</th>
+                <th>Livestock</th>
+                <th>Count</th>
+                <th>Consumption</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for livestock in livestocks %}
+            <tr>
+                <td class="text-center">{{loop.index}}</td>
+                <td class="text-start">{{livestock.name}}</td>
+                <td class="text-end">{{livestock.count}}</td>
+                <td class="text-end">{{livestock.consumption}}</td>
+                <td class="text-center"><a href="" class="btnChangeSection" style="text-decoration: none;"><i
+                            class="fa-solid fa-pen-to-square"></i></a></i></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</section>
+<section id="section2" class="hidden">
+    <form class="card-body" id="formId">
+        <h5 class="card-title text-center fw-bold">Livestocks Consumption</h5>
+        {{select(id='livestock_type', label='Select Livestock Type', dd_array=dropdown_data)}}
+        {{floating_input(id='livestock_count', label='Livestock Count')}}
+        <div class="text-center">
+            <button type="button" class="btn btn-outline-dark mb-3" id="btnAdd" disabled>Add</button>
+        </div>
+        <table class="table table-bordered table-sm fs-7">
+            <thead>
+                <tr class="text-center">
+                    <th>S.No.</th>
+                    <th>Type</th>
+                    <th>Count</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody id="table-body">
+            <!--Placeholder for dynamic table-->
+            </tbody>
+            <tfoot>
+                <tr>
+                  <td colspan="2">Total Livestocks</td>
+                  <td id="total-livestock" class="text-end">0</td>
+                  <td></td>
+                </tr>
+              </tfoot>
+        </table>
+        <!-- <input type="hidden" name="formData" value=""> -->
+        <div class="d-flex">
+            <div class="d-grid gap-2">
+                <a type="button" href="" class="btn btn-outline-dark mb-3 btnChangeSection">Cancel</a>
+            </div>
+            <div class="d-grid gap-2 flex-grow-1 ms-2">
+                <button type="button" id="btnSubmit" class="btn btn-primary mb-3 disabled btnChangeSection">Submit</button>
+            </div>
+       </div>        
+      </form>
+</section>
+
+{% endblock %}
+{% block scripts %}
+<script>
+
+    // Select all buttons with the class 'btnChangeSection'
+    const buttons = document.querySelectorAll('.btnChangeSection');
+
+    buttons.forEach(button => {
+        button.addEventListener('click', function(event) {
+            event.preventDefault();
+            toggleSpinner(); // Show spinner before transition
+
+            const section1 = document.getElementById('section1');
+            const section2 = document.getElementById('section2');
+
+            // Simulate a delay for the transition (e.g., for animations)
+            setTimeout(() => {
+                // Toggle visibility of sections
+                if (section1.classList.contains('hidden')) {
+                    section1.classList.remove('hidden');
+                    section2.classList.add('hidden');
+                } else {
+                    section1.classList.add('hidden');
+                    section2.classList.remove('hidden');
+                }
+                toggleSpinner(); // Hide spinner after transition
+            }, 500); // Adjust the timeout duration as needed
+        });
+    });
+</script>
+<script>
+    // Dynamic table creation and deletion
+    const tableBody = document.getElementById("table-body");
+    const totalLivestockElement = document.getElementById("total-livestock");
+    const livestockType = document.getElementById("select_livestock_type");
+    const livestockCount = document.getElementById("input_livestock_count");
+    const addButton = document.getElementById("btnAdd");
+    const submitButtom = document.getElementById("btnSubmit");
+
+    const rows = [];
+
+    livestockType.focus();
+
+    function validateField(input, condition) {
+        if (condition) {
+            input.classList.remove("is-invalid");
+            input.classList.add("is-valid");
+            enableAddButton();
+            return true;
+        } else {
+            input.classList.add("is-invalid");
+            input.classList.remove("is-valid");
+            enableAddButton();
+            return false;
+        }
+        
+        }
+    
+    function enableAddButton(){
+        const livestock = livestockType.selectedIndex;
+        const count = parseInt(livestockCount.value);
+
+        // Input validation
+        if (livestock==="0" || count <= 0 || isNaN(count)) {
+            addButton.setAttribute('disabled','disabled');
+        } else {
+            addButton.removeAttribute('disabled');
+        }
+    }
+    function validateLivestockType() {
+    return validateField(livestockType, livestockType.selectedIndex !== 0);
+    }
+
+    function validatecount() {
+    const count = parseInt(livestockCount.value);
+    return validateField(livestockCount, !isNaN(count) && count > 0);
+    }
+
+
+    function enablesubmitButtom(rows) {
+        if (rows.length > 0){ 
+          submitButtom.classList.remove('disabled');
+        } 
+        else {
+          submitButtom.classList.add('disabled');
+      }
+    }
+
+    function updateTotalcount() {
+      const total = rows.reduce((sum, row) => sum + parseInt(row.count), 0);
+      totalLivestockElement.textContent = total.toFixed(0);
+    }
+
+    function resetInputs() {
+      livestockType.selectedIndex = 0;
+      livestockCount.value = "";
+      livestockType.classList.remove("is-valid", "is-invalid"); 
+      livestockCount.classList.remove("is-valid", "is-invalid"); 
+    }
+
+    function addRowToTable(row) {
+      // const rowIndex = rows.length - 1;
+      // Find if row with the same industry already exists
+      const existingRow = [...tableBody.children].find(
+        (tr) => tr.querySelector("td:nth-child(2)").textContent === row.livestock_type
+      );
+      if (existingRow) {
+        // Update the existing row
+        existingRow.querySelector("td:nth-child(3)").textContent = row.count;
+      } else {
+        const tr = document.createElement("tr");
+
+        tr.innerHTML = `
+          <td class="text-center">${row.serial + 1}</td>
+          <td>${row.livestock_type}</td>
+          <td class="text-end">${row.count}</td>
+          <td class="text-center"><button class="btn text-danger p-0" data-index="${row.serial}"><i class="fa-regular fa-circle-xmark"></i></button></td>
+        `;
+
+        tableBody.appendChild(tr);
+      }
+    }
+
+    addButton.addEventListener("click", () => {
+      const livestockOption = livestockType.options[livestockType.selectedIndex];
+      const livestock_text = livestockOption.text;
+      const livestock_value = livestockOption.value;
+      const count = parseInt(livestockCount.value);
+
+
+      // Prevent duplicates
+      const existing = rows.find((row) => row.livestock_type === livestock_text);
+
+      if (existing) {
+        // Update the existing row in rows array
+        existing.count = count;
+        addRowToTable(existing); // Update row in the table
+      } else {
+        // Add new row
+        const newRow = { serial: rows.length, livestock_type: livestock_text, count:count,livestock_id:livestock_value};
+        rows.push(newRow);
+        addRowToTable(newRow); // Add new row to the table
+      }
+
+      updateTotalcount();
+      resetInputs();
+      enablesubmitButtom(rows);
+    });
+
+    tableBody.addEventListener("click", (e) => {
+      if (e.target.closest(".btn.text-danger")) {
+        const deleteButton = e.target.closest(".btn.text-danger");
+        const index = parseInt(deleteButton.dataset.index, 10);
+
+        // Remove the row from data and DOM
+        rows.splice(index, 1);
+
+        // Re-render the table to update row numbers
+        tableBody.innerHTML = "";
+        rows.forEach((row, idx) => {
+          row.serial = idx; // Update indices
+          addRowToTable(row);
+        });
+
+        updateTotalcount();
+        enablesubmitButtom(rows);
+      }
+    });
+    // *** CHANGE: Event listeners for real-time validation ***
+    livestockType.addEventListener("change", validateLivestockType);
+    livestockCount.addEventListener("input", validatecount);
+    // END Dynamic table creation and deletion
+
+    submitButtom.addEventListener('click', (event)=> {
+      event.preventDefault(); // Prevent the default button behavior
+      toggleSpinner();
+      url = "{{url_for('desktop.livestocks')}}";
+      payload = rows;
+      fetch(url,{
+          method: 'POST',
+          headers: {
+              'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(payload)
+      }).then(response => {
+          if (!response.ok) {
+              throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+      .then(data => {
+          // toggleSpinner();
+          window.location.href=data['redirect_to'];
+      })
+      .catch(error => {
+          toggleSpinner();
+          console.error('Error:', error);
+      });
+    });
+</script>
+{%endblock%}

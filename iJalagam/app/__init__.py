@@ -6,11 +6,13 @@ from flask_login import LoginManager
 
 from iJalagam.app.db import db
 from iJalagam.app.models import State, District, Block, Village
+from iJalagam.app.models import *
 from iJalagam.app.models.users import User
 from iJalagam.app.routes.auth import blp as authBlueprint
 from iJalagam.app.routes.routes import blp as routesBlueprint
-from iJalagam.app.routes.entries import blp as entryBlueprint
+# from iJalagam.app.routes.entries import blp as entryBlueprint
 from iJalagam.app.routes.mobile import blp as mobileBlueprint
+from iJalagam.app.routes.desktop import blp as desktopBlueprint
 
 def create_app():
     app = Flask(__name__)
@@ -26,7 +28,7 @@ def create_app():
     # register db
     db.init_app(app)
     current_directory = os.getcwd()
-    migrations_directory = current_directory + '/iJalagam/migrations'
+    migrations_directory = current_directory + '/migrations'
     migrate = Migrate(app, db, directory=migrations_directory)
 
     login_manager = LoginManager()
@@ -38,7 +40,8 @@ def create_app():
         return User.query.get(int(user_id))
     # register blueprints
     app.register_blueprint(authBlueprint )
-    app.register_blueprint(routesBlueprint)
-    app.register_blueprint(entryBlueprint, url_prefix='/data')
+    # app.register_blueprint(routesBlueprint)
+    # app.register_blueprint(entryBlueprint, url_prefix='/data')
     app.register_blueprint(mobileBlueprint, url_prefix='/m')
+    app.register_blueprint(desktopBlueprint,url_prefix='/d')
     return app

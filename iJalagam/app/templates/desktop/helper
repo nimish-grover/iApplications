@@ -1,0 +1,164 @@
+
+    <div class="row">
+      <div class="col-2"></div>
+      <div class="col">
+        <h5 class="card-title text-center fw-bold">Approved Status</h5>
+      </div>
+      <div class="col-2"></div>
+    </div>
+    <div class="row d-flex mt-2 ">
+        <div class="col justify-self-start">
+            <div class="card shadow rounded-1 bg-danger bg-opacity-25 border-danger mb-1 px-2">
+                <div class="p-3">
+                    <div class="text-center"> 
+                        <div class="mb-2">           
+                            
+                                <i class="fa-solid fa-xl fa-people-roof"></i>
+                    
+                        </div>               
+                        <div class="fs-7 text-danger-emphasis mt-n5 mb-1">Human</div>
+            
+                    </div>            
+                </div>
+            </div>
+        </div>
+        <div class="col justify-self-end">
+            <div class="card shadow rounded-1 bg-success bg-opacity-25 border-success mb-1 px-2">
+                <div class="p-3">
+                    <div class="text-center"> 
+                        <div class="mb-2">           
+                            
+                                <i class="fa-solid fa-xl fa-paw"></i>
+                    
+                        </div>               
+                        <div class="fs-7 text-success-emphasis mt-n5 mb-1">Livestock</div>
+                    </div>            
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row d-flex mt-3 ">
+        <div class="col justify-self-start">
+            <div class="card shadow rounded-1 bg-success bg-opacity-25 border-success mb-1 px-2">
+                <div class="p-3">
+                    <div class="text-center"> 
+                        <div class="mb-2">           
+                            
+                                <i class="fa-solid fa-xl fa-brands fa-pagelines"></i>
+                    
+                        </div>               
+                        <div class="fs-7 text-success-emphasis mt-n5 mb-1">Crops</div>
+            
+                    </div>            
+                </div>
+            </div>
+        </div>
+        <div class="col justify-self-end">
+            <div class="card shadow rounded-1 bg-danger bg-opacity-25 border-danger mb-1 px-2">
+                <div class="p-3">
+                    <div class="text-center"> 
+                        <div class="mb-2">           
+                            
+                                <i class="fa-solid fa-xl fa-industry"></i>
+                    
+                        </div>               
+                        <div class="fs-7 text-danger-emphasis mt-n5 mb-1">Industry</div>
+                    </div>            
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row d-flex mt-3 ">
+        <div class="col justify-self-start">
+            <div class="card shadow rounded-1 bg-danger bg-opacity-25 border-danger mb-1 px-2">
+                <div class="p-3">
+                    <div class="text-center"> 
+                        <div class="mb-2">           
+                            
+                                <i class="fa-solid fa-xl fa-water"></i>
+                    
+                        </div>               
+                        <div class="fs-7 text-danger-emphasis mt-n5 mb-1">Surface</div>
+            
+                    </div>            
+                </div>
+            </div>
+        </div>
+        <div class="col justify-self-end">
+            <div class="card shadow rounded-1 bg-danger bg-opacity-25 border-danger mb-1 px-2">
+                <div class="p-3">
+                    <div class="text-center"> 
+                        <div class="mb-2">           
+                            
+                                <i class="fa-solid fa-xl fa-cloud-rain"></i>
+                    
+                        </div>               
+                        <div class="fs-7 text-danger-emphasis mt-n5 mb-1">Rainfall</div>
+                    </div>            
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row d-flex mt-3 ">
+        <div class="col justify-self-start">
+            <div class="card shadow rounded-1 bg-success bg-opacity-25 border-success mb-1 px-2">
+                <div class="p-3">
+                    <div class="text-center"> 
+                        <div class="mb-2">           
+                            
+                                <i class="fa-solid fa-xl fa-cloud-showers-water"></i>
+                    
+                        </div>               
+                        <div class="fs-7 text-success-emphasis mt-n5 mb-1">Lulc</div>
+            
+                    </div>            
+                </div>
+            </div>
+        </div>
+        <div class="col justify-self-end">
+            <div class="card shadow rounded-1 bg-danger bg-opacity-25 border-danger mb-1 px-2">
+                <div class="p-3">
+                    <div class="text-center"> 
+                        <div class="mb-2">           
+                            
+                                <i class="fa-solid fa-xl fa-arrow-up-from-ground-water"></i>
+                    
+                        </div>               
+                        <div class="fs-7 text-danger-emphasis mt-n5 mb-1">Groundwater</div>
+                    </div>            
+                </div>
+            </div>
+        </div>
+    </div>
+
+   </div>
+
+
+
+   {%macro steps(progress=None)%}
+   <div class="main-container">
+     <div class="steps-container">
+         {%for label,data in progress.items() %}
+         <div class="step {%if data.isApproved %} completed {%endif%}{%if data.current%} in-progress{%endif%}">
+             {%if data.isApproved %}
+             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                 <path d="M20.285 2l-11.285 11.567-5.286-5.011-3.714 3.716 9 8.728 15-15.285z" />
+             </svg>
+             {%endif%}
+             {%if data.current%}
+             <div class="preloader"></div>
+             {%endif%}
+             <div class="label {%if data.isApproved %} completed {%endif%}{%if data.current%} loading {%endif%}">
+                 {{label|title()}}
+             </div>
+             <div class="icon {%if data.isApproved %} completed {%endif%}{%if data.current%} in-progress {%endif%}">
+                 <i class="{{data.icon}}"></i>
+             </div>
+         </div>
+         {%if not loop.last%}
+         <div class="line"></div>
+         {%endif%}
+         {%endfor%}
+     </div>
+ </div>
+ {%endmacro%}

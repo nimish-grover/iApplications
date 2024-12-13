@@ -1,0 +1,200 @@
+
+<style>
+    /* @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap");
+
+:root {
+	--primary-color: #fff;
+	--secondary-color: #f564ff;
+}
+
+*,
+*:after,
+*:before {
+	box-sizing: border-box;
+}
+
+body {
+	font-family: "Inter", sans-serif;
+	background-color: rgba(#e6eef9, 0.5);
+} 
+    .tab-container {
+	position: absolute;
+	left: 0;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+} */
+
+
+</style>
+{% macro toggle_button(labels=[]) %}
+{% if labels %}
+<div class="d-flex aligh-items-center justify-content-center">
+	<div class="tabs">
+        {% for item in labels %}
+		<input type="radio" id="radio-{{loop.index}}"  
+        name="tabs" {% if not loop.index/2 == 1 %} checked {% endif %} />
+		<label class="tab" for="radio-{{loop.index}}">{{item | title}}</label>
+        {% endfor %}
+		<!-- <input type="radio" id="radio-2" name="tabs" />
+		<label class="tab" for="radio-2">Development</label> -->
+		<span class="glider"></span>
+	</div>
+</div>
+{% endif %}
+{% endmacro %}
+
+<style>
+    .square-25{
+        height: 25px;
+        width: 25px;
+    }
+    .square-50{
+        height: 50px;
+        width: 50px;
+    }
+</style>
+<div class="mt-3">
+    <div class="d-flex flex-column align-items-center">
+        <!-- Circle with Icon -->
+        <div class="d-flex justify-content-center align-items-center bg-white square-25 rounded-circle">
+            <i class="fa-solid fa-person"></i>
+        </div>
+        <!-- Text Below the Circle -->
+        <div class="fs-8 fw-bold text-dark-emphasis">
+            15.90
+        </div>
+        <!-- Text Below the Number -->
+        
+        <div class="fs-8 fw-lighter text-body-secondary mt-n5">thousand</div>
+    </div>
+</div>
+<hr>
+
+
+  {% macro checkbox(id='input', label='') %}   
+  <div class="form-check ms-1 my-3">
+    <input class="form-check-input" type="checkbox" value="" id="{{id}}" name="{{id}}"> 
+    <label class="form-check-label text-start fst-italic" for="flexCheckDefault" style="color: #6c757d;">
+       {{label}}
+    </label>
+  </div>
+  {% endmacro %}
+
+  {%macro steps(progress=None)%}
+  <div class="main-container">
+    <div class="steps-container">
+        {%for label,data in progress.items() %}
+        <div class="step {%if data.isApproved %} completed {%endif%}{%if data.current%} in-progress{%endif%}">
+            {%if data.isApproved %}
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                <path d="M20.285 2l-11.285 11.567-5.286-5.011-3.714 3.716 9 8.728 15-15.285z" />
+            </svg>
+            {%endif%}
+            {%if data.current%}
+            <div class="preloader"></div>
+            {%endif%}
+            <div class="label {%if data.isApproved %} completed {%endif%}{%if data.current%} loading {%endif%}">
+                {{label|title()}}
+            </div>
+        </div>
+        {%if not loop.last%}
+        <div class="line"></div>
+        {%endif%}
+        {%endfor%}
+    </div>
+</div>
+{%endmacro%}
+
+
+
+
+{% macro select(id='', dd_array=None, label='') -%}
+<div class="mb-3">
+    <select class="form-select" aria-label="Default select example" id="{{id}}" name="{{id}}" disabled>
+        <option selected disabled>--{{label}}--</option>
+        {% for item in dd_array %}
+            <option value="{{item.id}}">{{item.name}}</option>
+        {% endfor %}
+      </select>
+</div>
+{%- endmacro%}
+{% macro block_button(label='') %}
+<div class="d-grid gap-2">
+    <button type="submit" class="btn btn-primary">{{label}}</button>
+</div>
+{% endmacro %}
+{% macro submit_button() %}
+<div class="d-grid gap-2">
+    <input type="submit" class="btn btn-primary" value="Submit" id="btn_submit">
+</div>
+{% endmacro %}
+
+{#<!-- {% macro select(id='', dd_array=[], label='Select') %}
+<select class="form-select m-2" aria-label="Default select example" id="{{id}}" disabled>
+    <option selected>--{{label}}--</option>
+    {% for item in dd_array %}
+    <option value="{{item['value']}}">{{item['label']}}</option>
+    {% endfor %}
+  </select>
+{% endmacro %} -->#}
+
+<!-- Chart -->
+ {% macro chart() %}
+ <div id="main" style="height: 35vh; width: 80vw;"></div>
+ {% endmacro %}
+<!-- End Chart -->
+
+
+
+<div class="card border-primary text-center mx-2 h-50">
+    <div class="card-header bg-primary p-1">
+    </div>
+    <div class="card-body">
+      <h5 class="card-title">Special title treatment</h5>
+      <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
+    </div>
+    <div class="card-footer bg-primary p-1">
+    </div>
+  </div>
+{% macro bottom_menu(menu_array=[]) %}
+    {% if not 'index' in request.path  %}
+    <nav class="bg-dark">
+        <div class="d-flex justify-content-between aligh-items-center" id="bottom_menu">
+            {% for item in menu_array %} 
+            <a class="d-flex flex-column justify-content-center align-items-center flex-fill p-2 
+            {% if (item.label in request.path) %} bg-white text-dark {% else %} text-white {% endif %} 
+            link-underline link-underline-opacity-0" href="{{item.route}}">
+                <i class="{{item.icon}}"></i>
+                <span class="fs-8">{{item.label | title}}</span>
+            </a>
+            {% endfor %}
+        </div>
+    </nav>
+    <script>
+    // Select all anchor tags within the #bottom_menu div
+    const anchors = document.querySelectorAll('#bottom_menu a');
+    // Add event listeners to each anchor tag
+    anchors.forEach(anchor => {
+        anchor.addEventListener('click', event => {
+            event.preventDefault(); // Prevent the default navigation behavior
+            toggleSpinner();
+            const targetURL = anchor.getAttribute('href'); // Get the href value
+            // Redirect after 1-second delay
+            setTimeout(() => {
+                    window.location.href = targetURL;
+                }, 500);
+        });
+    });
+
+    </script>
+    {% endif %}
+{% endmacro %}
+
+<script>
+    
+
+</script>

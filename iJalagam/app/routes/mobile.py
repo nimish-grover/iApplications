@@ -88,7 +88,7 @@ def index():
             session['payload'] = ''
         session['payload'] = payload
         return json.dumps(url_for('.home'))
-    states = State.get_aspirational_states()
+    states = State.get_aspirational_states() 
     return render_template("mobile/index.html", states=states)
 
 @blp.route("/districts", methods=['POST'])

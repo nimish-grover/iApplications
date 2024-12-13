@@ -1,0 +1,195 @@
+{% extends 'desktop/base.html' %}
+{% block title %} approved {% endblock %}
+{% from 'mobile/components.html' import chart, table_title, floating_input, validate_button, input_hidden %}
+{% block content %}
+{{table_title(title='Edit Livestock Data', subtitle='(in Numbers)')}}
+<section>
+    <div class="overflow-y-scroll" style="height:30vh !important;">    
+        <table class="table table-bordered table-sm fs-7 mb-0">
+            <thead class="text-center">
+                <tr>
+                    <th>S.No.</th>
+                    <th>Livestock</th>
+                    <th>Count</th>
+                    <th>Update</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in livestock %}
+                <tr>
+                    <td class="text-center">
+                        {{loop.index}}
+                        {{input_hidden(name='id', value=row['id'])}}
+                    </td>
+                    <td class="text-start">
+                        {{row['livestock_name'] | title}}
+                    </td>
+                    <td class="text-end">
+                        {{row['count']}}
+                    </td>
+                    <td class="text-center text-body-secondary">
+                        <button class="btn fetch-row-data p-0 fs-7">
+                            <i class="fa-solid fa-pen"></i>
+                        </button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div> 
+    {{validate_button()}}
+</section>
+<section class="visually-hidden">
+    {{floating_input(label='Category', placeholder='', input_id='category', input_type='text', isdisabled='true' )}}
+    {{floating_input(label='Enter Livestock Count', placeholder='Enter Livestock Count', input_id='population', input_type='number', pattern='', error_message='Must be a whole number' )}}
+    <div class="text-end">
+        <button class="btn btn-outline-dark btn-sm me-2" id="btnBack">Back</button>
+        <button class="btn btn-dark btn-sm" id="btnUpdate">Update</button>
+    </div>    
+</section>
+<input type="hidden" name="livestock_data" id="livestockData" value="{{livestock_data}}">
+<input type="hidden" name="post_url" id="postUrl" value="{{url_for('desktop.livestocks')}}">
+{% endblock %}
+{% block scripts %}
+<script>
+
+// Elements
+const sectionTable = document.querySelector("section:first-of-type");
+const sectionInput = document.querySelector("section:last-of-type");
+const btnBack = document.getElementById("btnBack");
+const btnUpdate = document.getElementById("btnUpdate");
+const btnSubmit = document.getElementById("btn_submit");
+const chkDeclare = document.getElementById("chkDeclare");
+const categoryInput = document.getElementById("category");
+const populationInput = document.getElementById("population");
+const postUrl = document.getElementById("postUrl").value;
+
+// Livestock array
+let livestock = JSON.parse(document.getElementById('livestockData').value);
+
+let currentRowId = null; // Tracks the currently edited row
+
+// On page load, set initial visibility and button states
+document.addEventListener("DOMContentLoaded", () => {
+    sectionTable.classList.remove("visually-hidden");
+    sectionInput.classList.add("visually-hidden");
+
+    // Enable/disable the checkbox and submit button based on `is_approved`
+    const isAnyNotApproved = livestock.some(row => !row.is_approved);
+    if (chkDeclare) { chkDeclare.disabled = !isAnyNotApproved; }
+    // btnSubmit.disabled = isAnyNotApproved;
+});
+
+// Event listener for edit buttons
+document.querySelectorAll(".btn.fetch-row-data").forEach(button => {
+    button.addEventListener("click", function (event) {
+        event.preventDefault();
+        toggleSpinner();
+
+        // Get row data using hidden inputs
+        const row = this.closest("tr");
+        const rowId = parseInt(row.querySelector('input[name="id"]').value, 10);
+        const livestockRow = livestock.find(h => h.id === rowId);
+
+        // Populate input fields in the form
+        currentRowId = rowId;
+        categoryInput.value = livestockRow.livestock_name;
+        populationInput.value = livestockRow.count;
+
+        // Switch sections
+        sectionTable.classList.add("visually-hidden");
+        sectionInput.classList.remove("visually-hidden");
+        toggleSpinner();
+    });
+});
+
+// Back button event
+btnBack.addEventListener("click", function (event) {
+    event.preventDefault();
+    toggleSpinner();
+
+    // Reset currentRowId and switch sections
+    currentRowId = null;
+    sectionInput.classList.add("visually-hidden");
+    sectionTable.classList.remove("visually-hidden");
+    toggleSpinner();
+});
+
+// Update button event
+btnUpdate.addEventListener("click", function (event) {
+    event.preventDefault();
+    toggleSpinner();
+
+    if (currentRowId !== null) {
+        // Update the livestock array
+        const updatedCount = parseInt(populationInput.value, 10);
+        const livestockRow = livestock.find(h => h.id === currentRowId);
+
+        // Store the original value if not already stored
+        if (!livestockRow.hasOwnProperty("original_count")) {
+            livestockRow.original_count = livestockRow.count; // Store the initial count value
+        }
+
+        // Update the count in the livestock array
+        livestockRow.count = updatedCount;
+
+        // Update the table row
+        const row = document.querySelector(`tr input[value="${currentRowId}"]`).closest("tr");
+        const cell = row.querySelector(".text-end");
+
+        // Compare the updated count with the original count and apply/remove 'text-danger'
+        if (updatedCount !== livestockRow.original_count) {
+            cell.textContent = updatedCount;
+            cell.classList.add("text-danger");
+        } else {
+            cell.textContent = updatedCount;
+            cell.classList.remove("text-danger");
+        }
+
+        // Reset and switch sections
+        currentRowId = null;
+        sectionInput.classList.add("visually-hidden");
+        sectionTable.classList.remove("visually-hidden");
+    }
+    toggleSpinner();
+});
+
+
+// Checkbox change event
+if (chkDeclare){
+    chkDeclare.addEventListener("change", function () {
+        btnSubmit.disabled = !this.checked;
+    });
+}
+
+// Submit button event
+btnSubmit.addEventListener("click", (event) => {
+    event.preventDefault();
+    toggleSpinner();
+
+    // Post updated livestock array to the server
+    fetch(postUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(livestock)
+    }).then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        return response.json(); // Parse JSON response
+    })
+    .then(data => {
+        if (data.redirect_url) {
+            toggleSpinner();
+            window.location.href = data.redirect_url; // Redirect to the URL provided
+        } else {
+            alert("No redirect URL provided.");
+        }
+    }).catch(error => {
+        toggleSpinner();
+        console.error("Error submitting data:", error);
+        alert("An error occurred while submitting data.");
+    });
+});
+</script>
+{% endblock %}

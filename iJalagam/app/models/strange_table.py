@@ -1,8 +1,9 @@
-from iJalagam.app import db
+from sqlalchemy import func, literal
+from iJalagam.app.db import db
 
 
-class StrangeRunoff(db.Model):
-    __tablename__ = "strange_runoff"
+class StrangeTable(db.Model):
+    __tablename__ = "strange_table"
 
     id=db.Column(db.Integer, primary_key=True)
     rainfall_in_inches=db.Column(db.Integer)
@@ -24,36 +25,35 @@ class StrangeRunoff(db.Model):
             'bad': self.bad_runoff,
             'average': self.average_runoff
         }
-    
+
     @classmethod
-    def get_all(cls):
-        return cls.query.all()
+    def get_runoff_by_rainfall(cls, rainfall_in_mm):
+        # Subquery to calculate the minimum rainfall_in_mm >= 20
+        subquery_min_rainfall = db.session.query(
+            func.min(StrangeTable.rainfall_in_mm)
+        ).filter(
+            StrangeTable.rainfall_in_mm >= rainfall_in_mm
+        ).scalar_subquery()
+
+        # Subquery to fetch runoff_data
+        query = db.session.query(
+                StrangeTable.rainfall_in_mm.label("rainfall_in_mm"),
+                StrangeTable.good_runoff.label("good_runoff"),
+                StrangeTable.average_runoff.label("average_runoff"),
+                StrangeTable.bad_runoff.label("bad_runoff"),
+            ).filter(StrangeTable.rainfall_in_mm == subquery_min_rainfall)
+
+        # Execute the query
+        results = query.all()
+
+        if results:
+            json_data = [{
+                'good': row.good_runoff,
+                'average': row.average_runoff,
+                'bad': row.bad_runoff,
+                'rainfall_in_mm': row.rainfall_in_mm
+            } for row in results]
+            return json_data
+
+        return None        
     
-    @classmethod
-    def get_by_mm(cls, rainfall_mm):
-        return cls.query.filter_by(rainfall_in_mm = rainfall_mm).first()
-    
-    @classmethod
-    def get_by_inches(cls, rainfall_inches):
-        return cls.query.filter_by(rainfall_in_inches = rainfall_inches).first()
-    
-    @classmethod
-    def get_runoff_yield(cls, rainfall):
-        data = cls.query.all()
-        data = list(data)
-        data_reverse = sorted(data, key = lambda x: int(x.rainfall_in_inches), reverse = True)
-        rainfall = float(rainfall)
-        if rainfall > 1524:
-            return {"message": "The data is out of range. Please enter values below 2000 mm"}
-        else:
-            strange = {}
-            for index_ in range(len(data_reverse)):
-                if rainfall > float(data_reverse[index_].rainfall_in_mm):
-                    item = data_reverse[index_ - 1]
-                    strange = StrangeRunoff(rainfall, round(item.good_runoff, 1), round(item.average_runoff,1), round(item.bad_runoff,1))
-                    break
-                elif rainfall <= 25.4:
-                    item = data_reverse[len(data_reverse)-1]
-                    strange = StrangeRunoff(rainfall, round(item.good_runoff,1), round(item.average_runoff,1), round(item.bad_runoff,1))
-                    break
-        return strange.json() 

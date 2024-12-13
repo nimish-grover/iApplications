@@ -1,50 +1,51 @@
+
 from iJalagam.app.db import db
 
 class District(db.Model):
     __tablename__ = 'districts'
 
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), nullable=False)
-    code = db.Column(db.Integer, nullable=False, unique=True)
-    census_code = db.Column(db.Integer)
-    state_id = db.Column(db.ForeignKey('states.id'), nullable=False)
-    local_name = db.Column(db.String(100))
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True, nullable=False)
+    state_lgd_code = db.Column(db.Integer, db.ForeignKey('states.lgd_code'), nullable=False)
+    lgd_code = db.Column(db.Integer, unique=True, nullable=False)
+    district_name = db.Column(db.String(255), nullable=True)
+    census_code = db.Column(db.Integer, nullable=False)
 
-    state = db.relationship('State')
+    # Relationship to State
+    state = db.relationship("State", backref=db.backref("districts", lazy="dynamic"))
 
-    def __init__(self, name, code, census_code, state_id, local_name):
-        self.name = name
-        self.code = code
+    def __init__(self, state_lgd_code, lgd_code, district_name=None, census_code=None):
+        self.state_lgd_code = state_lgd_code
+        self.lgd_code = lgd_code
+        self.district_name = district_name
         self.census_code = census_code
-        self.state_id = state_id
-        self.local_name = local_name
+
+    def __repr__(self):
+        return f"<District(id={self.id}, state_lgd_code={self.state_lgd_code}, lgd_code={self.lgd_code})>"
 
     def json(self):
         return {
-            'id': self.id,
-            'name': self.name,
-            'code': self.code,
-            'census_code': self.census_code,
-            'state_id': self.state_id,
-            'local_name': self.local_name
+            "id": self.id,
+            "state_lgd_code": self.state_lgd_code,
+            "lgd_code": self.lgd_code,
+            "district_name": self.district_name,
+            "census_code": self.census_code
         }
-
-
+        
     @classmethod
-    def get_districts(cls, state_id):
-        results = cls.query.filter_by(state_id = state_id).order_by(cls.name).all()
+    def get_aspirational_districts(cls, state_lgd_code):
+        results = cls.query.filter(cls.lgd_code.in_([745,196,641,72,20,338,563,9,434,398,431,426,405,500,92,115,112,227,583,596,610,721,129,119,132]), 
+                                   cls.state_lgd_code==state_lgd_code).order_by(cls.district_name).all()
         if results:
             json_data = [result.json() for result in results]
             return json_data
         else:
             return None
-    
+        
+        
     @classmethod
-    def get_aspirational_districts(cls, state_id):
-        results = cls.query.filter(cls.code.in_([745,196,641,72,20,338,563,9,434,398,431,426,405,500,92,115,112,227,583,596,610,721,129,119,132]), 
-                                   cls.state_id==state_id).order_by(cls.name).all()
-        if results:
-            json_data = [result.json() for result in results]
-            return json_data
+    def get_lgd_code(cls,district_id):
+        query = db.session.query(cls.lgd_code).filter_by(id=district_id).scalar()
+        if query:
+            return query
         else:
             return None
