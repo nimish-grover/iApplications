@@ -22,8 +22,9 @@ def faq():
     return render_template('faq.html')  # Rendering faq.html template
 
 # Route for the user manual page, accessible only to logged-in users
+
 @blp.route('/user_manual')
-# @login_required
+@login_required
 def user_manual():
     return render_template('user_manual.html')  # Rendering user_manual.html template
 

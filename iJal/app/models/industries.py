@@ -19,4 +19,53 @@ class Industry(db.Model):
     
     @classmethod
     def get_all_industries(cls):
-        return cls.query.all()
+        results = cls.query.all()
+
+        if results:
+            return results
+        else:
+            data = cls.json_data["industries"]
+            for industry_name in data:
+                industry = Industry(industry_sector=industry_name)
+                db.session.add(industry)
+            db.session.commit()
+            return cls.query.all()
+
+    json_data = {
+        "industries": [
+            "Aerospace and Aviation",
+            "Agriculture",
+            "Apparel Made Ups & Home Furnishing",
+            "Automotive",
+            "Beauty & Wellness",
+            "Banking Financial Services and Insurance",
+            "Capital Goods",
+            "Cement",
+            "Construction",
+            "Electronics",
+            "Food Industry",
+            "Furniture & Fittings",
+            "Gem & Jewellery",
+            "Handicrafts and Carpet",
+            "Healthcare",
+            "Hydrocarbon",
+            "Indian Iron and Steel",
+            "Infrastructure Equipment",
+            "Instrumentation Automation",
+            "IT ITeS",
+            "Leather",
+            "Life Sciences",
+            "Logistics",
+            "Media & Entertainment",
+            "Power",
+            "Retailers Association's",
+            "Rubber Chemical & Petrochemical",
+            "Green Industries",
+            "Mining",
+            "Sports Physical Education Fitness & Leisure",
+            "Telecom",
+            "Textile",
+            "Tourism and Hospitality",
+            "Water Management & Plumbing"
+        ]
+    }

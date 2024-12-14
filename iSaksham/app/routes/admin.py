@@ -1,5 +1,5 @@
 from flask import flash, redirect, render_template, request, session, url_for
-from flask_login import current_user, login_required, login_user, logout_user
+from flask_login import current_user, login_required, login_user, logout_user,login_manager
 from flask_smorest import Blueprint
 from passlib.hash import pbkdf2_sha256
 
@@ -23,7 +23,9 @@ def login():
             hash_check = pbkdf2_sha256.verify(password, db_pass)        
             if db_email == email and hash_check:
                 login_user(user, remember=remember)
-                return redirect(url_for('learning.home'))
+                next_page = '/isaksham'+ request.form.get('next')
+                return redirect(next_page) if next_page else redirect(url_for('learning.home'))
+                
             else:
                 flash('Incorrect Credentials.')
                 return redirect(url_for('admin.login'))
@@ -109,6 +111,8 @@ def resend_otp():
     else:
         flash("Email cannot be sent. Please try again later.")
         return redirect(url_for('admin.verify_otp'))
+
+
 
 # Route for logout
 @blp.route('/logout')

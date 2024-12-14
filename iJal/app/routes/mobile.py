@@ -20,6 +20,8 @@ def index():
         if 'payload' in session:
             session['payload'] = ''
         session['payload'] = payload
+        if current_user.is_authenticated:
+            return json.dumps(url_for('desktop.status'))
         return json.dumps(url_for('.home'))
     if current_user.is_authenticated:
         states = State.get_states_by_id(current_user.state_id)

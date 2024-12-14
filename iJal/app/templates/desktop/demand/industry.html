@@ -27,10 +27,10 @@
                         {{row['category'] | title}}
                     </td>
                     <td class="text-end">
-                        0
+                        {{row['industry_count']}}
                     </td>
                     <td class="text-end">
-                        0
+                        {{row['annual_allocation']}}
                     </td>
                     <td class="text-center text-body-secondary">
                         <button class="btn fetch-row-data p-0 fs-7">
@@ -47,7 +47,7 @@
 <section class="visually-hidden">
     {{floating_input(label='Category', placeholder='', input_id='category', input_type='text', isdisabled='true' )}}
     {{floating_input(label='Enter Industry Count', placeholder='Enter Industry Count', input_id='industry_count', input_type='number', pattern='', error_message='Must be a whole number' )}}
-    {{floating_input(label='Annual Water Allocation', placeholder='Annual Water Allocation', input_id='population', input_type='number', pattern='', error_message='Must be a whole number' )}} 
+    {{floating_input(label='Annual Water Allocation', placeholder='Annual Water Allocation', input_id='annual_allocation', input_type='number', pattern='', error_message='Must be a whole number' )}} 
     {{floating_select(option_array=[{'id': 1, 'category': 'Cu M'}, {'id': 1, 'category': 'Ha M'}, {'id': 1, 'category': 'MLD'}], label='Select Unit')}}
     <div class="text-end">
         <button class="btn btn-outline-dark btn-sm me-2" id="btnBack">Back</button>
@@ -68,8 +68,8 @@ const btnUpdate = document.getElementById("btnUpdate");
 const btnSubmit = document.getElementById("btn_submit");
 const chkDeclare = document.getElementById("chkDeclare");
 const categoryInput = document.getElementById("category");
-const populationInput = document.getElementById("population");
-const industryCount = document.getElementById("population");
+const annualAllocationInput = document.getElementById("annual_allocation");
+const industryCountInput = document.getElementById("industry_count");
 const postUrl = document.getElementById("postUrl").value;
 
 // Livestock array
@@ -85,7 +85,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // Enable/disable the checkbox and submit button based on `is_approved`
     const isAnyNotApproved = industry.some(row => !row.is_approved);
     if (chkDeclare) { chkDeclare.disabled = !isAnyNotApproved; }
-    btnSubmit.disabled = isAnyNotApproved;
+    // btnSubmit.disabled = isAnyNotApproved;
 });
 
 // Event listener for edit buttons
@@ -102,8 +102,8 @@ document.querySelectorAll(".btn.fetch-row-data").forEach(button => {
         // Populate input fields in the form
         currentRowId = rowId;
         categoryInput.value = industryRow.category;
-        populationInput.value = 0;
-        industryCount.value = 0;
+        annualAllocationInput.value = 0;
+        industryCountInput.value = 0;
 
         // Switch sections
         sectionTable.classList.add("visually-hidden");
@@ -131,11 +131,16 @@ btnUpdate.addEventListener("click", function (event) {
 
     if (currentRowId !== null) {
         // Update the industry array
-        const updatedCount = parseInt(populationInput.value, 10);
+        const updatedCount = parseInt(annualAllocationInput.value, 10);
         const industryRow = industry.find(h => h.id === currentRowId);
 
         // Store the original value if not already stored
         if (!industryRow.hasOwnProperty("original_count")) {
+            industryRow.original_count = industryRow.count; // Store the initial count value
+        }
+
+        // Store the original value if not already stored
+        if (!industryRow.hasOwnProperty("original_allocation")) {
             industryRow.original_count = industryRow.count; // Store the initial count value
         }
 

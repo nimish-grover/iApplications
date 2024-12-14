@@ -22,10 +22,10 @@
                         {{input_hidden(name='id', value=row['id'])}}
                     </td>
                     <td class="text-start">
-                        {{row['transfer_name'] | title}}
+                        {{row['water_transfer'] | title}}
                     </td>
                     <td class="text-end">
-                        {{row['count']}}
+                        {{row['quantity']}}
                     </td>
                     <td class="text-center text-body-secondary">
                         <button class="btn fetch-row-data p-0 fs-7">
@@ -96,8 +96,8 @@
     
             // Populate input fields in the form
             currentRowId = rowId;
-            categoryInput.value = transferRow.transfer_name;
-            populationInput.value = transferRow.count;
+            categoryInput.value = transferRow.water_transfer;
+            populationInput.value = transferRow.quantity;
     
             // Switch sections
             sectionTable.classList.add("visually-hidden");
@@ -123,16 +123,16 @@
         toggleSpinner();
         if (currentRowId !== null) {
             // Update the transfer array
-            const updatedCount = parseInt(populationInput.value, 10);
+            const updatedCount = parseFloat(populationInput.value, 10);
             const transferRow = transfer.find(h => h.id === currentRowId);
     
             // Store the original value if not already stored
             if (!transferRow.hasOwnProperty("original_count")) {
-                transferRow.original_count = transferRow.count; // Store the initial count value
+                transferRow.original_count = transferRow.quantity; // Store the initial count value
             }
     
             // Update the count in the transfer array
-            transferRow.count = updatedCount;
+            transferRow.quantity = updatedCount;
     
             // Update the table row
             const row = document.querySelector(`tr input[value="${currentRowId}"]`).closest("tr");

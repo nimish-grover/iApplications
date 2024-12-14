@@ -1,5 +1,5 @@
 import os
-from flask import Flask, g, request, send_from_directory  # Importing necessary Flask modules
+from flask import Flask, g, request, send_from_directory,url_for,redirect  # Importing necessary Flask modules
 from iSaksham.app.db import db  # Importing database extension
 from flask_migrate import Migrate  # Importing Flask-Migrate for database migrations
 from iSaksham.app.routes.learning import blp as HomeBlueprint  # Importing blueprint for home routes
@@ -61,11 +61,16 @@ def create_app():
     login_manager = LoginManager()  # Initializing LoginManager
     login_manager.login_view = 'admin.login'  # Setting the login view
     login_manager.init_app(app)  # Initializing LoginManager with the Flask app
-
+    
     # Function to load user for Flask-Login
     @login_manager.user_loader
     def load_user(user_id):
         return User.query.get(int(user_id))
+    
+    @login_manager.unauthorized_handler
+    def unauthorized():
+        print("Unauthorized access to:", request.path)  # Debugging
+        return redirect(url_for('admin.login', next=request.full_path))
 
     # Function to increment visit count before each request
     @app.before_request

@@ -10,6 +10,7 @@ from iJal.app.models.block_surface import BlockWaterbody
 from iJal.app.models.block_territory import BlockTerritory
 from datetime import datetime, timezone
 
+from iJal.app.models.block_transfer import BlockWaterTransfer
 from iJal.app.models.industries import Industry
 from iJal.app.models.lulc_census import LULCCensus
 
@@ -127,6 +128,10 @@ class BlockData:
             block_crops.update_db()
         return True
     
+    @classmethod
+    def get_block_industries():
+        pass
+
     def get_industries():
         industries = Industry.get_all_industries()
         results =[{'id': item.id, 'category':item.industry_sector } for item in industries]
@@ -242,11 +247,10 @@ class BlockData:
                     rainfall.update_db()
         return True
     
-
     @classmethod
     def get_lulc_supply(cls, block_id, district_id, state_id, user_id):
         bt_id = BlockTerritory.get_bt_id(block_id, district_id, state_id)
-        return cls. get_or_insert_lulc(block_id, district_id, bt_id, user_id)
+        return cls.get_or_insert_lulc(block_id, district_id, bt_id, user_id)
 
     def get_or_insert_lulc(block_id, district_id, bt_id, user_id):
         lulc = BlockLULC.get_by_bt_id(bt_id)
@@ -256,13 +260,14 @@ class BlockData:
             lulc_supply = LULCCensus.get_lulc(block_id=block_id, district_id=district_id)
             if lulc_supply:
                 for item in lulc_supply:
-                    block_lulc = BlockLULC(
-                        lulc_id=item['lulc_id'],
-                        area=item['lulc_area'],
-                        bt_id=bt_id,
-                        is_approved=False,
-                        created_by=user_id)
-                    block_lulc.save_to_db()
+                    if item['lulc_area']>0:
+                        block_lulc = BlockLULC(
+                            lulc_id=item['lulc_id'],
+                            area=item['lulc_area'],
+                            bt_id=bt_id,
+                            is_approved=False,
+                            created_by=user_id)
+                        block_lulc.save_to_db()
                 lulc = BlockLULC.get_by_bt_id(bt_id)     
                 return lulc
             
@@ -278,6 +283,39 @@ class BlockData:
                 block_lulc.is_approved = True
                 block_lulc.created_by = user_id
                 block_lulc.update_db()
+        return True
+    
+    @classmethod
+    def get_water_transfer(cls, block_id, district_id, state_id, user_id):
+        bt_id = BlockTerritory.get_bt_id(block_id, district_id, state_id)
+        return cls.get_or_insert_water_transfer(block_id, district_id, bt_id, user_id)
+    
+    def get_or_insert_water_transfer(block_id, district_id, bt_id, user_id):
+        water_transfer = BlockWaterTransfer.get_by_bt_id(bt_id)
+        return water_transfer
+    
+    def update_water_transfer(json_data, user_id):
+        for item in json_data: 
+            id = item['id']
+            type_id = item['type_id']
+            sector_id = item['sector_id']
+            block_water_transfer = BlockWaterTransfer.get_by_id(id)
+            if block_water_transfer:
+                block_water_transfer.type_id = type_id
+                block_water_transfer.sector_id = sector_id
+                block_water_transfer.quantity = item['quantity']
+                block_water_transfer.is_approved = True
+                block_water_transfer.created_by = user_id
+                block_water_transfer.update_db()
+            else:
+                if item['quantity'] > 0:
+                    block_water_transfer = BlockWaterTransfer(
+                        transfer_quantity=item['quantity'],
+                        transfer_type_id=item['type_id'],
+                        transfer_sector_id=item['sector_id'],
+                        bt_id=item['bt_id'])
+
+                    block_water_transfer.save_to_db()
         return True
     
     

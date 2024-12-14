@@ -43,6 +43,8 @@ def upgrade():
     sa.Column('transfer_quantity', sa.Float(), nullable=False),
     sa.Column('transfer_type_id', sa.Integer(), nullable=False),
     sa.Column('transfer_sector_id', sa.Integer(), nullable=False),
+    sa.Column('bt_id', sa.Integer(), nullable=False),
+    sa.ForeignKeyConstraint(['bt_id'], ['block_territory.id'], ),
     sa.ForeignKeyConstraint(['transfer_sector_id'], ['block_transfer_sectors.id'], ),
     sa.ForeignKeyConstraint(['transfer_type_id'], ['block_transfer_types.id'], ),
     sa.PrimaryKeyConstraint('id')

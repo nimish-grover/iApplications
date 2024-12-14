@@ -125,6 +125,7 @@ def industries():
                         #    is_approved=is_approved,
                            breadcrumbs=HelperClass.get_breadcrumbs(payload),
                            menu= HelperClass.get_demand_menu())
+
 @blp.route('/surface', methods=['POST','GET'])
 def surface():
     session_data = session.get('payload')
@@ -163,6 +164,7 @@ def rainfall():
                                             district_id=payload['district_id'], 
                                             state_id=payload['state_id'],
                                             user_id=current_user.id)
+    
     is_approved = all(row['is_approved'] for row in rainfall)
     return render_template('desktop/supply/rainfall.html', 
                             rainfall=rainfall, 
@@ -210,6 +212,7 @@ def ground():
                                             state_id=payload['state_id'],
                                             user_id=current_user.id)
     is_approved = all(row['is_approved'] for row in ground_supply)
+
     return render_template('desktop/supply/ground.html',
                            ground_supply = ground_supply,
                            groundwater_data = json.dumps(ground_supply),
@@ -217,15 +220,22 @@ def ground():
                            breadcrumbs=HelperClass.get_breadcrumbs(payload),
                            menu= HelperClass.get_supply_menu())
 
-@blp.route('/transfer')
+@blp.route('/transfer', methods=["POST",'GET'])
 def transfer():
+    if request.method=='POST':
+        json_data = request.json
+        BlockData.update_water_transfer(json_data, current_user.id)
+        return jsonify({'redirect_url': url_for('.status')})
     session_data = session.get('payload')
     if not session_data:
         return redirect(url_for('mobile.index'))
     else:
         payload = json.loads(session_data)
-    transfer_data = [{'id':1, 'transfer_name':'Inward', 'count':0},
-                     {'id':2, 'transfer_name':'Outward', 'count':0}]
+    transfer_data = BlockData.get_water_transfer(block_id=payload['block_id'], 
+                                            district_id=payload['district_id'], 
+                                            state_id=payload['state_id'],
+                                            user_id=current_user.id)
+    
     return render_template('desktop/transfer.html',
                            water_transfer = transfer_data,
                            transfer_data=json.dumps(transfer_data),

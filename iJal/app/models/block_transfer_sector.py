@@ -18,3 +18,20 @@ class BlockTransferSector(db.Model):
             'sector': self.sector,
             'remarks': self.remarks
         }
+    
+    @classmethod
+    def get_all(cls):
+        results = cls.query.all()
+        if results:
+            return results
+        else:
+            data = cls.json_data["transfer_sectors"]
+            for item in data:
+                block_transfer_type = BlockTransferSector(sector=item)
+                db.session.add(block_transfer_type)
+            db.session.commit()
+            return cls.query.all()
+
+    json_data = {
+        "transfer_sectors":['drinking','irrigation','industry']
+    }
