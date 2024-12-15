@@ -6,6 +6,7 @@ from iJal.app.classes.budget_data import BudgetData
 from iJal.app.classes.helper import HelperClass
 from iJal.app.models import BlockTerritory
 from iJal.app.models.block_pop import BlockPop
+from iJal.app.models.industries import Industry
 
 
 blp = Blueprint('desktop','desktop')
@@ -17,16 +18,11 @@ def status():
         return redirect(url_for('mobile.index'))
     else:
         payload = json.loads(session_data)
+    
+    progress_status = BlockData.get_status(block_id=payload['block_id'], 
+                                            district_id=payload['district_id'], 
+                                            state_id=payload['state_id'])
 
-    progress_status = [{'id':1,'category':'Human','status':True,'url':url_for('.human')},
-                       {'id':2,'category':'Livestock','status':False,'url':url_for('.livestocks')},
-                       {'id':3,'category':'Crops','status':False,'url':url_for('.crops')},
-                       {'id':4,'category':'Industry','status':False,'url':url_for('.industries')},
-                       {'id':5,'category':'Surface','status':True,'url':url_for('.surface')},
-                       {'id':6,'category':'Ground','status':False,'url':url_for('.ground')},
-                       {'id':7,'category':'LULC','status':False,'url':url_for('.lulc')},
-                       {'id':8,'category':'Rainfall','status':True,'url':url_for('.rainfall')},
-                       {'id':9,'category':'Transfer','status':False, 'url':url_for('.transfer')}]
     return render_template('desktop/home.html',
                            progress = progress_status,
                            breadcrumbs=HelperClass.get_breadcrumbs(payload),
@@ -108,21 +104,26 @@ def crops():
 @blp.route('/industries', methods=['POST','GET'])
 @login_required
 def industries():
-    # if request.method=='POST':
-    #     json_data = request.json
-    #     BlockData.update_industries(json_data, current_user.id)
-    #     return jsonify({'redirect_url': url_for('.status')})
+    if request.method=='POST':
+        json_data = request.json
+        session_data = session.get('payload')
+        payload = json.loads(session_data)
+        BlockData.update_industries(json_data, current_user.id,payload)
+        return jsonify({'redirect_url': url_for('.status')})
     session_data = session.get('payload')
     if not session_data:
         return redirect(url_for('mobile.index'))
     else:
         payload = json.loads(session_data)
-    industries = BlockData.get_industries()
-    # is_approved = all(row['is_approved'] for row in industries)
+    industries = BlockData.get_industries_consumption(block_id = payload['block_id'],
+                                                    district_id = payload['district_id'],
+                                                    state_id = payload['state_id'])
+    
+    is_approved = all(row['is_approved'] for row in industries)
     return render_template('desktop/demand/industry.html', 
                            industries=industries, 
                            industry_data=json.dumps(industries), 
-                        #    is_approved=is_approved,
+                           is_approved=is_approved,
                            breadcrumbs=HelperClass.get_breadcrumbs(payload),
                            menu= HelperClass.get_demand_menu())
 
@@ -241,3 +242,5 @@ def transfer():
                            transfer_data=json.dumps(transfer_data),
                            breadcrumbs=HelperClass.get_breadcrumbs(payload),
                            menu= HelperClass.get_main_menu())
+    
+

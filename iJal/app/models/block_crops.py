@@ -45,6 +45,7 @@ class BlockCrop(db.Model):
             cls.id, 
             cls.crop_id, 
             cls.area.label('crop_area'),
+            cls.bt_id,
             cls.is_approved,
             Crop.crop_name
         ).join(Crop, Crop.id==cls.crop_id
@@ -58,6 +59,7 @@ class BlockCrop(db.Model):
                 'crop_id': item.crop_id,
                 'crop_area': item.crop_area,
                 'crop_name': item.crop_name,
+                'bt_id':item.bt_id,
                 'is_approved': item.is_approved
                 } for item in results]
             return json_data        
@@ -74,4 +76,7 @@ class BlockCrop(db.Model):
 
     def update_db(self):
         db.session.commit()
-    
+
+    def delete_from_db(object):
+        db.session.delete(object)
+        db.session.commit()

@@ -36,5 +36,19 @@ class State(db.Model):
             return json_data
         else:
             return None
+        
+    @classmethod
+    def get_all(cls):
+        query = cls.query.order_by(cls.state_name).all()
+        json_data = [{'id':result.id,'value':result.state_name} for result in query]
+        if json_data:
+            return json_data
+        else:
+            return None
+        
+    @classmethod
+    def get_id_by_name(cls,name):
+        query = db.session.query(cls.id).filter_by(state_name=name).scalar()
+        return query
 
 

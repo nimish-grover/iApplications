@@ -28,6 +28,53 @@
 </div>
 {%- endmacro%}
 
+<!-- validation input -->
+ {%macro validation_input(id='',label='',min ='',invalid ='',valid='',type='',disabled='' )%}
+<div class="form-floating my-3 position-relative">
+    <input 
+        class="form-control form-control-sm" 
+        id="{{id}}" 
+        placeholder="{{label}}" 
+        name="{{id}}" 
+        type="{{type}}" 
+        required 
+        min="{{min}}" 
+        step="any"
+        {{disabled}}>
+    <div class="validation-symbol position-absolute end-0 top-50 translate-middle-y pe-3"></div>
+    <div class="invalid-feedback text-start">
+        {{invalid}}
+    </div>
+    <div class="valid-feedback text-start">
+        {{valid}}
+    </div>
+    <label for="{{id}}">{{label}}</label>
+</div>
+{%endmacro%}
+
+{%macro validation_select(id='',label='',dd_array=[],valid='',invalid='')%}
+<div class="form-floating mb-3 position-relative">
+    <select 
+        class="form-select" 
+        id="{{id}}" 
+        aria-label="Floating label select example" 
+        required >
+        <option value="" disabled selected>{{label}}</option>
+        {%for row in dd_array%}
+            <option value="{{row.id}}">{{row.value}}</option>
+        {%endfor%}
+    </select>
+    <div class="validation-symbol position-absolute end-0 top-50 translate-middle-y pe-3"></div>
+    <div class="invalid-feedback text-start">
+        {{invalid}}
+    </div>
+    <div class="valid-feedback text-start">
+        {{valid}}
+    </div>
+    <label for="{{id}}">{{label}}</label>
+</div>
+{%endmacro%}
+
 <!-- Floating Select -->
 {% macro floating_select(option_array,label) %}
 {% if option_array | length > 0 %}         
@@ -86,20 +133,31 @@ aria-valuemin="0" aria-valuemax="100">
 
 <!-- VALIDATE BUTTON (TYPE=Submit) -->
 
-{% macro validate_button() %}
+{% macro validate_button(is_approved='False') %}
 <div class="d-grid gap-2">
-    <input type="submit" class="btn btn-primary" value="Validate" id="btn_submit">
+    <input type="submit" class="btn btn-primary" value="{%if is_approved%}Update{%else%}Validate{%endif%}" id="btn_submit">
 </div>
 {% endmacro %}
 
 <!--SEARCH INPUT GROUP -->
 
-{% macro search_input() %}
+{% macro search_input(placeholder='') %}
 <div class="input-group input-group-sm mb-3">
-    <input type="text" id="searchInput" class="form-control" placeholder="Seach crop name..." aria-label="Recipient's username" aria-describedby="searchInput_2">
+    <input type="text" id="searchInput" class="form-control" placeholder="{{placeholder}}" aria-label="Recipient's username" aria-describedby="searchInput_2">
     <span class="input-group-text" id="searchInput_2"><i class="fa-solid fa-magnifying-glass"></i></span>
   </div>
 {% endmacro %}
+
+{%macro badge(is_approved='False')%}
+<div class="col">
+    <div class="position-relative d-inline-block{%if is_approved%} text-success {%else%} text-dark {%endif%}">
+        <!-- Background Icon -->
+        <i class="fa-solid fa-certificate" style="font-size:1.65em;"></i>
+        <!-- Overlay Icon -->
+        <i class="fa-regular fa-circle-check position-absolute top-50 start-50 translate-middle text-white" style="font-size:0.8em"></i>
+    </div>        
+</div>
+{%endmacro%}
 
 <!-- INPUT HIDDEN (TYPE=HIDDEN) -->
 

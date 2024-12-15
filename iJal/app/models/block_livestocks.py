@@ -47,6 +47,7 @@ class BlockLivestock(db.Model):
             cls.livestock_id, 
             cls.count,
             cls.is_approved,
+            cls.bt_id,
             Livestock.livestock_name,
         ).join(Livestock, Livestock.id==cls.livestock_id
         ).filter(cls.bt_id==bt_id)
@@ -58,6 +59,7 @@ class BlockLivestock(db.Model):
                           'livestock_id':item.livestock_id, 
                           'count': item.count, 
                           'is_approved': item.is_approved,
+                          'bt_id':item.bt_id,
                           'livestock_name':item.livestock_name} for item in results]
             return json_data
         else:
@@ -73,4 +75,8 @@ class BlockLivestock(db.Model):
 
     def save_to_db(self):
         db.session.add(self)
+        db.session.commit()
+
+    def delete_from_db(object):
+        db.session.delete(object)
         db.session.commit()

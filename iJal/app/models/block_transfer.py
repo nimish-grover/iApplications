@@ -1,9 +1,15 @@
 from sqlalchemy import case, func, text
 from iJal.app.db import db
+from zoneinfo import ZoneInfo
+from datetime import datetime
+
 from iJal.app.models.block_transfer_sector import BlockTransferSector
 from iJal.app.models.block_transfer_type import BlockTransferType
 
 class BlockWaterTransfer(db.Model):
+    def get_current_time():
+        return datetime.now(ZoneInfo('Asia/Kolkata'))
+    
     __tablename__ = "block_water_transfers"
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True,)
@@ -11,15 +17,21 @@ class BlockWaterTransfer(db.Model):
     transfer_type_id = db.Column(db.ForeignKey('block_transfer_types.id'), nullable=False)
     transfer_sector_id = db.Column(db.ForeignKey('block_transfer_sectors.id'), nullable=False)
     bt_id = db.Column(db.ForeignKey('block_territory.id'), nullable=False)
+    is_approved = db.Column(db.Boolean, nullable=False, default=False)
+    created_on = db.Column(db.DateTime, default=get_current_time)
+    lulc_id = db.Column(db.ForeignKey('lulc.id'), nullable=False)
+    created_by = db.Column(db.ForeignKey('users.id'), nullable=False)
 
     transfer_type = db.relationship('BlockTransferType', backref = db.backref('block_water_transfers', lazy='dynamic'))
     transfer_sector = db.relationship('BlockTransferSector', backref = db.backref('block_water_transfers', lazy='dynamic'))
 
-    def __init__(self, transfer_quantity, transfer_type_id, transfer_sector_id, bt_id):
+    def __init__(self, transfer_quantity, transfer_type_id, transfer_sector_id,is_approved,created_by, bt_id):
         self.transfer_quantity = transfer_quantity
         self.transfer_type_id = transfer_type_id
         self.transfer_sector_id = transfer_sector_id
         self.bt_id = bt_id
+        self.is_approved = is_approved
+        self.created_by = created_by
 
     def json(self):
         return {
@@ -78,4 +90,9 @@ class BlockWaterTransfer(db.Model):
 
     def save_to_db(self):
         db.session.add(self)
+        db.session.commit()
+        
+    @classmethod
+    def delete_from_db(cls,object):
+        db.session.delete(object)
         db.session.commit()

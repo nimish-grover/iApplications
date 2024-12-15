@@ -85,3 +85,7 @@ class BlockLULC(db.Model):
 
     def update_db(self):
         db.session.commit()
+        
+    def delete_from_db(object):
+        db.session.delete(object)
+        db.session.commit()

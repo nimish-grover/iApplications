@@ -8,8 +8,9 @@ from iJal.app.models.block_pop import BlockPop
 from iJal.app.models.block_rainfall import BlockRainfall
 from iJal.app.models.block_surface import BlockWaterbody
 from iJal.app.models.block_territory import BlockTerritory
+from iJal.app.models.block_industries import BlockIndustry
 from datetime import datetime, timezone
-
+from flask import url_for
 from iJal.app.models.block_transfer import BlockWaterTransfer
 from iJal.app.models.industries import Industry
 from iJal.app.models.lulc_census import LULCCensus
@@ -88,10 +89,21 @@ class BlockData:
             id = item['id']
             count = item['count']
             block_livestock = BlockLivestock.get_by_id(id)
-            block_livestock.count = count
-            block_livestock.is_approved = True
-            block_livestock.created_by = user_id
-            block_livestock.update_db()
+            if block_livestock:
+                if item['count'] == 0:
+                    BlockLivestock.delete_from_db(block_livestock)
+                else:
+                    block_livestock.count = count
+                    block_livestock.is_approved = True
+                    block_livestock.created_by = user_id
+                    block_livestock.update_db()
+            else:
+                block_livestock = BlockLivestock(livestock_id=item['livestock_id'],
+                                                 count=item['count'],
+                                                 bt_id=item['bt_id'],
+                                                 is_approved=True,
+                                                 created_by=user_id)
+                block_livestock.save_to_db()
         return True
 
     @classmethod
@@ -122,20 +134,58 @@ class BlockData:
             id = item['id']
             crop_area = item['crop_area']
             block_crops = BlockCrop.get_by_id(id)
-            block_crops.area = crop_area
-            block_crops.is_approved = True
-            block_crops.created_by = user_id
-            block_crops.update_db()
+            if block_crops:
+                if item['crop_area'] == 0:
+                    BlockCrop.delete_from_db(block_crops)
+                else:
+                    block_crops.area = crop_area
+                    block_crops.is_approved = True
+                    block_crops.created_by = user_id
+                    block_crops.update_db()
+            else:
+                block_crops = BlockCrop(crop_id=item['crop_id'],
+                                        area=item['area'],
+                                        created_by=user_id,
+                                        bt_id=item['bt_id'],
+                                        is_approved=True)
+                block_crops.save_to_db()
         return True
     
     @classmethod
-    def get_block_industries():
-        pass
+    def get_industries_consumption(cls,block_id,district_id,state_id):
+        bt_id = cls.get_bt_id(block_id=block_id,district_id=district_id,state_id=state_id)
+        industries = BlockIndustry.get_by_bt_id(bt_id)
+        return industries
+    
+    @classmethod
+    def update_industries(cls,json_data,user_id,payload):
+        bt_id = cls.get_bt_id(block_id=payload['block_id'],district_id=payload['district_id'],state_id=payload['state_id'])
+        for item in json_data:
+            table_id = item['table_id']
+            if table_id: # insert into db
+                block_industries = BlockIndustry.get_by_id(table_id)
+                if item['allocation'] == 0:
+                    BlockIndustry.delete_from_db(block_industries)
+                else:
+                    block_industries.allocation = item['allocation']
+                    block_industries.unit = item['unit']
+                    block_industries.count = item['count']
+                    block_industries.is_approved = True
+                    block_industries.created_by = user_id
+                    block_industries.update_db()
 
-    def get_industries():
-        industries = Industry.get_all_industries()
-        results =[{'id': item.id, 'category':item.industry_sector } for item in industries]
-        return results 
+            else: # update in db 
+                if item['allocation'] > 0:
+                    block_industries = BlockIndustry(industry_id=item['industry_id'],
+                                                    allocation=item['allocation'],
+                                                    unit=item['unit'],
+                                                    bt_id=bt_id,
+                                                    count=item['count'],
+                                                    is_approved=True,
+                                                    created_by=user_id)
+                    block_industries.save_to_db()
+        return True
+
     
     @classmethod
     def get_surface_supply(cls, block_id, district_id, state_id, user_id):
@@ -168,11 +218,22 @@ class BlockData:
                 id = item['id']
                 block_surface = BlockWaterbody.get_by_id(id)
                 if block_surface: 
+                    if item['count'] == 0:
+                        BlockWaterbody.delete_from_db(block_surface)
                     block_surface.count = item['count']
                     block_surface.storage = item['storage']
                     block_surface.is_approved = True
                     block_surface.created_by = user_id
                     block_surface.update_db()
+                else:
+                    if item['count'] > 0:
+                        block_surface = BlockWaterbody(wb_type_id=item['waterbody_id'],
+                                                        count=item['count'],
+                                                        storage=item['storage'],
+                                                        bt_id=item['bt_id'],
+                                                        is_approved=True,
+                                                        created_by=user_id)
+                        block_surface.save_to_db()
         return True
 
     @classmethod
@@ -276,13 +337,25 @@ class BlockData:
             id = item['id']
             area = item['area']
             lulc_id = item['lulc_id']
-            block_lulc = BlockLULC.get_by_id(id)
+            
             if block_lulc:
-                block_lulc.area = area
-                block_lulc.lulc_id = lulc_id
-                block_lulc.is_approved = True
-                block_lulc.created_by = user_id
-                block_lulc.update_db()
+                block_lulc = BlockLULC.get_by_id(id)
+                if item['area'] == 0:
+                    BlockLULC.delete_from_db(block_lulc)
+                else:
+                    block_lulc.area = area
+                    block_lulc.lulc_id = lulc_id
+                    block_lulc.is_approved = True
+                    block_lulc.created_by = user_id
+                    block_lulc.update_db()
+            else:
+                if item['area'] > 0:
+                    block_lulc = BlockLULC(lulc_id=lulc_id,
+                                            area=area,
+                                            bt_id=item['bt_id'],
+                                            is_approved=True,
+                                            created_by=user_id)
+                    block_lulc.save_to_db()
         return True
     
     @classmethod
@@ -301,12 +374,15 @@ class BlockData:
             sector_id = item['sector_id']
             block_water_transfer = BlockWaterTransfer.get_by_id(id)
             if block_water_transfer:
-                block_water_transfer.type_id = type_id
-                block_water_transfer.sector_id = sector_id
-                block_water_transfer.quantity = item['quantity']
-                block_water_transfer.is_approved = True
-                block_water_transfer.created_by = user_id
-                block_water_transfer.update_db()
+                if item['quantity'] == 0:
+                    BlockWaterTransfer.delete_from_db(block_water_transfer)
+                else:
+                    block_water_transfer.type_id = type_id
+                    block_water_transfer.sector_id = sector_id
+                    block_water_transfer.quantity = item['quantity']
+                    block_water_transfer.is_approved = True
+                    block_water_transfer.created_by = user_id
+                    block_water_transfer.update_db()
             else:
                 if item['quantity'] > 0:
                     block_water_transfer = BlockWaterTransfer(
@@ -316,7 +392,25 @@ class BlockData:
                         bt_id=item['bt_id'])
 
                     block_water_transfer.save_to_db()
+
+                    
         return True
     
-    
-    
+    @classmethod
+    def get_status(cls,block_id,district_id,state_id):
+        bt_id = cls.get_bt_id(block_id,district_id,state_id)
+        status = BlockTerritory.get_status_by_bt_id(bt_id)
+        query_result = status[0]  # Assuming only one result from the query
+        categories = ['Human', 'Crops', 'Livestocks', 'Industry', 'Surface', 'Grondwater', 'LULC', 'Rainfall', 'Water Transfer']
+        category_urls = ['human', 'livestocks', 'crops', 'industries', 'surface', 'ground', 'lulc', 'rainfall', 'transfer']
+
+        progress = [
+            {
+                'id': idx + 1,
+                'category': category,
+                'status': bool(query_result[idx]),
+                'url': url_for(f'desktop.{category_urls[idx]}')
+            }
+            for idx, category in enumerate(categories)
+        ]
+        return progress

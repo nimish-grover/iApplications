@@ -54,6 +54,7 @@ class BlockWaterbody(db.Model):
             cls.storage,
             cls.count,
             cls.is_approved,
+            cls.bt_id,
             WaterbodyType.waterbody_name
         ).join(WaterbodyType, WaterbodyType.id==cls.wb_type_id
         ).filter(cls.bt_id == bt_id)
@@ -65,6 +66,7 @@ class BlockWaterbody(db.Model):
                           'storage':item.storage, 
                           'count':item.count, 
                           'is_approved':item.is_approved,
+                          'bt_id':item.bt_id,
                           'waterbody_name':item.waterbody_name} 
                           for item in results]
             return json_data
@@ -80,4 +82,8 @@ class BlockWaterbody(db.Model):
 
     def save_to_db(self):
         db.session.add(self)
+        db.session.commit()
+
+    def delete_from_db(object):
+        db.session.delete(object)
         db.session.commit()

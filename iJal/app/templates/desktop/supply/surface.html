@@ -1,8 +1,14 @@
 {% extends 'desktop/base.html' %}
 {% block title %}Surface{% endblock %}
-{% from 'mobile/components.html' import table_title, validate_button, input_hidden, floating_input %}
+{% from 'mobile/components.html' import table_title, validate_button, input_hidden, floating_input,validation_input,badge %}
 {% block content %}
-{{table_title(title='Edit Waterbody Data', subtitle='in Ha M')}}
+<div class="row">
+    <div class="col"></div>
+    <div class="col-8 text-center">
+        {{table_title(title='Edit Waterbody Data', subtitle='(in Ha M)')}}
+    </div>
+    {{badge(is_approved=is_approved)}}
+</div>
 <section>
     <div class="overflow-y-scroll" style="height:30vh !important;">    
         <table class="table table-bordered table-sm fs-7 mb-0">
@@ -42,15 +48,15 @@
             </tbody>
         </table>
     </div> 
-    {{validate_button()}}
+    {{validate_button(is_approved=is_approved)}}
 </section>
 <section>
     {{floating_input(label='Waterbody', placeholder='', input_id='wb_name', input_type='text', isdisabled='true' )}}
-    {{floating_input(label='Enter Waterbody Count', placeholder='Enter Waterbody Count', input_id='wb_count', input_type='number', pattern='', error_message='Must be a whole number' )}}
-    {{floating_input(label='Enter Waterbody Storage', placeholder='Enter Waterbody Storage', input_id='wb_storage', input_type='number', pattern='', error_message='Must be a whole number' )}}
+    {{validation_input(label = 'Enter Waterbody Count',id = 'wb_count',type='number',valid = 'Looks Good!',invalid = 'Must be a Number greater than 0',min='0')}}
+    {{validation_input(label = 'Enter Waterbody Storage',id = 'wb_storage',type='number',valid = 'Looks Good!',invalid = 'Must be a Number greater than 0.01',min='0')}}
     <div class="text-end">
         <button class="btn btn-outline-dark btn-sm me-2" id="btnBack">Back</button>
-        <button class="btn btn-dark btn-sm" id="btnUpdate">Update</button>
+        <button class="btn btn-dark btn-sm" id="btnUpdate" disabled>Update</button>
     </div>  
 </section>
 <input type="hidden" name="waterbody_data" id="waterbodyData" value="{{waterbody_data}}">
@@ -118,6 +124,7 @@ btnBack.addEventListener("click", function (event) {
 
     // Reset currentRowId and switch sections
     currentRowId = null;
+    resetValidationState();
     sectionInput.classList.add("visually-hidden");
     sectionTable.classList.remove("visually-hidden");
     toggleSpinner();
@@ -171,6 +178,7 @@ btnUpdate.addEventListener("click", function (event) {
 
         // Reset and switch sections
         currentRowId = null;
+        resetValidationState();
         sectionInput.classList.add("visually-hidden");
         sectionTable.classList.remove("visually-hidden");
     }
@@ -214,5 +222,64 @@ btnSubmit.addEventListener("click", (event) => {
         alert("An error occurred while submitting data.");
     });
 });
+
+
+function resetValidationState() {
+    const inputs = document.querySelectorAll('input, select');
+    inputs.forEach(input => {
+        const validFeedback = input.parentElement.querySelector('.valid-feedback');
+        const invalidFeedback = input.parentElement.querySelector('.invalid-feedback');
+        if (validFeedback) validFeedback.style.display = 'none';
+        if (invalidFeedback) invalidFeedback.style.display = 'none';
+        input.classList.remove('is-valid', 'is-invalid');
+        btnUpdate.disabled = true;
+    });
+}
+
+(() => {
+  'use strict'
+
+  // Fetch all the forms we want to apply custom Bootstrap validation styles to
+  const forms = document.querySelectorAll('.needs-validation')
+
+  // Loop over them and prevent submission
+  Array.from(forms).forEach(form => {
+    form.addEventListener('submit', event => {
+      if (!form.checkValidity()) {
+        event.preventDefault()
+        event.stopPropagation()
+      }
+
+      form.classList.add('was-validated')
+    }, false)
+  });
+
+  // Real-time validation
+  const inputs = document.querySelectorAll('input, select');
+
+// Attach real-time validation to all input/select fields
+inputs.forEach(input => {
+    input.addEventListener('input', () => validateField(input));
+    input.addEventListener('change', () => validateField(input));
+});
+
+function validateField(input) {
+    const validFeedback = input.parentElement.querySelector('.valid-feedback');
+    const invalidFeedback = input.parentElement.querySelector('.invalid-feedback');
+    btnUpdate.disabled = false;
+    if (input.checkValidity()) {
+        validFeedback.style.display = 'block';
+        invalidFeedback.style.display = 'none';
+        input.classList.remove('is-invalid');
+        input.classList.add('is-valid');
+    } else {
+        validFeedback.style.display = 'none';
+        invalidFeedback.style.display = 'block';
+        input.classList.remove('is-valid');
+        input.classList.add('is-invalid');
+    }
+}
+})()
+
 </script>
 {% endblock %}

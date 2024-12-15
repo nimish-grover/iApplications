@@ -29,8 +29,12 @@
             </button>
             <ul class="dropdown-menu dropdown-menu-end">
                 {% if current_user.is_authenticated %}
-                <li><a class="dropdown-item" href="{{url_for('auth.logout')}}">Logout</a></li>
+                    {%if current_user.isAdmin%}
+                        <li><a class="dropdown-item" href="{{url_for('auth.approve')}}">Approvals</a></li>
+                    {%endif%}
                 <li><a class="dropdown-item" href="{{url_for('mobile.home')}}">Budget</a></li>
+                <li><a class="dropdown-item" href="{{url_for('auth.logout')}}">Logout</a></li>
+
                 {% else %}
                 <li><a class="dropdown-item" href="{{url_for('auth.login')}}">Login</a></li>
                 <li><a class="dropdown-item" href="{{url_for('mobile.index')}}">Home</a></li>

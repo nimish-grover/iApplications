@@ -1,7 +1,16 @@
 from zoneinfo import ZoneInfo
-from sqlalchemy import and_, func
+from sqlalchemy import and_, func,case
 from iJal.app.db import db
 from datetime import datetime, timezone
+from iJal.app.models.block_pop import BlockPop
+from iJal.app.models.block_crops import BlockCrop
+from iJal.app.models.block_ground import BlockGround
+from iJal.app.models.block_industries import BlockIndustry
+from iJal.app.models.block_livestocks import BlockLivestock
+from iJal.app.models.block_rainfall import BlockRainfall
+from iJal.app.models.block_lulc import BlockLULC
+from iJal.app.models.block_surface import BlockWaterbody
+from iJal.app.models.block_transfer import BlockWaterTransfer
 
 
 class BlockTerritory(db.Model):
@@ -43,6 +52,43 @@ class BlockTerritory(db.Model):
             return query.json()
         else:
             return None
+    
+    @classmethod
+    def get_status_by_bt_id(cls,bt_id):
+        query = db.session.query(
+            func.coalesce(func.max(case((BlockPop.is_approved == 'True', 1), else_=0)), 0).label('population'),
+            func.coalesce(func.max(case((BlockLivestock.is_approved == 'True', 1), else_=0)), 0).label('livestock'),
+            func.coalesce(func.max(case((BlockCrop.is_approved == 'True', 1), else_=0)), 0).label('crop'),
+            func.coalesce(func.max(case((BlockIndustry.is_approved == 'True', 1), else_=0)), 0).label('industry'),
+            func.coalesce(func.max(case((BlockWaterbody.is_approved == 'True', 1), else_=0)), 0).label('surface'),
+            func.coalesce(func.max(case((BlockGround.is_approved == 'True', 1), else_=0)), 0).label('ground'),
+            func.coalesce(func.max(case((BlockLULC.is_approved == 'True', 1), else_=0)), 0).label('lulc'),
+            func.coalesce(func.max(case((BlockRainfall.is_approved == 'True', 1), else_=0)), 0).label('rainfall'),
+            func.coalesce(func.max(case((BlockWaterTransfer.is_approved == 'True', 1), else_=0)), 0).label('water_transfer')
+        ).select_from(BlockTerritory
+        ).join(
+            BlockPop, BlockPop.bt_id == BlockTerritory.id, isouter=True
+        ).join(
+            BlockCrop, BlockCrop.bt_id == BlockTerritory.id, isouter=True
+        ).join(
+            BlockLivestock, BlockLivestock.bt_id == BlockTerritory.id, isouter=True
+        ).join(
+            BlockIndustry, BlockIndustry.bt_id == BlockTerritory.id, isouter=True
+        ).join(
+            BlockWaterbody, BlockWaterbody.bt_id == BlockTerritory.id, isouter=True
+        ).join(
+            BlockGround, BlockGround.bt_id == BlockTerritory.id, isouter=True
+        ).join(
+            BlockLULC, BlockLULC.bt_id == BlockTerritory.id, isouter=True
+        ).join(
+            BlockWaterTransfer, BlockWaterTransfer.bt_id == BlockTerritory.id, isouter=True
+        ).join(
+            BlockRainfall, BlockRainfall.bt_id == BlockTerritory.id, isouter=True
+        ).filter(
+            BlockTerritory.id == bt_id
+        ).all()
+        
+        return query 
     
     @classmethod
     def get_bt_id(cls, block_id, district_id, state_id):

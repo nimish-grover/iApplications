@@ -1,7 +1,8 @@
-from flask import Blueprint, flash, get_flashed_messages, redirect, render_template, request, session, url_for
+from flask import Blueprint, flash, get_flashed_messages, redirect, render_template, request, session, url_for,json,jsonify
 from flask_login import login_user, logout_user
 from iJal.app.models.territory import TerritoryJoin
 from iJal.app.models.users import User
+from iJal.app.models.states import State
 
 blp = Blueprint("auth","auth")
 
@@ -47,6 +48,21 @@ def login():
             flash('User is not authorized. Please contact State Coordinator')
     message = get_message()
     return render_template('auth/login.html', flash_message = message)
+
+@blp.route('/approve',methods=['POST','GET'])
+def approve():
+    if request.method =='POST':
+        json_data = request.json
+        for item in json_data:
+            if item['table_id']:
+                user_object = User.get_by_id(item['table_id'])
+                user_object.isActive = True if item['isactive'] == 'Approve' else False
+                user_object.state_id = State.get_id_by_name(item['state'])
+                user_object.update_db()
+        return jsonify({'redirect_url': url_for('.approve')})
+    users = User.get_all()
+    states = State.get_all()
+    return render_template('auth/approve.html',users=users,user_data=json.dumps(users),states=states)
 
 @blp.route('/logout')
 def logout():
