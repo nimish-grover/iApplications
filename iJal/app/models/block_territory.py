@@ -1,14 +1,15 @@
 from zoneinfo import ZoneInfo
-from sqlalchemy import and_, func,case
+from sqlalchemy import and_, case, func
 from iJal.app.db import db
 from datetime import datetime, timezone
-from iJal.app.models.block_pop import BlockPop
+
 from iJal.app.models.block_crops import BlockCrop
 from iJal.app.models.block_ground import BlockGround
 from iJal.app.models.block_industries import BlockIndustry
 from iJal.app.models.block_livestocks import BlockLivestock
-from iJal.app.models.block_rainfall import BlockRainfall
 from iJal.app.models.block_lulc import BlockLULC
+from iJal.app.models.block_pop import BlockPop
+from iJal.app.models.block_rainfall import BlockRainfall
 from iJal.app.models.block_surface import BlockWaterbody
 from iJal.app.models.block_transfer import BlockWaterTransfer
 
@@ -32,8 +33,7 @@ class BlockTerritory(db.Model):
         self.district_id = district_id
         self.block_id = block_id
         self.is_approved = is_approved
-
-        
+  
     def json(self):
         return {
             "id":self.id,
@@ -41,9 +41,8 @@ class BlockTerritory(db.Model):
             "district_id":self.district_id,
             "block_id":self.block_id,
             "is_approved":self.is_approved,
-            "created_on":self.created_on
+            "created_on":self.created_on    
         }
-    
     
     @classmethod
     def get_by_block_id(cls,_block_id):
@@ -54,7 +53,38 @@ class BlockTerritory(db.Model):
             return None
     
     @classmethod
-    def get_status_by_bt_id(cls,bt_id):
+    def get_bt_id(cls, block_id, district_id, state_id):
+        return db.session.query(cls.id).filter(
+                cls.block_id == block_id,
+                cls.district_id == district_id,
+                cls.state_id == state_id
+            ).scalar()
+    
+    
+    @classmethod
+    def get_all(cls):
+        query=cls.query.order_by(cls.id.desc())
+        return query
+
+    def save_to_db(self):
+        db.session.add(self)
+        db.session.commit()
+
+    @classmethod
+    def delete_from_db(cls,_id):
+        user = cls.query.filter_by(id=_id).first()
+        db.session.delete(user)
+        db.session.commit()
+
+    def commit_db():
+        db.session.commit()
+
+    @classmethod
+    def update_db(cls,data,_id):
+        user = cls.query.filter_by(id=_id).update(data)
+        db.session.commit()
+    @classmethod
+    def get_status_by_bt_id(cls, bt_id):
         query = db.session.query(
             func.coalesce(func.max(case((BlockPop.is_approved == 'True', 1), else_=0)), 0).label('population'),
             func.coalesce(func.max(case((BlockLivestock.is_approved == 'True', 1), else_=0)), 0).label('livestock'),
@@ -89,30 +119,3 @@ class BlockTerritory(db.Model):
         ).all()
         
         return query 
-    
-    @classmethod
-    def get_bt_id(cls, block_id, district_id, state_id):
-        return cls.query.with_entities(cls.id).filter(block_id==block_id, district_id==district_id, state_id==state_id).scalar()
-    
-    @classmethod
-    def get_all(cls):
-        query=cls.query.order_by(cls.id.desc())
-        return query
-
-    def save_to_db(self):
-        db.session.add(self)
-        db.session.commit()
-
-    @classmethod
-    def delete_from_db(cls,_id):
-        user = cls.query.filter_by(id=_id).first()
-        db.session.delete(user)
-        db.session.commit()
-
-    def commit_db():
-        db.session.commit()
-
-    @classmethod
-    def update_db(cls,data,_id):
-        user = cls.query.filter_by(id=_id).update(data)
-        db.session.commit()

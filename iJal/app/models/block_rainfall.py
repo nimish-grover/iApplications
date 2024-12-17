@@ -1,6 +1,8 @@
 
 from datetime import datetime
 from zoneinfo import ZoneInfo
+
+from sqlalchemy import func
 from iJal.app.db import db
 
 
@@ -52,9 +54,9 @@ class BlockRainfall(db.Model):
         query = db.session.query(
             cls.id, 
             cls.month_year,
-            cls.actual,
-            cls.normal,
-            cls.bt_id,
+            func.coalesce(cls.actual,0).label('actual'),
+            func.coalesce(cls.normal,0).label('normal'),
+            func.coalesce(cls.bt_id,bt_id).label("bt_id"),
             cls.is_approved
         ).filter(
             cls.bt_id == bt_id
@@ -64,13 +66,15 @@ class BlockRainfall(db.Model):
 
         if results:
             json_data = [{
-                'id': row.id,
+                'id': index + 1,
+                'table_id': row.id,
+                'full_month_year': row.month_year,
                 'month_year': row.month_year.strftime('%b-%y'),
                 'actual': row.actual,
                 'normal': row.normal,
                 'bt_id': row.bt_id,
                 'is_approved': row.is_approved
-                } for row in results]
+                } for index,row in enumerate(results)]
             return json_data
 
         return None
@@ -79,10 +83,21 @@ class BlockRainfall(db.Model):
     def get_all(cls):
         query=cls.query.order_by(cls.id.desc())
         return query
+    
+    @classmethod
+    def check_duplicate(cls, month_year, bt_id):
+        return cls.query.filter(cls.month_year==month_year, cls.bt_id==bt_id).first()
 
     def update_db(self):
         db.session.commit()
 
     def save_to_db(self):
-        db.session.add(self)
+        duplicate_item = self.check_duplicate(self.month_year, self.bt_id)
+        if duplicate_item:
+            duplicate_item.actual = self.actual
+            duplicate_item.created_by = self.created_by
+            duplicate_item.is_approved = self.is_approved
+            duplicate_item.created_on = BlockRainfall.get_current_time()
+        else:
+            db.session.add(self)
         db.session.commit()

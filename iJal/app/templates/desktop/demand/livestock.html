@@ -7,7 +7,11 @@
     <div class="col-8 text-center">
         {{table_title(title='Edit Livestock Data', subtitle='(in Numbers)')}}
     </div>
-    {{badge(is_approved=is_approved)}}
+    <div class="col">
+        {% if is_approved %}
+        {{badge()}}
+        {% endif %}
+    </div>
 </div>
 <section>
 
@@ -44,7 +48,9 @@
             </tbody>
         </table>
     </div> 
-    {{validate_button(is_approved=is_approved)}}
+    <div class="mt-3">
+        {{validate_button(is_approved=is_approved)}}
+    </div>
 </section>
 <section class="visually-hidden">
     {{floating_input(label='Category', placeholder='', input_id='category', input_type='text', isdisabled='true' )}}

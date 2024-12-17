@@ -15,7 +15,7 @@ def create_app():
     load_dotenv()
     
     # configuration
-    app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("JAL_DATABASE_URL")
+    app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("JALAGAM_DATABASE_URL")
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
     app.config['SESSION_COOKIE_SAMESITE'] = 'None'  # or 'Lax' or 'Strict'
     app.config['SESSION_COOKIE_SECURE'] = True  # Required if SameSite=None

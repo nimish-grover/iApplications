@@ -33,7 +33,8 @@ from iJal.app.models.block_crops import BlockCrop
 from iJal.app.models.block_industries import BlockIndustry
 from iJal.app.models.block_ground import BlockGround
 from iJal.app.models.block_lulc import BlockLULC
-from iJal.app.models.block_surface import BlockWaterbody
+
+
 from iJal.app.models.block_rainfall import BlockRainfall
 from iJal.app.models.block_transfer_type import BlockTransferType
 from iJal.app.models.block_transfer_sector import BlockTransferSector

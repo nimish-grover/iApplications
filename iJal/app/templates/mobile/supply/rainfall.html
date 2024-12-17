@@ -31,7 +31,7 @@
                 <tr>
                     <td>Total Rainfall</td>
                     <td class="text-end">{{ monthwise_rainfall | map(attribute='normal') | sum | round(0) }}</td>
-                    <td class="text-end">{{ waterbmonthwise_rainfallodies | map(attribute='actual') | sum | round(0) }}</td>
+                    <td class="text-end">{{ monthwise_rainfall | map(attribute='actual') | sum | round(0) }}</td>
                 </tr>
             </tfoot>
           </table>

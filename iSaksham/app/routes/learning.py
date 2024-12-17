@@ -24,7 +24,7 @@ def faq():
 # Route for the user manual page, accessible only to logged-in users
 
 @blp.route('/user_manual')
-@login_required
+# @login_required
 def user_manual():
     return render_template('user_manual.html')  # Rendering user_manual.html template
 
@@ -64,14 +64,14 @@ def course_2018():
     return render_template('course_2018.html',accordion_content = accordion_content,accordion_title= accordion_title)
 
 # Route for the course page, accessible only to logged-in users
-@login_required
+# @login_required
 @blp.route('/course_2024')
 # @login_required
 def course_2024():
     
     return render_template('course_2024.html')  # Rendering course.html template
 
-@login_required
+# @login_required
 @blp.route('/play_chapter/<int:id>')
 def play_chapter(id):
     modules = Modules.get_all()

@@ -1,208 +1,69 @@
 {% extends 'desktop/base.html' %}
 {% block title %} Approve {% endblock %}
-{% from 'mobile/components.html' import chart, table_title, floating_input, validate_button, input_hidden, floating_select, search_input,validation_input,validation_select%}
+{% from 'mobile/components.html' import chart, table_title, floating_input, submit_button, input_hidden, floating_select, search_input,validation_input,validation_select%}
 {% block content %}
 {{table_title(title='Approve Users')}}
-<section>    
-    {{search_input(placeholder='Search User')}}
-    <div class="overflow-y-scroll" style="height:30vh !important;">
-        <table class="table table-bordered table-sm fs-7 mb-0">
-            <thead class="text-center">
-                <tr>
-                    <th>S.No.</th>
-                    <th>Username</th>
-                    <th>State</th>
-                    <th>Status</th>
-                    <th>Update</th>
-                </tr>
-            </thead>
-            <tbody id="tablebody">
-                {% for row in users %}
-                <tr>
-                    <td class="text-center">
-                        {{loop.index}}
-                        {{input_hidden(name='id', value=loop.index)}}
-                    </td>
-                    <td class="text-start text-truncate" style="max-width: 150px;">
-                        {{row['username']}}
-                    </td>
-                    <td class="text-start" id="userState">
-                        {{row['state']}}
-                    </td>
-                    <td class="text-center" id="userStatus">
-                        {%if row['isactive']=='Approve'%}
-                        <span class="text-success"><i class="fa-solid fa-check"></i></span> 
-                        {%else%}
-                        <span class="text-danger"><i class="fa-solid fa-xmark"></i></span>
-                        {%endif%}
-                    </td>
-                    <td class="text-center text-body-secondary">
-                        <button class="btn fetch-row-data p-0 fs-7">
-                            <i class="fa-solid fa-pen"></i>
-                        </button>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div> 
-    <div class="mt-3">
-        {{validate_button(is_approved='True')}}
-    </div>
-</section>
-<section class="visually-hidden">
-    {{validation_input(label = 'Username',id = 'username',type='text',valid = 'Looks Good!',invalid = 'Must be a username',disabled='disabled')}}
-    {{validation_select(label = 'Select State',id = 'state',valid = 'Looks Good!',invalid = 'Please select a valid state.',dd_array=states)}}
-    {{validation_select(label = 'Action',id = 'isactive',valid = 'Looks Good!',invalid = 'Please select a valid action.',dd_array=[{'id': Approve, 'value': 'Approve'},{'id': Disapprove, 'value': 'Disapprove'}])}}
-    <div class="text-end">
-        <button class="btn btn-outline-dark btn-sm me-2" id="btnBack">Back</button>
-        <button class="btn btn-dark btn-sm" id="btnUpdate" disabled>Update</button>
-    </div>    
-</section>
+{{search_input(placeholder='Search User')}}
+<div class="overflow-y-scroll" style="height:30vh !important;">
+    <table class="table table-bordered table-sm fs-7 mb-0">
+        <thead class="text-center">
+            <tr>
+                <th>S.No.</th>
+                <th>Username</th>
+                <th>State</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody id="tablebody">
+            {% for row in users %}
+            <tr>
+                <td class="text-center">
+                    {{loop.index}}
+                    {{input_hidden(name='id', value=row['id'])}}
+                </td>
+                <td class="text-start text-truncate" style="max-width: 150px;">
+                    {{row['username']}}
+                </td>
+                <td class="text-start" id="userState">
+                    {{row['state_name']}}
+                </td>
+                <td class="text-center" id="userStatus">                        
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" data-id="{{ row['id'] }}" 
+                        role="switch" id="userIsActive" {% if row["isActive"] %} checked {% endif %}
+                        onchange="toggleUserStatus(this)">
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div> 
+<div class="mt-3">
+    {{submit_button()}}
+</div>
 <input type="hidden" name="user_data" id="userData" value="{{user_data}}">
-<input type="hidden" name="post_url" id="postUrl" value="{{url_for('auth.approve')}}">
+<input type="hidden" name="postUrl" id="postUrl" value="{{url_for('auth.approve')}}">
 {% endblock %}
 {% block scripts %}
 <script>
+const btnSubmit = document.getElementById('btn_submit');
+let users = JSON.parse(document.getElementById('userData').value);
+const postUrl = document.getElementById('postUrl').value;
 
-// Elements
-const sectionTable = document.querySelector("section:first-of-type");
-const sectionInput = document.querySelector("section:last-of-type");
-const btnBack = document.getElementById("btnBack");
-const btnUpdate = document.getElementById("btnUpdate");
-const btnSubmit = document.getElementById("btn_submit");
-const chkDeclare = document.getElementById("chkDeclare");
-const usernameInput = document.getElementById("username");
-const stateInput = document.getElementById("state");
-const isactiveInput = document.getElementById("isactive");
-const postUrl = document.getElementById("postUrl").value;
+// Function to handle checkbox toggle
+function toggleUserStatus(checkbox) {
+    // Access the row ID using the data-id attribute
+    const userId = parseInt(checkbox.dataset.id, 10); // Convert to integer
+    const isChecked = checkbox.checked;
 
-// Livestock array
-let user = JSON.parse(document.getElementById('userData').value);
-console.log(user);
-let currentRowId = null; // Tracks the currently edited row
-
-// On page load, set initial visibility and button states
-document.addEventListener("DOMContentLoaded", () => {
-    sectionTable.classList.remove("visually-hidden");
-    sectionInput.classList.add("visually-hidden");
-
-    // Enable/disable the checkbox and submit button based on `is_approved`
-    const isAnyNotApproved = user.some(row => !row.is_approved);
-    if (chkDeclare) { chkDeclare.disabled = !isAnyNotApproved; }
-    // btnSubmit.disabled = isAnyNotApproved;
-});
-
-// Event listener for edit buttons
-document.querySelectorAll(".btn.fetch-row-data").forEach(button => {
-    button.addEventListener("click", function (event) {
-        event.preventDefault();
-        toggleSpinner();
-
-        // Get row data using hidden inputs
-        const row = this.closest("tr");
-        const rowId = parseInt(row.querySelector('input[name="id"]').value, 10);
-        const userRow = user.find(h => h.id === rowId);
-        // Populate input fields in the form
-        console.log(userRow);
-        currentRowId = rowId;
-        usernameInput.value = userRow.username;
-        Array.from(stateInput.options).forEach(option => {
-            if (userRow.state !== "" && option.textContent === userRow.state) {
-                option.selected = true;
-            }
-        });
-        Array.from(isactiveInput.options).forEach(option => {
-        if (userRow.isactive !== "" && option.textContent === userRow.isactive) {
-        option.selected = true;
-            }
-        });
-
-
-        // Switch sections
-        sectionTable.classList.add("visually-hidden");
-        sectionInput.classList.remove("visually-hidden");
-        toggleSpinner();
-    });
-});
-
-// Back button event
-btnBack.addEventListener("click", function (event) {
-    event.preventDefault();
-    toggleSpinner();
-
-    // Reset currentRowId and switch sections
-    currentRowId = null;
-    resetValidationState();
-    sectionInput.classList.add("visually-hidden");
-    sectionTable.classList.remove("visually-hidden");
-    toggleSpinner();
-});
-
-// Update button event
-btnUpdate.addEventListener("click", function (event) {
-    event.preventDefault();
-    toggleSpinner();
-
-    if (currentRowId !== null) {
-        // Update the user array
-        
-        const updatedState = stateInput.options[stateInput.selectedIndex].text;
-        const updatedAction = isactiveInput.options[isactiveInput.selectedIndex].text; // get text from dropdown options 
-        const userRow = user.find(h => h.id === currentRowId);
-
-        // Store the original value if not already stored
-        if (!userRow.hasOwnProperty("original_state")) {
-            userRow.original_state = userRow.state; // Store the initial count value
-        }
-        if (!userRow.hasOwnProperty("original_isactive")) {
-            userRow.original_isactive = userRow.isactive; // Store the initial isactive value
-        }
-
-
-        // Update the count in the user array
-        userRow.state = updatedState;
-        userRow.isactive = updatedAction;
-
-        // Update the table row
-        const row = document.querySelector(`tr input[value="${currentRowId}"]`).closest("tr");
-        const isactiveCell = row.querySelector("#userStatus");
-        const stateCell = row.querySelector("#userState");
-
-
-        // Update the icon based on the new value of isactive
-        if (updatedAction === 'Approve') {
-            isactiveCell.innerHTML = '<span class="text-success"><i class="fa-solid fa-check"></i></span>';
-        } else {
-            isactiveCell.innerHTML = '<span class="text-danger"><i class="fa-solid fa-xmark"></i></span>';
-        }
-
-
-        // Compare the updated count with the original count and apply/remove 'text-danger'
-        if (updatedState !== userRow.original_state) {
-            stateCell.textContent = updatedState;
-            stateCell.classList.add("text-danger");
-        } else {
-            stateCell.textContent = updatedState;
-            stateCell.classList.remove("text-danger");
-        }
-
-        // Reset and switch sections
-
-        currentRowId = null;
-        resetValidationState();
-        sectionInput.classList.add("visually-hidden");
-        sectionTable.classList.remove("visually-hidden");
+    // Find the user in the users array and update the isActive property
+    const user = users.find(user => user.id === userId);
+    if (user) {
+        user.isActive = isChecked; // Update isActive
+        // console.log(`User ID: ${userId}, Updated isActive: ${isChecked}`);
+        // console.log("Updated users array:", users);
     }
-    toggleSpinner();
-});
-
-
-// Checkbox change event
-if (chkDeclare){
-    chkDeclare.addEventListener("change", function () {
-        btnSubmit.disabled = !this.checked;
-    });
 }
 
 // Submit button event
@@ -210,14 +71,15 @@ btnSubmit.addEventListener("click", (event) => {
     event.preventDefault();
     toggleSpinner();
 
-    // Post updated livestock array to the server
+    // Post updated crop array to the server
     fetch(postUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(user)
+        body: JSON.stringify(users)
     }).then(response => {
         if (!response.ok) {
             throw new Error(`HTTP error! Status: ${response.status}`);
+            toggleSpinner();
         }
         return response.json(); // Parse JSON response
     })
@@ -229,92 +91,11 @@ btnSubmit.addEventListener("click", (event) => {
             alert("No redirect URL provided.");
         }
     }).catch(error => {
-        toggleSpinner();
         console.error("Error submitting data:", error);
         alert("An error occurred while submitting data.");
+        toggleSpinner();
     });
 });
-
-// Search Input
-document.getElementById("searchInput").addEventListener("input", function () {
-    const filter = this.value.toLowerCase();
-    const rows = document.querySelectorAll("#tablebody tr");
-    rows.forEach(row => {
-        const cropName = row.cells[1].textContent.toLowerCase();
-        if (cropName.includes(filter)) {
-            row.style.display = "";
-        } else {
-            row.style.display = "none";
-        }
-    });
-});
-
-function resetValidationState() {
-    const inputs = document.querySelectorAll('input, select');
-    inputs.forEach(input => {
-        const validFeedback = input.parentElement.querySelector('.valid-feedback');
-        const invalidFeedback = input.parentElement.querySelector('.invalid-feedback');
-        if (validFeedback) validFeedback.style.display = 'none';
-        if (invalidFeedback) invalidFeedback.style.display = 'none';
-        input.classList.remove('is-valid', 'is-invalid');
-        if (input.tagName.toLowerCase() === 'select') {
-            input.selectedIndex = 0; // Reset to the first option
-        }
-        btnUpdate.disabled = true;
-    });
-}
-// Validation
-// Example starter JavaScript for disabling form submissions if there are invalid fields
-(() => {
-  'use strict'
-
-  // Fetch all the forms we want to apply custom Bootstrap validation styles to
-  const forms = document.querySelectorAll('.needs-validation')
-
-  // Loop over them and prevent submission
-  Array.from(forms).forEach(form => {
-    form.addEventListener('submit', event => {
-      if (!form.checkValidity()) {
-        event.preventDefault()
-        event.stopPropagation()
-      }
-
-      form.classList.add('was-validated')
-    }, false)
-  });
-
-  // Real-time validation
-  const inputs = document.querySelectorAll('input, select');
-
-// Attach real-time validation to all input/select fields
-inputs.forEach(input => {
-    if (input.id == 'searchInput') {
-        //do nothing
-    }else{
-        input.addEventListener('input', () => validateField(input));
-        input.addEventListener('change', () => validateField(input));
-    }
-    
-});
-
-function validateField(input) {
-    const validFeedback = input.parentElement.querySelector('.valid-feedback');
-    const invalidFeedback = input.parentElement.querySelector('.invalid-feedback');
-    btnUpdate.disabled = false;
-    if (input.checkValidity()) {
-        validFeedback.style.display = 'block';
-        invalidFeedback.style.display = 'none';
-        input.classList.remove('is-invalid');
-        input.classList.add('is-valid');
-    } else {
-        validFeedback.style.display = 'none';
-        invalidFeedback.style.display = 'block';
-        input.classList.remove('is-valid');
-        input.classList.add('is-invalid');
-    }
-}
-})()
-
 
 </script>
 {% endblock %}

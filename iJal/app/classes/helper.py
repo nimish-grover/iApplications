@@ -22,10 +22,10 @@ class HelperClass():
     
     def get_main_menu():
         return [
-            { "route" : url_for('mobile.index'), "label":"index", "icon":"fa-solid fa-house"},
+            { "route" : url_for('mobile.index'), "label":"home", "icon":"fa-solid fa-house"},
+            { "route" : url_for('desktop.status'), "label":"status", "icon":"fa-solid fa-list-check"},
             { "route" : url_for('desktop.human'), "label":"demand", "icon":"fa-solid fa-chart-line"},
             { "route" : url_for('desktop.surface'), "label":"supply", "icon":"fa-solid fa-glass-water-droplet"},
-            { "route" : url_for('desktop.status'), "label":"status", "icon":"fa-solid fa-list-check"},
             { "route" : url_for('desktop.transfer'), "label":"transfer", "icon":"fa-solid fa-arrow-right-arrow-left"},
         ]
     

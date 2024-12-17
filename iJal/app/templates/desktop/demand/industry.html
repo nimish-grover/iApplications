@@ -5,9 +5,13 @@
 <div class="row">
     <div class="col"></div>
     <div class="col-8 text-center">
-        {{table_title(title='Edit Industry Data', subtitle='(in Numbers)')}}
+        {{table_title(title='Edit Industry Data', subtitle='(in Ha M)')}}
     </div>
-    {{badge(is_approved=is_approved)}}
+    <div class="col">
+        {% if is_approved %}
+            {{badge()}}
+        {% endif %}
+    </div>    
 </div>
 <section>    
 
@@ -31,7 +35,7 @@
                         {{input_hidden(name='id', value=loop.index)}}
                     </td>
                     <td class="text-start">
-                        {{row['industry_name'] | title}}
+                        {{row['industry_sector'] | title}}
                     </td>
                     <td class="text-end" id="industryCount">
                         {{row['count']}}
@@ -55,10 +59,11 @@
 </section>
 <section class="visually-hidden">
     {{validation_input(label = 'Industry Sector',id = 'category',type='text',valid = 'Looks Good!',invalid = 'Must be an Industry Sector',disabled='disabled')}}
-    {{validation_input(label = 'Enter Industry Count',id = 'count',type='number',valid = 'Looks Good!',invalid = 'Must be a Number greater than 0',min='0')}}
-    {{validation_input(label = 'Annual Water Allocation',id = 'allocation',type='number',valid = 'Looks Good!',invalid = 'Must be a Number greater than 0',min='0')}}
-    {{validation_select(label = 'Select unit',id = 'unit',valid = 'Looks Good!',invalid = 'Please select a valid unit.',dd_array=[{'id': 1, 'value': 'Cu M'},{'id': 1, 'value': 'Ha M'},{'id': 1, 'value': 'MLD'}])}}
-
+    {{validation_input(label = 'Enter Industry Count',id = 'count',type='number',valid = 'Looks Good!',invalid = 'Must be a whole number',min='0')}}
+    {{validation_input(label = 'Annual Water Allocation (in Ha M)',id = 'allocation',type='number',valid = 'Looks Good!',invalid = 'Must be a a whole number',min='0')}}
+    <div class="d-none">
+        {{validation_select(label = 'Select unit',id = 'unit',valid = 'Looks Good!',invalid = 'Please select a valid unit.',dd_array=[{'id': 1, 'value': 'Cu M'},{'id': 1, 'value': 'Ha M'},{'id': 1, 'value': 'MLD'}])}}
+    </div>
     <div class="text-end">
         <button class="btn btn-outline-dark btn-sm me-2" id="btnBack">Back</button>
         <button class="btn btn-dark btn-sm" id="btnUpdate" disabled>Update</button>
@@ -112,11 +117,14 @@ document.querySelectorAll(".btn.fetch-row-data").forEach(button => {
         console.log(industryRow);
         // Populate input fields in the form
         currentRowId = rowId;
-        categoryInput.value = industryRow.industry_name;
+        categoryInput.value = industryRow.industry_sector;
         annualAllocationInput.value = industryRow.allocation;
         industryCountInput.value = industryRow.count;
         Array.from(industryUnitInput.options).forEach(option => {
-            if (industryRow.unit !== "" && option.textContent === industryRow.unit) {
+            // if (industryRow.unit !== "" && option.textContent === industryRow.unit) {
+            //     option.selected = true;
+            // }
+            if (option.textContent.toLowerCase() === "ha m") {
                 option.selected = true;
             }
         });
@@ -301,7 +309,9 @@ inputs.forEach(input => {
         //do nothing
     }else{
         input.addEventListener('input', () => validateField(input));
-        input.addEventListener('change', () => validateField(input));
+        if (input.tagName=='SELECT') {
+            input.addEventListener('change', () => validateField(input));
+        }
     }
     
 });
@@ -310,6 +320,7 @@ function validateField(input) {
     const validFeedback = input.parentElement.querySelector('.valid-feedback');
     const invalidFeedback = input.parentElement.querySelector('.invalid-feedback');
     btnUpdate.disabled = false;
+    if (industryUnitInput.selectedIndex==0) btnUpdate.disabled=true;
     if (input.checkValidity()) {
         validFeedback.style.display = 'block';
         invalidFeedback.style.display = 'none';

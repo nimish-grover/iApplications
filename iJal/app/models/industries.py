@@ -69,10 +69,3 @@ class Industry(db.Model):
             "Water Management & Plumbing"
         ]
     }
-    
-    
-    @classmethod
-    def get_industries(cls):
-        industries = cls.get_all_industries()
-        results =[{'id': item.id, 'category':item.industry_sector } for item in industries]
-        return results 

@@ -29,12 +29,11 @@
             </button>
             <ul class="dropdown-menu dropdown-menu-end">
                 {% if current_user.is_authenticated %}
-                    {%if current_user.isAdmin%}
-                        <li><a class="dropdown-item" href="{{url_for('auth.approve')}}">Approvals</a></li>
-                    {%endif%}
-                <li><a class="dropdown-item" href="{{url_for('mobile.home')}}">Budget</a></li>
                 <li><a class="dropdown-item" href="{{url_for('auth.logout')}}">Logout</a></li>
-
+                <li><a class="dropdown-item" href="{{url_for('mobile.home')}}">Budget</a></li>
+                    {% if current_user.isAdmin %}
+                    <li><a class="dropdown-item" href="{{url_for('auth.approve')}}">Approve</a></li>
+                    {% endif %}
                 {% else %}
                 <li><a class="dropdown-item" href="{{url_for('auth.login')}}">Login</a></li>
                 <li><a class="dropdown-item" href="{{url_for('mobile.index')}}">Home</a></li>
@@ -90,7 +89,7 @@
     <div class="fixed-bottom">       
         {{ bottom_menu(menu_array=menu|default([])) }}
     </div>
-    <div class="toast-container position-fixed bottom-0 end-0 p-3">
+    <div class="toast-container position-fixed bottom-0 end-0 p-3 mb-6">
         <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
           <div class="toast-header">
             <span class="me-2"><i class="fa-solid fa-droplet"></i></span>
@@ -108,6 +107,10 @@
     <script src="{{url_for('static', filename='js/popper.min.js')}}"></script> 
     <script src="{{url_for('static', filename='js/bootstrap.min.js')}}"></script>    
     <script>
+        // Tooltip
+        const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
+        const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
+
         // Toggle dropdown
         const dropdownElementList = document.querySelectorAll('.dropdown-toggle')
         const dropdownList = [...dropdownElementList].map(dropdownToggleEl => new bootstrap.Dropdown(dropdownToggleEl))

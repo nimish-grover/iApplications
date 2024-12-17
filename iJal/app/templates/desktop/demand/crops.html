@@ -7,10 +7,13 @@
     <div class="col-8 text-center">
         {{table_title(title='Edit Crops Data', subtitle='(in Ha M)')}}
     </div>
-    {{badge(is_approved=is_approved)}}
+    <div class="col">
+        {% if is_approved %}
+            {{badge()}}
+        {% endif  %}
+    </div>
 </div>
 <section>
-
     {{search_input(placeholder='Search Crops')}}
     <div class="overflow-y-scroll" style="height:30vh !important;">    
         <table class="table table-bordered table-sm fs-7 mb-0">

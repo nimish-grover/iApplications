@@ -7,7 +7,11 @@
     <div class="col-8 text-center">
         {{table_title(title='Edit Water Transfer Data', subtitle='(in Ha M)')}}
     </div>
-    {{badge(is_approved=is_approved)}}
+    <div class="col">
+        {% if is_approved %}
+        {{badge()}}
+        {% endif %}
+    </div>
 </div>
 <section>
     <div class="overflow-y-scroll" style="height:30vh !important;">
@@ -16,7 +20,7 @@
                 <tr>
                     <th>S.No.</th>
                     <th>Water Transfer</th>
-                    <th>Ha M</th>
+                    <th>Qty</th>
                     <th>Update</th>
                 </tr>
             </thead>
@@ -47,7 +51,7 @@
 </section>
 <section class="visually-hidden">
     {{floating_input(label='Category', placeholder='', input_id='category', input_type='text', isdisabled='true' )}}
-    {{validation_input(label = 'Water Transfer Qty',id = 'population',type='number',valid = 'Looks Good!',invalid = 'Must be a Number greater than 0',min='0')}}
+    {{validation_input(label = 'Water Transfer Qty',id = 'population',type='number',valid = 'Looks Good!',invalid = 'Must be a whole number',min='0')}}
     <!--{#{{floating_select(option_array=[{'id': 1, 'category': 'Inward'},{'id': 1, 'category': 'Outward'}], label='Select Transfer Type')}}
     {{floating_input(label='Annual Water Allocation', placeholder='Annual Water Allocation', 
     input_id='population', input_type='number', pattern='', error_message='Must be a whole number' )}}
@@ -95,6 +99,8 @@
         button.addEventListener("click", function (event) {
             event.preventDefault();
             toggleSpinner();
+            // disable update button
+            btnUpdate.disabled = true;
             // Get row data using hidden inputs
             const row = this.closest("tr");
             const rowId = parseInt(row.querySelector('input[name="id"]').value, 10);

@@ -26,7 +26,7 @@
         {% endfor %}
       </select>
 </div>
-{%- endmacro%}
+{%- endmacro %}
 
 <!-- validation input -->
  {%macro validation_input(id='',label='',min ='',invalid ='',valid='',type='',disabled='' )%}
@@ -46,7 +46,7 @@
         {{invalid}}
     </div>
     <div class="valid-feedback text-start">
-        {{valid}}
+        &nbsp;
     </div>
     <label for="{{id}}">{{label}}</label>
 </div>
@@ -69,7 +69,7 @@
         {{invalid}}
     </div>
     <div class="valid-feedback text-start">
-        {{valid}}
+        &nbsp;
     </div>
     <label for="{{id}}">{{label}}</label>
 </div>
@@ -103,7 +103,7 @@ aria-valuemin="0" aria-valuemax="100">
 <div class="mt-auto">
     <a href="{{url_for('auth.login')}}" class="btn btn-warning text-warning-emphasis"
         style="--bs-btn-padding-y: .25rem; --bs-btn-padding-x: .5rem; --bs-btn-font-size: .75rem;">
-        Approve
+        Validate
     </a>
 </div>
 {% endmacro %}
@@ -148,9 +148,9 @@ aria-valuemin="0" aria-valuemax="100">
   </div>
 {% endmacro %}
 
-{%macro badge(is_approved='False')%}
+{%macro badge()%}
 <div class="col">
-    <div class="position-relative d-inline-block{%if is_approved%} text-success {%else%} text-dark {%endif%}">
+    <div class="position-relative d-inline-block text-success" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Validated data">
         <!-- Background Icon -->
         <i class="fa-solid fa-certificate" style="font-size:1.65em;"></i>
         <!-- Overlay Icon -->
@@ -168,7 +168,7 @@ aria-valuemin="0" aria-valuemax="100">
 <!-- CHART -->
 
  {% macro chart() %}
- <div id="main" style="height: 35vh; width: 80vw;"></div>
+ <div id="main" style="height: 35vh; width: 90%;"></div>
  {% endmacro %}
  
 <!-- BOTTOM MENU & SCRIPT -->

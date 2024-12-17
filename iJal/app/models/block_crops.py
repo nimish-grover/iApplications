@@ -1,5 +1,7 @@
 from datetime import datetime
 from zoneinfo import ZoneInfo
+
+from sqlalchemy import desc, func
 from iJal.app.db import db
 from iJal.app.models.crops import Crop
 
@@ -42,26 +44,30 @@ class BlockCrop(db.Model):
     @classmethod
     def get_by_bt_id(cls, bt_id):
         query = db.session.query(
-            cls.id, 
-            cls.crop_id, 
-            cls.area.label('crop_area'),
-            cls.bt_id,
-            cls.is_approved,
+            func.coalesce(cls.id, None).label('table_id'), 
+            Crop.id.label('crop_id'), 
+            func.coalesce(cls.area,0).label('crop_area'),
+            func.coalesce(cls.is_approved, None).label('is_approved'),
+            func.coalesce(cls.bt_id, bt_id).label('bt_id'),
             Crop.crop_name
-        ).join(Crop, Crop.id==cls.crop_id
-        ).filter(cls.bt_id==bt_id)
+        ).outerjoin(
+            cls, 
+            (Crop.id==cls.crop_id) &
+            (cls.bt_id==bt_id)
+        ).order_by(desc(func.coalesce(cls.area,0).label('crop_area')))
 
         results = query.all()
 
         if results:
             json_data = [{
-                'id': item.id,
+                'id': index + 1,
+                'table_id': item.table_id,
+                'bt_id': item.bt_id,
                 'crop_id': item.crop_id,
                 'crop_area': item.crop_area,
                 'crop_name': item.crop_name,
-                'bt_id':item.bt_id,
                 'is_approved': item.is_approved
-                } for item in results]
+                } for index,item in enumerate(results)]
             return json_data        
         else:
             return None
@@ -70,13 +76,27 @@ class BlockCrop(db.Model):
     def get_by_id(cls, id):
         return cls.query.filter(cls.id==id).first()
     
+    @classmethod
+    def check_duplicate(cls, crop_id, bt_id):
+        return cls.query.filter(cls.crop_id==crop_id, cls.bt_id==bt_id).first()
+   
+    
     def save_to_db(self):
-        db.session.add(self)
+        duplicate_item = self.check_duplicate(self.crop_id, self.bt_id)
+        if duplicate_item:
+            duplicate_item.area = self.area
+            duplicate_item.created_by = self.created_by
+            duplicate_item.created_on = BlockCrop.get_current_time()
+            duplicate_item.is_approved = self.is_approved
+            duplicate_item.update_db()
+        else:
+            db.session.add(self)
         db.session.commit()
 
     def update_db(self):
         db.session.commit()
-
-    def delete_from_db(object):
-        db.session.delete(object)
+    
+    def delete_from_db(self):
+        db.session.delete(self)
         db.session.commit()
+    

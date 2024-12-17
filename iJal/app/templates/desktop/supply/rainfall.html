@@ -1,14 +1,20 @@
 {% extends 'desktop/base.html' %}
 {% block title %} Rainfall {% endblock %}
-{% from 'mobile/components.html' import table_title, validate_button, input_hidden, floating_input,validation_input,badge%}
+{% from 'mobile/components.html' import table_title, validate_button, validation_input, input_hidden, floating_input, badge %}
 {% block content %}
 <div class="row">
     <div class="col"></div>
-    <div class="col-8 text-center">
+    <div class="col-8">
         {{table_title(title='Edit Rainfall Data', subtitle='(in mm)')}}
     </div>
-    {{badge(is_approved=is_approved)}}
+    <div class="col">
+        {% if is_approved %}
+            {{badge()}}
+        {% endif %}
+    </div>
 </div>
+
+
 <section>
     <div class="overflow-y-scroll" style="height:30vh !important;">    
         <table class="table table-bordered table-sm fs-7 mb-0">
@@ -53,12 +59,12 @@
 </section>
 <section>
     {{floating_input(label='Month Year', placeholder='', input_id='month_year', input_type='text', isdisabled='true' )}}
-    {{validation_input(label = 'Normal Rainfall',id = 'normal',type='number',valid = 'Looks Good!',invalid = 'Must be a Number greater than 0',min='0')}}
-    {{validation_input(label = 'Actual Rainfall',id = 'actual',type='number',valid = 'Looks Good!',invalid = 'Must be a Number greater than 0',min='0')}}
-
+    {{floating_input(label='Normal Rainfall', placeholder='Normal Rainfall', input_id='normal', input_type='number', pattern='', error_message='Must be a whole number', isdisabled='true' )}}
+    {{validation_input(label = 'Actual Rainfall',id = 'actual',type='number',valid = 'Looks Good!',invalid = 'Must be a whole number',min='0')}}
+    {#{{floating_input(label='Actual Rainfall', placeholder='Actual Rainfall', input_id='actual', input_type='number', pattern='', error_message='Must be a whole number' )}}#}
     <div class="text-end">
         <button class="btn btn-outline-dark btn-sm me-2" id="btnBack">Back</button>
-        <button class="btn btn-dark btn-sm" id="btnUpdate" disabled>Update</button>
+        <button class="btn btn-dark btn-sm" id="btnUpdate">Update</button>
     </div>    
 </section>
 
@@ -127,7 +133,6 @@ btnBack.addEventListener("click", function (event) {
 
     // Reset currentRowId and switch sections
     currentRowId = null;
-    resetValidationState();
     sectionInput.classList.add("visually-hidden");
     sectionTable.classList.remove("visually-hidden");
     toggleSpinner();
@@ -183,7 +188,6 @@ btnUpdate.addEventListener("click", function (event) {
 
         // Reset and switch sections
         currentRowId = null;
-        resetValidationState();
         sectionInput.classList.add("visually-hidden");
         sectionTable.classList.remove("visually-hidden");
     }
@@ -228,17 +232,7 @@ btnSubmit.addEventListener("click", (event) => {
     });
 });
 
-function resetValidationState() {
-    const inputs = document.querySelectorAll('input, select');
-    inputs.forEach(input => {
-        const validFeedback = input.parentElement.querySelector('.valid-feedback');
-        const invalidFeedback = input.parentElement.querySelector('.invalid-feedback');
-        if (validFeedback) validFeedback.style.display = 'none';
-        if (invalidFeedback) invalidFeedback.style.display = 'none';
-        input.classList.remove('is-valid', 'is-invalid');
-        btnUpdate.disabled = true;
-    });
-}
+// validation
 
 (() => {
   'use strict'

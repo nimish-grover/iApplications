@@ -9,12 +9,14 @@ class State(db.Model):
     state_name = db.Column(db.String(255), nullable=True)
     census_code = db.Column(db.Integer, nullable=True)
     is_state = db.Column(db.Boolean, nullable=True, default=True)
+    short_name = db.Column(db.String(10), nullable=True)
 
-    def __init__(self, lgd_code, state_name=None, census_code=None, is_state=None):
+    def __init__(self, lgd_code, state_name=None, census_code=None, is_state=None, short_name=None):
         self.lgd_code = lgd_code
         self.state_name = state_name
         self.census_code = census_code
         self.is_state = is_state
+        self.short_name = short_name
 
     def __repr__(self):
         return f"<State(id={self.id}, lgd_code={self.lgd_code}, state_name={self.state_name})>"
@@ -25,7 +27,8 @@ class State(db.Model):
             "lgd_code": self.lgd_code,
             "state_name": self.state_name,
             "census_code": self.census_code,
-            "is_state": self.is_state
+            "is_state": self.is_state,
+            "short_name": self.short_name
         }
     
     @classmethod
@@ -36,19 +39,5 @@ class State(db.Model):
             return json_data
         else:
             return None
-        
-    @classmethod
-    def get_all(cls):
-        query = cls.query.order_by(cls.state_name).all()
-        json_data = [{'id':result.id,'value':result.state_name} for result in query]
-        if json_data:
-            return json_data
-        else:
-            return None
-        
-    @classmethod
-    def get_id_by_name(cls,name):
-        query = db.session.query(cls.id).filter_by(state_name=name).scalar()
-        return query
 
 

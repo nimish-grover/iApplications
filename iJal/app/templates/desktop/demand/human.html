@@ -6,9 +6,13 @@
 <div class="row">
     <div class="col"></div>
     <div class="col-8 text-center">
-        {{table_title(title='Edit Population', subtitle='(in Numbers)')}}
+        {{table_title(title='Edit Population Data', subtitle='(in Numbers)')}}
     </div>
-    {{badge(is_approved=is_approved)}}
+    <div class="col">
+        {% if is_approved %}
+        {{badge()}}
+        {% endif %}
+    </div>
 </div>
 
 <section>
@@ -192,6 +196,7 @@ btnSubmit.addEventListener("click", (event) => {
     })
     .then(data => {
         if (data.redirect_url) {
+            toggleSpinner();
             window.location.href = data.redirect_url; // Redirect to the URL provided
         } else {
             alert("No redirect URL provided.");
@@ -259,154 +264,5 @@ function validateField(input) {
     }
 }
 })()
-
-
-    // document.addEventListener('DOMContentLoaded', () => {
-    //     // Section references
-    //     const sectionTable = document.querySelector('section:first-of-type'); // Table section
-    //     const sectionForm = document.querySelector('section:last-of-type'); // Form section
-
-    //     // Input and button references
-    //     const fetchButtons = document.querySelectorAll('.fetch-row-data'); // Row update buttons
-    //     const inputCategory = document.getElementById('category'); // Input for category
-    //     const inputPopulation = document.getElementById('population'); // Input for population
-    //     const btnUpdate = document.getElementById('btnUpdate'); // Update button
-    //     const btnBack = document.getElementById('btnBack'); // Back button
-    //     const btnSubmit = document.getElementById('btn_submit'); // Submit button
-    //     const checkboxDeclare = document.getElementById('chkDeclare'); // Checkbox for approval
-    //     let human_data = JSON.parse(document.getElementById('human_data').value)
-
-    //     // Show table section and hide form section by default
-    //     sectionTable.classList.remove('visually-hidden');
-    //     sectionForm.classList.add('visually-hidden');
-
-    //     // Hide checkbox and submit button by default
-    //     // checkboxDeclare.parentElement.classList.add('visually-hidden');
-    //     // btnSubmit.classList.add('visually-hidden');
-
-    //     // Track the original population value and row index
-    //     let originalPopulation = null;
-    //     let selectedRow = null;
-
-    //     // Toggle visibility between table and form sections
-    //     const toggleSections = () => {
-    //         sectionTable.classList.toggle('visually-hidden');
-    //         sectionForm.classList.toggle('visually-hidden');
-    //     };
-
-    //     // Handle fetch-row-data button clicks
-    //     fetchButtons.forEach((button, index) => {
-    //         button.addEventListener('click', () => {
-    //             // Get the row corresponding to the clicked button
-    //             const row = button.closest('tr');
-    //             selectedRow = row; // Store selected row
-
-    //             // Fetch row data
-    //             const category = row.querySelectorAll('td')[1].textContent.trim();
-    //             const population = row.querySelectorAll('td')[2].textContent.trim();
-
-    //             // Update input fields
-    //             inputCategory.value = category;
-    //             inputPopulation.value = population;
-    //             inputCategory.disabled = true;
-    //             inputPopulation.disabled = false;
-
-    //             // Store the original population value
-    //             originalPopulation = population;
-
-    //             // Show the form section
-    //             toggleSections();
-    //         });
-    //     });
-
-    //     // Handle Back button click
-    //     btnBack.addEventListener('click', () => {
-    //         // Reset input fields
-    //         inputCategory.value = '';
-    //         inputPopulation.value = '';
-    //         originalPopulation = null;
-
-    //         // Show the table section
-    //         toggleSections();
-    //     });
-
-    //     // Handle Update button click
-    //     btnUpdate.addEventListener('click', () => {
-    //         const updatedPopulation = inputPopulation.value.trim();
-
-    //         // Validate population input
-    //         if (!updatedPopulation || isNaN(updatedPopulation) || updatedPopulation <= 0) {
-    //             alert('Please enter a valid whole number for population.');
-    //             return;
-    //         }
-
-    //         // Update the table row with the new population value
-    //         const populationCell = selectedRow.querySelectorAll('td')[2];
-    //         if (originalPopulation !== updatedPopulation) {
-    //             populationCell.textContent = updatedPopulation;
-    //             populationCell.classList.add('text-danger'); // Highlight updated value
-
-    //             // Show checkbox and submit button
-    //             checkboxDeclare.parentElement.classList.remove('visually-hidden');
-    //             btnSubmit.classList.remove('visually-hidden');
-    //             // btnSubmit.disabled = true; // Keep submit disabled until checkbox is checked
-    //         }
-
-    //         // Reset the form and toggle back to the table section
-    //         toggleSections();
-    //     });
-
-    //     // Enable/disable Submit button based on checkbox state
-    //     checkboxDeclare.addEventListener('change', () => {
-    //         btnSubmit.disabled = !checkboxDeclare.checked;
-    //     });
-
-    //     // Handle Submit button click
-    //     btnSubmit.addEventListener('click', () => {
-    //         // Gather all rows and their data
-    //         const rows = document.querySelectorAll('tbody tr');
-    //         const updatedRows = Array.from(rows).map(row => {
-    //             const cells = row.querySelectorAll('td');
-    //             return {
-    //                 sNo: cells[0].textContent.trim(),
-    //                 category: cells[1].textContent.trim(),
-    //                 population: cells[2].textContent.trim(),
-    //             };
-    //         });
-
-    //         // Post data to backend
-    //         fetch('/update-population', {
-    //             method: 'POST',
-    //             headers: {
-    //                 'Content-Type': 'application/json',
-    //             },
-    //             body: JSON.stringify({ updatedRows }),
-    //         })
-    //             .then(response => {
-    //                 if (response.ok) {
-    //                     alert('Data successfully updated!');
-    //                 } else {
-    //                     alert('Failed to update data.');
-    //                 }
-    //             })
-    //             .catch(error => {
-    //                 console.error('Error:', error);
-    //                 alert('An error occurred while updating data.');
-    //             });
-
-    //         // Reset checkbox and submit button
-    //         checkboxDeclare.checked = false;
-    //         btnSubmit.disabled = true;
-    //         checkboxDeclare.parentElement.classList.add('visually-hidden');
-    //         btnSubmit.classList.add('visually-hidden');
-    //     });
-
-    //     // Input validation: Allow only whole numbers in the population input
-    //     inputPopulation.addEventListener('input', (e) => {
-    //         e.target.value = e.target.value.replace(/[^0-9]/g, ''); // Remove non-numeric characters
-    //     });
-    // });
-
-
 </script>
 {% endblock %}

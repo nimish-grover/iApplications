@@ -1,5 +1,7 @@
 from datetime import datetime
 from zoneinfo import ZoneInfo
+
+from sqlalchemy import func
 from iJal.app.db import db
 from iJal.app.models.livestocks import Livestock
 
@@ -43,24 +45,30 @@ class BlockLivestock(db.Model):
     @classmethod
     def get_by_bt_id(cls, bt_id):
         query = db.session.query(
-            cls.id, 
-            cls.livestock_id, 
-            cls.count,
+            cls.id.label('table_id'), 
+            func.coalesce(cls.bt_id,bt_id).label('bt_id'),
+            Livestock.id.label('livestock_id'), 
+            func.coalesce(cls.count,0).label('count'),
             cls.is_approved,
-            cls.bt_id,
             Livestock.livestock_name,
-        ).join(Livestock, Livestock.id==cls.livestock_id
-        ).filter(cls.bt_id==bt_id)
+        ).outerjoin(
+            cls, 
+            (Livestock.id == cls.livestock_id) & 
+            (cls.bt_id==bt_id)
+        ).order_by(Livestock.id)
 
         results = query.all()
 
         if results:
-            json_data = [{'id': item.id, 
-                          'livestock_id':item.livestock_id, 
-                          'count': item.count, 
-                          'is_approved': item.is_approved,
-                          'bt_id':item.bt_id,
-                          'livestock_name':item.livestock_name} for item in results]
+            json_data = [{
+                'id':index + 1,
+                'table_id': item.table_id, 
+                'bt_id': item.bt_id,
+                'livestock_id':item.livestock_id, 
+                'count': item.count, 
+                'is_approved': item.is_approved,
+                'livestock_name':item.livestock_name} 
+                for index,item in enumerate(results)]
             return json_data
         else:
             return None
@@ -68,15 +76,27 @@ class BlockLivestock(db.Model):
     @classmethod
     def get_by_id(cls, id):
         return cls.query.filter(cls.id==id).first()
+    
+    @classmethod
+    def check_duplicate(cls, livestock_id, bt_id):
+        return cls.query.filter(cls.livestock_id==livestock_id, cls.bt_id==bt_id).first()
 
     def update_db(self):
         # db.session.add(self)
         db.session.commit()
 
     def save_to_db(self):
-        db.session.add(self)
+        duplicate_item = self.check_duplicate(livestock_id=self.livestock_id, bt_id=self.bt_id)
+        if duplicate_item:
+            duplicate_item.count = self.count
+            duplicate_item.created_on = BlockLivestock.get_current_time()
+            duplicate_item.created_by = self.created_by
+            duplicate_item.is_approved = self.is_approved
+            duplicate_item.update_db()
+        else:
+            db.session.add(self)
         db.session.commit()
 
-    def delete_from_db(object):
-        db.session.delete(object)
+    def delete_from_db(self):
+        db.session.delete(self)
         db.session.commit()

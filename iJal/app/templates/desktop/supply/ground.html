@@ -1,13 +1,16 @@
 {% extends 'desktop/base.html' %}
 {% block title %}Ground{% endblock %}
-{% from 'mobile/components.html' import table_title, validate_button, floating_input, input_hidden,validation_input,badge %}
+{% from 'mobile/components.html' import table_title, validate_button, floating_input, input_hidden, badge, validation_input %}
 {% block content %}
 <div class="row">
     <div class="col"></div>
-    <div class="col-8 text-center">
-        {{table_title(title='Edit Groundwater Data', subtitle='(in Ha M)')}}
+    <div class="col-8">
+        {{table_title(title='Edit Groundwater Data', subtitle='(in Ha M)')}}</div>
+    <div class="col">
+        {% if is_approved %}
+        {{badge()}}
+        {% endif %}
     </div>
-    {{badge(is_approved=is_approved)}}
 </div>
 <section>
     <div class="overflow-y-scroll" style="height:30vh !important;">    
@@ -16,7 +19,7 @@
                 <tr>
                     <th>S.No.</th>
                     <th>Description</th>
-                    <th>Quantity</th>
+                    <th>Qty</th>
                     <th>Update</th>
                 </tr>
             </thead>
@@ -45,11 +48,10 @@
 </section>
 <section class="visually-hidden">
     {{floating_input(label='Category', placeholder='', input_id='category', input_type='text', isdisabled='true' )}}
-    {{validation_input(label = 'Groundwater Value',id = 'population',type='number',valid = 'Looks Good!',invalid = 'Must be a Number greater than 0',min='0')}}
-
+    {{validation_input(label = 'Enter Groundwater Extraction', id = 'population',type='number',valid = 'Looks Good!',invalid = 'Must be a whole number',min='0')}}
     <div class="text-end">
         <button class="btn btn-outline-dark btn-sm me-2" id="btnBack">Back</button>
-        <button class="btn btn-dark btn-sm" id="btnUpdate" disabled>Update</button>
+        <button class="btn btn-dark btn-sm" id="btnUpdate">Update</button>
     </div>    
 </section>
 <input type="hidden" name="livestock_data" id="groundwaterData" value="{{groundwater_data}}">
@@ -115,7 +117,6 @@ btnBack.addEventListener("click", function (event) {
 
     // Reset currentRowId and switch sections
     currentRowId = null;
-    resetValidationState();
     sectionInput.classList.add("visually-hidden");
     sectionTable.classList.remove("visually-hidden");
     toggleSpinner();
@@ -154,7 +155,6 @@ btnUpdate.addEventListener("click", function (event) {
 
         // Reset and switch sections
         currentRowId = null;
-        resetValidationState();
         sectionInput.classList.add("visually-hidden");
         sectionTable.classList.remove("visually-hidden");
     }
@@ -198,19 +198,7 @@ btnSubmit.addEventListener("click", (event) => {
         alert("An error occurred while submitting data.");
     });
 });
-
-function resetValidationState() {
-    const inputs = document.querySelectorAll('input, select');
-    inputs.forEach(input => {
-        const validFeedback = input.parentElement.querySelector('.valid-feedback');
-        const invalidFeedback = input.parentElement.querySelector('.invalid-feedback');
-        if (validFeedback) validFeedback.style.display = 'none';
-        if (invalidFeedback) invalidFeedback.style.display = 'none';
-        input.classList.remove('is-valid', 'is-invalid');
-        btnUpdate.disabled = true;
-    });
-}
-
+// Validation
 (() => {
   'use strict'
 

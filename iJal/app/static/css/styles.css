@@ -7,27 +7,3 @@
 .fs-8{
     font-size: 0.7rem;
 }
-.icon-stack {
-    position: relative;
-    display: inline-block;
-    width: 1em; /* Adjust based on icon size */
-    height: 1em;
-}
-
-.icon-stack .fa-certificate {
-    position: absolute;
-    top: 0;
-    left: 0;
-    z-index: 1; /* Background icon */
-    font-size: 2em; /* Adjust size if needed */
-}
-
-.icon-stack .overlay-icon {
-    position: absolute;
-    top: 50%; /* Center the overlay icon vertically */
-    left: 50%; /* Center the overlay icon horizontally */
-    transform: translate(-50%, -50%); /* Adjust centering */
-    z-index: 2; /* Foreground icon */
-    font-size: 1.5em; /* Adjust size relative to the background icon */
-    /* color: green; Set color of the overlay icon */
-}

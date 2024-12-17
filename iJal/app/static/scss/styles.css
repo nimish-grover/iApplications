@@ -11990,17 +11990,17 @@ textarea.form-control-lg {
 }
 
 .h-80 {
-  height: 80%;
+  height: 70vh;
   max-height: 75vh;
 }
 
 .h-70 {
-  height: 70%;
+  height: 60vh;
   max-height: 70%;
 }
 
 .h-60 {
-  height: 60%;
+  height: 50vh;
   max-height: 60%;
 }
 

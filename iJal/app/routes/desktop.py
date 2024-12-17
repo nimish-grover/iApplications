@@ -1,4 +1,4 @@
-from flask import Blueprint, json, jsonify, redirect, render_template, request, session, url_for
+from flask import Blueprint, flash, get_flashed_messages, json, jsonify, redirect, render_template, request, session, url_for
 from flask_login import current_user, login_required
 
 from iJal.app.classes.block_data import BlockData
@@ -6,7 +6,6 @@ from iJal.app.classes.budget_data import BudgetData
 from iJal.app.classes.helper import HelperClass
 from iJal.app.models import BlockTerritory
 from iJal.app.models.block_pop import BlockPop
-from iJal.app.models.industries import Industry
 
 
 blp = Blueprint('desktop','desktop')
@@ -18,13 +17,12 @@ def status():
         return redirect(url_for('mobile.index'))
     else:
         payload = json.loads(session_data)
-    
-    progress_status = BlockData.get_status(block_id=payload['block_id'], 
+    progress_status = BlockData.get_progress_status(block_id=payload['block_id'], 
                                             district_id=payload['district_id'], 
                                             state_id=payload['state_id'])
-
     return render_template('desktop/home.html',
                            progress = progress_status,
+                           flash_message = get_message(),
                            breadcrumbs=HelperClass.get_breadcrumbs(payload),
                            menu= HelperClass.get_main_menu())
 
@@ -35,6 +33,7 @@ def human():
     if request.method=='POST':
         json_data = request.json
         BlockData.update_human(json_data, current_user.id)
+        flash('Population Data is Validated/Updated')
         return jsonify({'redirect_url': url_for('.status')})
     session_data = session.get('payload')
     if not session_data:
@@ -45,7 +44,10 @@ def human():
                                             district_id=payload['district_id'], 
                                             state_id=payload['state_id'],
                                             user_id=current_user.id)
-    is_approved = all(row['is_approved'] for row in human)
+    is_approved = (
+        all(row['is_approved'] for row in human if row['is_approved'] is not None) 
+        and any(row['is_approved'] is not None for row in human)
+    )
     return render_template('desktop/demand/human.html', 
                            human=human, 
                            human_data=json.dumps(human), 
@@ -59,6 +61,7 @@ def livestocks():
     if request.method=='POST':
         json_data = request.json
         BlockData.update_livestock(json_data, current_user.id)
+        flash('Livestock Data is Validated/Updated')
         return jsonify({'redirect_url': url_for('.status')})
     session_data = session.get('payload')
     if not session_data:
@@ -69,7 +72,10 @@ def livestocks():
                                             district_id=payload['district_id'], 
                                             state_id=payload['state_id'],
                                             user_id=current_user.id)
-    is_approved = all(row['is_approved'] for row in livestocks)
+    is_approved = (
+        all(row['is_approved'] for row in livestocks if row['is_approved'] is not None) 
+        and any(row['is_approved'] is not None for row in livestocks)
+    )
     return render_template('desktop/demand/livestock.html', 
                            livestock=livestocks, 
                            livestock_data=json.dumps(livestocks), 
@@ -83,6 +89,7 @@ def crops():
     if request.method=='POST':
         json_data = request.json
         BlockData.update_crops(json_data, current_user.id)
+        flash('Crops Data is Validated/Updated')
         return jsonify({'redirect_url': url_for('.status')})
     session_data = session.get('payload')
     if not session_data:
@@ -93,7 +100,10 @@ def crops():
                                             district_id=payload['district_id'], 
                                             state_id=payload['state_id'],
                                             user_id=current_user.id)
-    is_approved = all(row['is_approved'] for row in crops)
+    is_approved = (
+        all(row['is_approved'] for row in crops if row['is_approved'] is not None) 
+        and any(row['is_approved'] is not None for row in crops)
+    )
     return render_template('desktop/demand/crops.html', 
                            crops=crops, 
                            crops_data=json.dumps(crops), 
@@ -106,20 +116,22 @@ def crops():
 def industries():
     if request.method=='POST':
         json_data = request.json
-        session_data = session.get('payload')
-        payload = json.loads(session_data)
-        BlockData.update_industries(json_data, current_user.id,payload)
+        BlockData.update_industries(json_data, current_user.id)
+        flash('Industries Data is Validated/Updated')
         return jsonify({'redirect_url': url_for('.status')})
     session_data = session.get('payload')
     if not session_data:
         return redirect(url_for('mobile.index'))
     else:
         payload = json.loads(session_data)
-    industries = BlockData.get_industries_consumption(block_id = payload['block_id'],
-                                                    district_id = payload['district_id'],
-                                                    state_id = payload['state_id'])
-    
-    is_approved = all(row['is_approved'] for row in industries)
+    industries = BlockData.get_block_industries(block_id=payload['block_id'], 
+                                            district_id=payload['district_id'], 
+                                            state_id=payload['state_id'],
+                                            user_id=current_user.id)
+    is_approved = (
+        all(row['is_approved'] for row in industries if row['is_approved'] is not None) 
+        and any(row['is_approved'] is not None for row in industries)
+    )
     return render_template('desktop/demand/industry.html', 
                            industries=industries, 
                            industry_data=json.dumps(industries), 
@@ -137,16 +149,20 @@ def surface():
     if request.method=='POST':
         json_data = request.json
         BlockData.update_surface(json_data, current_user.id)
+        flash('Surface Water Data is Validated/Updated')
         return jsonify({'redirect_url': url_for('.status')})    
     surface_supply = BlockData.get_surface_supply(block_id=payload['block_id'], 
                                             district_id=payload['district_id'], 
                                             state_id=payload['state_id'],
                                             user_id=current_user.id)
-    # is_approved = all(row.is_approved for row in surface_supply)
+    is_approved = (
+        all(row['is_approved'] for row in surface_supply if row['is_approved'] is not None) 
+        and any(row['is_approved'] is not None for row in surface_supply)
+    )
     return render_template('desktop/supply/surface.html',
                         waterbodies = surface_supply,
                         waterbody_data = json.dumps(surface_supply),
-                        # is_approved = is_approved,
+                        is_approved = is_approved,
                         breadcrumbs=HelperClass.get_breadcrumbs(payload),
                         menu= HelperClass.get_supply_menu())
 
@@ -155,6 +171,7 @@ def rainfall():
     if request.method=='POST':
         json_data = request.json
         BlockData.update_rainfall(json_data, current_user.id)
+        flash('Rainfall Data is Validated/Updated')
         return jsonify({'redirect_url': url_for('.status')})
     session_data = session.get('payload')
     if not session_data:
@@ -166,7 +183,10 @@ def rainfall():
                                             state_id=payload['state_id'],
                                             user_id=current_user.id)
     
-    is_approved = all(row['is_approved'] for row in rainfall)
+    is_approved = (
+        all(row['is_approved'] for row in rainfall if row['is_approved'] is not None) 
+        and any(row['is_approved'] is not None for row in rainfall)
+    )
     return render_template('desktop/supply/rainfall.html', 
                             rainfall=rainfall, 
                             rainfall_data=json.dumps(rainfall), 
@@ -179,6 +199,7 @@ def lulc():
     if request.method=='POST':
         json_data = request.json
         BlockData.update_lulc(json_data, current_user.id)
+        flash('LULC Data is Validated/Updated')
         return jsonify({'redirect_url': url_for('.status')})
     session_data = session.get('payload')
     if not session_data:
@@ -189,7 +210,10 @@ def lulc():
                                             district_id=payload['district_id'], 
                                             state_id=payload['state_id'],
                                             user_id=current_user.id)
-    is_approved = all(row['is_approved'] for row in lulc)
+    is_approved = (
+        all(row['is_approved'] for row in lulc if row['is_approved'] is not None) 
+        and any(row['is_approved'] is not None for row in lulc)
+    )
     return render_template('desktop/supply/lulc.html', 
                         lulc=lulc, 
                         lulc_data=json.dumps(lulc), 
@@ -202,6 +226,7 @@ def ground():
     if request.method=='POST':
         json_data = request.json
         BlockData.update_ground(json_data, current_user.id)
+        flash('Ground water Data is Validated/Updated')
         return jsonify({'redirect_url': url_for('.status')})
     session_data = session.get('payload')
     if not session_data:
@@ -212,7 +237,10 @@ def ground():
                                             district_id=payload['district_id'], 
                                             state_id=payload['state_id'],
                                             user_id=current_user.id)
-    is_approved = all(row['is_approved'] for row in ground_supply)
+    is_approved = (
+        all(row['is_approved'] for row in ground_supply if row['is_approved'] is not None) 
+        and any(row['is_approved'] is not None for row in ground_supply)
+    )
 
     return render_template('desktop/supply/ground.html',
                            ground_supply = ground_supply,
@@ -223,9 +251,11 @@ def ground():
 
 @blp.route('/transfer', methods=["POST",'GET'])
 def transfer():
+    is_approved=False
     if request.method=='POST':
         json_data = request.json
         BlockData.update_water_transfer(json_data, current_user.id)
+        flash('Water Transfer Data is Validated/Updated')
         return jsonify({'redirect_url': url_for('.status')})
     session_data = session.get('payload')
     if not session_data:
@@ -237,10 +267,25 @@ def transfer():
                                             state_id=payload['state_id'],
                                             user_id=current_user.id)
     
+    is_approved = (
+        all(row['is_approved'] for row in transfer_data if row['is_approved'] is not None) 
+        and any(row['is_approved'] is not None for row in transfer_data)
+    )
+    
     return render_template('desktop/transfer.html',
                            water_transfer = transfer_data,
                            transfer_data=json.dumps(transfer_data),
+                           is_approved = is_approved,
                            breadcrumbs=HelperClass.get_breadcrumbs(payload),
                            menu= HelperClass.get_main_menu())
-    
 
+
+
+def get_message():
+    messages = get_flashed_messages()
+    if len(messages) > 0:
+        message = messages[0]
+    else:
+        message = ''
+
+    return message

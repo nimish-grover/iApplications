@@ -5,15 +5,20 @@
 <div class="row">
     <div class="col"></div>
     <div class="col-8 text-center">
-        {{table_title(title='Edit Waterbody Data', subtitle='(in Ha M)')}}
+        {{table_title(title='Edit Surface Water Data', subtitle='(in Ha M)')}}
     </div>
-    {{badge(is_approved=is_approved)}}
+    <div class="col">
+        {% if is_approved %}
+            {{badge()}}
+        {% endif %}
+    </div>
 </div>
 <section>
     <div class="overflow-y-scroll" style="height:30vh !important;">    
         <table class="table table-bordered table-sm fs-7 mb-0">
             <thead class="text-center">
                 <tr>
+                    <th>S.No.</th>
                     <th>Waterbody</th>
                     <th>Count</th>
                     <th>Capacity</th>
@@ -23,6 +28,7 @@
             <tbody>
                 {% for row in waterbodies %}
                 <tr>
+                    <td class="text-center">{{loop.index}}</td>
                     <td class="text-start">
                         {% if row['waterbody_name']|lower=='whs' %}
                         {{row['waterbody_name'] | upper}}
@@ -52,8 +58,8 @@
 </section>
 <section>
     {{floating_input(label='Waterbody', placeholder='', input_id='wb_name', input_type='text', isdisabled='true' )}}
-    {{validation_input(label = 'Enter Waterbody Count',id = 'wb_count',type='number',valid = 'Looks Good!',invalid = 'Must be a Number greater than 0',min='0')}}
-    {{validation_input(label = 'Enter Waterbody Storage',id = 'wb_storage',type='number',valid = 'Looks Good!',invalid = 'Must be a Number greater than 0.01',min='0')}}
+    {{validation_input(label = 'Enter Waterbody Count',id = 'wb_count',type='number',valid = 'Looks Good!',invalid = 'Must be a whole number',min='0')}}
+    {{validation_input(label = 'Enter Waterbody Storage',id = 'wb_storage',type='number',valid = 'Looks Good!',invalid = 'Must be a whole number',min='0')}}
     <div class="text-end">
         <button class="btn btn-outline-dark btn-sm me-2" id="btnBack">Back</button>
         <button class="btn btn-dark btn-sm" id="btnUpdate" disabled>Update</button>
@@ -212,6 +218,7 @@ btnSubmit.addEventListener("click", (event) => {
     })
     .then(data => {
         if (data.redirect_url) {
+            toggleSpinner();
             window.location.href = data.redirect_url; // Redirect to the URL provided
         } else {
             alert("No redirect URL provided.");

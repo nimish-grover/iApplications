@@ -24,7 +24,10 @@ def index():
             return json.dumps(url_for('desktop.status'))
         return json.dumps(url_for('.home'))
     if current_user.is_authenticated:
-        states = State.get_states_by_id(current_user.state_id)
+        if current_user.isAdmin:
+            states = TerritoryJoin.get_aspirational_states()
+        else:
+            states = State.get_states_by_id(current_user.state_id)
     else:
         states = TerritoryJoin.get_aspirational_states()
     return render_template("mobile/index.html", states=states)

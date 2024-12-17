@@ -47,10 +47,10 @@ def get_auth_check():
 @app.route('/')
 # @jwt_required()  # Correct usage without parentheses
 def serve_scorm_content():  # Get the user identity from the JWT token
-    # print(get_auth_check())
-    return redirect('/iauth/login')
-    # if 'user_id' not in session:
-    #     return redirect('/iauth/login')  # Redirect if the user is not authenticated
+    # # print(get_auth_check())
+    # return redirect('/iauth/login')
+    # # if 'user_id' not in session:
+    # #     return redirect('/iauth/login')  # Redirect if the user is not authenticated
     
     # Logic to serve SCORM content (e.g., a SCORM package or HTML content)
     return render_template('story.html')  # Render your SCORM content

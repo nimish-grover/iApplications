@@ -50,6 +50,10 @@ class BlockGround(db.Model):
     def get_by_id(cls, id):
         return cls.query.filter(cls.id==id).first()
     
+    @classmethod
+    def check_duplicate(cls, bt_id):
+        return cls.query.filter( cls.bt_id==bt_id).first()
+    
     def update_db(self):
         db.session.commit()
 

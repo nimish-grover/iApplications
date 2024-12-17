@@ -2,13 +2,16 @@
 {% block title %}LULC{% endblock %}
 {% from 'mobile/components.html' import table_title, validate_button, input_hidden, floating_input,validation_input,badge%}
 {% block content %}
-{{table_title(title='Edit LULC data', subtitle='(in Hectares)')}}
 <div class="row">
     <div class="col"></div>
     <div class="col-8 text-center">
-        {{table_title(title='Edit LULC Data', subtitle='(in Hectares)')}}
+        {{table_title(title='Edit LULC Data', subtitle='(in Ha)')}}
     </div>
-    {{badge(is_approved=is_approved)}}
+    <div class="col">
+        {% if is_approved %}
+        {{badge()}}
+        {% endif %}
+    </div>
 </div>
 <section>
     <div class="overflow-y-scroll" style="height:30vh !important;">    
@@ -50,7 +53,7 @@
 </section>
 <section>
     {{floating_input(label='LULC Name', placeholder='', input_id='lulc_name', input_type='text', isdisabled='true' )}}
-    {{validation_input(label = 'Enter LULC area',id = 'lulc_area',type='number',valid = 'Looks Good!',invalid = 'Must be a Number greater than 0',min='0')}}
+    {{validation_input(label = 'Enter LULC area',id = 'lulc_area',type='number',valid = 'Looks Good!',invalid = 'Must be a whole number',min='0')}}
 
     <div class="text-end">
         <button class="btn btn-outline-dark btn-sm me-2" id="btnBack">Back</button>

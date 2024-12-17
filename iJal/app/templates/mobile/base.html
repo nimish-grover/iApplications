@@ -36,6 +36,9 @@
                 {% if current_user.is_authenticated %}
                 <li><a class="dropdown-item" href="{{url_for('auth.logout')}}">Logout</a></li>
                 <li><a class="dropdown-item" href="{{url_for('mobile.home')}}">Budget</a></li>
+                    {% if current_user.isAdmin %}
+                    <li><a class="dropdown-item" href="{{url_for('auth.approve')}}">Approve</a></li>
+                    {% endif %}
                 {% else %}
                 <li><a class="dropdown-item" href="{{url_for('auth.login')}}">Login</a></li>
                 <li><a class="dropdown-item" href="{{url_for('mobile.index')}}">Home</a></li>
@@ -46,16 +49,16 @@
 
     {% from 'mobile/components.html' import bottom_menu, toggle_button, progress_bar, approve_button %}    
    <div class="container-fluid h-100">
-    
-    <div class="mt-6">
+    <div class="mt-5">&nbsp;</div>
+   <!-- {#<div class="mt-6">
         {% if 'index' in request.path or 'home' in request.path or 'auth/' in request.path %}
-        <div class="mt-5">&nbsp;</div> <!--important!-->
+        <div class="mt-5">&nbsp;</div> 
         {% else %}
         <label for="progress_bar" class="text-white fs-8 fw-bold">Validation Progress</label>
         {{progress_bar()}}
         {% endif %}
-    </div>
-    
+    </div>#} -->
+    <div class="col-lg-4 col-md-6 col-sm-12 col-xs-12 mx-auto">   
     <div class="card border-primary text-center h-60 mt-3">
         <div class="card-header bg-primary p-1">
         </div>
@@ -86,7 +89,8 @@
         </div>
         <div class="card-footer bg-primary p-1">
         </div>
-    </div>
+    </div>     
+</div>
    </div>
     <div class="fixed-bottom">
         {{toggle_button(labels=toggle_labels)}}        
