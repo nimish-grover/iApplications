@@ -1,4 +1,5 @@
 from iJal.app.db import db
+from iJal.app.models.districts import District
 
 class Block(db.Model):
     __tablename__ = 'blocks'
@@ -34,3 +35,9 @@ class Block(db.Model):
             "block_name": self.block_name
         }
 
+    @classmethod
+    def get_block_lgd(cls,block_id):
+        query = (db.session.query(cls.lgd_code)
+            .filter(cls.id == block_id)
+            ).scalar()
+        return query

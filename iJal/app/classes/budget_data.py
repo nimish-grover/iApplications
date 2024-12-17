@@ -6,6 +6,7 @@ from iJal.app.models.population_census import PopulationCensus
 from iJal.app.models.rainfall import Rainfall
 from iJal.app.models.strange_table import StrangeTable
 from iJal.app.models.waterbody_census import WaterbodyCensus
+from iJal.app.models.blocks import Block
 from itertools import cycle
 
 
@@ -22,7 +23,8 @@ class BudgetData:
     
     @classmethod
     def get_human_consumption(cls, block_id, district_id):
-        entity = PopulationCensus.get_population_by_block(block_id, district_id)
+        block_lgd = Block.get_block_lgd(block_id)
+        entity = PopulationCensus.get_block_or_population_census(block_lgd)
         bg_colors=['red','green']
         for item in entity:
             item['entity_consumption'] = round(cls.litre_to_hectare_meters((int(item['entity_value']) * cls.RURAL_CONSUMPTION * cls.DECADAL_GROWTH * cls.NUMBER_OF_DAYS)),2)
@@ -31,7 +33,8 @@ class BudgetData:
     
     @classmethod
     def get_livestock_consumption(cls, block_id, district_id):
-        entity = LivestockCensus.get_livestock_by_block(block_id, district_id)
+        block_lgd = Block.get_block_lgd(block_id)
+        entity = LivestockCensus.get_block_or_livestock_census(block_lgd)
         bg_colors = ['red','green','blue','gray','black','violet']
         for item in entity:
             item['entity_consumption'] = round(cls.litre_to_hectare_meters(float(item['entity_value']) * float(item['coefficient']) * cls.NUMBER_OF_DAYS),2) 
@@ -40,7 +43,8 @@ class BudgetData:
     
     @classmethod
     def get_crops_consumption(cls, block_id, district_id):
-        entity = CropCensus.get_crops_by_block(block_id, district_id)
+        block_lgd = Block.get_block_lgd(block_id)
+        entity = CropCensus.get_block_or_crops_census(block_lgd)
         for item in entity:
             item['entity_consumption'] = round(float(item['entity_value']) * float(item['coefficient']),2)         
         bg_colors = ['red','green','blue','gray','black','violet']
@@ -50,7 +54,8 @@ class BudgetData:
     
     @classmethod
     def get_surface_supply(cls, block_id, district_id):
-        entity = WaterbodyCensus.get_waterbody_by_block(block_id, district_id)
+        block_lgd = Block.get_block_lgd(block_id)
+        entity = WaterbodyCensus.get_block_or_waterbody_census(block_lgd)
         bg_colors = ['red','green','blue','gray','black','violet']
         surface_supply = cls.get_entity_supply(entity, bg_colors)
         sorted_data = sorted(surface_supply, key=lambda x: x['value'], reverse=False)
@@ -58,7 +63,8 @@ class BudgetData:
     
     @classmethod
     def get_ground_supply(cls, block_id, district_id):
-        entity = GroundwaterExtraction.get_groudwater_by_block(block_id, district_id)
+        block_lgd = Block.get_block_lgd(block_id)
+        entity = GroundwaterExtraction.get_block_or_groundwater_extraction(block_lgd)
         gw_array=[]
         for key,value in entity[0].items():
             item = {
@@ -72,9 +78,10 @@ class BudgetData:
     
     @classmethod
     def get_runoff(cls, block_id, district_id):
+        block_lgd = Block.get_block_lgd(block_id)
         rainfall_in_mm = 820
         runoff_data = StrangeTable.get_runoff_by_rainfall(rainfall_in_mm)
-        lulc_data = LULCCensus.get_lulc_by_block(block_id, district_id)
+        lulc_data = LULCCensus.get_block_or_lulc_census(block_lgd)
         runoff_array = []
         for key,value in runoff_data[0].items():
             if not key=='rainfall_in_mm':
@@ -92,7 +99,7 @@ class BudgetData:
     
     @classmethod
     def get_rainfall(cls, block_id, district_id):
-        rainfall_data = Rainfall.get_monthwise_rainfall(district_id)
+        rainfall_data = Rainfall.get_block_or_rainfall_data(block_id,district_id)
         return rainfall_data
     
     @classmethod

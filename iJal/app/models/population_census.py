@@ -1,6 +1,9 @@
 from sqlalchemy import func
 from iJal.app.db import db
 from iJal.app.models import Population, TerritoryJoin
+from iJal.app.models.block_territory import BlockTerritory
+from iJal.app.models.block_pop import BlockPop
+from iJal.app.models.blocks import Block
 
 class PopulationCensus(db.Model):
     __tablename__ = 'population_census'
@@ -60,6 +63,64 @@ class PopulationCensus(db.Model):
             Population.display_name,
             Population.population_type
         )
+        results = query.all()
+
+        if results:
+            result = [
+                {
+                    "entity_value": row.population_count,
+                    "entity_id": row.id,
+                    "entity_name": row.display_name
+                }
+                for row in results
+            ]
+            return result
+        else:
+            return None
+        
+    @classmethod
+    def get_block_or_population_census(cls,block_lgd):
+        subquery_bp = (
+            db.session.query(
+                BlockPop.population_id.label("population_id"),
+                func.sum(BlockPop.count).label("total_count")
+            )
+            .join(BlockTerritory, BlockPop.bt_id == BlockTerritory.id)
+            .join(Block, BlockTerritory.block_id == Block.id)
+            .filter(Block.lgd_code == block_lgd)
+            .group_by(BlockPop.population_id)
+            .subquery()
+        )
+
+        # Subquery for population_census
+        subquery_pc = (
+            db.session.query(
+                PopulationCensus.population_id.label("population_id"),
+                func.sum(PopulationCensus.population_count).label("total_count")
+            )
+            .join(TerritoryJoin, PopulationCensus.territory_id == TerritoryJoin.id)
+            .join(Block, TerritoryJoin.block_id == Block.id)
+            .filter(Block.lgd_code == block_lgd)
+            .group_by(PopulationCensus.population_id)
+            .subquery()
+        )
+
+        # Main query
+        query = (
+            db.session.query(
+                Population.display_name.label("display_name"),
+                Population.id.label("id"),
+                func.coalesce(
+                    subquery_bp.c.total_count,
+                    subquery_pc.c.total_count,
+                    0
+                ).label("population_count")
+            )
+            .outerjoin(subquery_bp, subquery_bp.c.population_id == Population.id)
+            .outerjoin(subquery_pc, subquery_pc.c.population_id == Population.id)
+            .filter(Population.id.in_([2, 3]))
+        )
+        
         results = query.all()
 
         if results:

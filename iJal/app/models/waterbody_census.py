@@ -2,6 +2,9 @@ from sqlalchemy import func
 from iJal.app.db import db
 from iJal.app.models.territory import TerritoryJoin
 from iJal.app.models.waterbody import WaterbodyType
+from iJal.app.models.blocks import Block
+from iJal.app.models.block_territory import BlockTerritory
+from iJal.app.models.block_surface import BlockWaterbody
 
 class WaterbodyCensus(db.Model):
     __tablename__ = 'waterbodies_census'
@@ -85,6 +88,58 @@ class WaterbodyCensus(db.Model):
             ).group_by(
                 WaterbodyType.id,WaterbodyType.waterbody_name
             )
+        results = query.all()
+        if results:
+            json_data = [{'entity_id':row.waterbody_id,
+                          'entity_name': row.waterbody_name,
+                          'entity_count': row.waterbody_count,
+                          'entity_value': row.storage_capacity}
+                         for row in results]
+            return json_data
+        return None
+
+
+    @classmethod
+    def get_block_or_waterbody_census(cls,block_lgd):
+        block_waterbodies_subquery = (
+            db.session.query(
+                BlockWaterbody.wb_type_id.label("waterbody_id"),
+                func.sum(BlockWaterbody.storage).label("total_storage"),
+                func.sum(BlockWaterbody.count).label("total_count")
+            )
+            .join(BlockTerritory, BlockTerritory.id == BlockWaterbody.bt_id)
+            .join(Block, Block.id == BlockTerritory.block_id)
+            .filter(Block.lgd_code == block_lgd)
+            .group_by(BlockWaterbody.wb_type_id)
+            .subquery()
+        )
+
+        # Subquery for waterbodies_census
+        waterbodies_census_subquery = (
+            db.session.query(
+                WaterbodyCensus.waterbody_id.label("waterbody_id"),
+                func.sum(WaterbodyCensus.storage_capacity).label("total_storage"),
+                func.count(WaterbodyCensus.waterbody_id).label("total_count")
+            )
+            .join(TerritoryJoin, TerritoryJoin.id == WaterbodyCensus.tj_id)
+            .join(Block, Block.id == TerritoryJoin.block_id)
+            .filter(Block.lgd_code == block_lgd)
+            .group_by(WaterbodyCensus.waterbody_id)
+            .subquery()
+        )
+
+        # Main query
+        query = (
+            db.session.query(
+                WaterbodyType.waterbody_name,
+                WaterbodyType.id.label("waterbody_id"),
+                func.coalesce(block_waterbodies_subquery.c.total_storage, waterbodies_census_subquery.c.total_storage, 0).label("storage_capacity"),
+                func.coalesce(block_waterbodies_subquery.c.total_count, waterbodies_census_subquery.c.total_count, 0).label("waterbody_count"),
+            )
+            .outerjoin(block_waterbodies_subquery, block_waterbodies_subquery.c.waterbody_id == WaterbodyType.id)
+            .outerjoin(waterbodies_census_subquery, waterbodies_census_subquery.c.waterbody_id == WaterbodyType.id)
+        )
+
         results = query.all()
         if results:
             json_data = [{'entity_id':row.waterbody_id,

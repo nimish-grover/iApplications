@@ -2,6 +2,9 @@ from sqlalchemy import func
 from iJal.app.db import db
 from iJal.app.models.crops import Crop
 from iJal.app.models.territory import TerritoryJoin
+from iJal.app.models.block_crops import BlockCrop
+from iJal.app.models.blocks import Block
+from iJal.app.models.block_territory import BlockTerritory
 
 class CropCensus(db.Model):
     __tablename__ = 'crop_census'
@@ -71,6 +74,56 @@ class CropCensus(db.Model):
         ).group_by(
             Crop.id,Crop.coefficient,Crop.crop_name
         )
+        results = query.all()
+        if results:
+            json_data = [{
+                        'entity_id':row.crop_id,
+                        'entity_value':row.crop_area, 
+                        'entity_name':row.crop_name,
+                        'coefficient':row.coefficient }
+                          for row in results]
+            return json_data
+        return None
+    
+    @classmethod
+    def get_block_or_crops_census(cls,block_lgd):
+        block_crops_subquery = (
+            db.session.query(
+                BlockCrop.crop_id.label("crop_id"),
+                func.sum(BlockCrop.area).label("total_area")
+            )
+            .join(BlockTerritory, BlockTerritory.id == BlockCrop.bt_id)
+            .join(Block, Block.id == BlockTerritory.block_id)
+            .filter(Block.lgd_code == block_lgd)
+            .group_by(BlockCrop.crop_id)
+            .subquery()
+        )
+
+        # Subquery for crop_census
+        crop_census_subquery = (
+            db.session.query(
+                CropCensus.crop_id.label("crop_id"),
+                func.sum(CropCensus.crop_area).label("total_area")
+            )
+            .join(TerritoryJoin, TerritoryJoin.id == CropCensus.territory_id)
+            .join(Block, Block.id == TerritoryJoin.block_id)
+            .filter(Block.lgd_code == block_lgd)
+            .group_by(CropCensus.crop_id)
+            .subquery()
+        )
+
+        # Main query
+        query = (
+            db.session.query(
+                Crop.crop_name,
+                Crop.id.label("crop_id"),
+                Crop.coefficient,
+                func.coalesce(block_crops_subquery.c.total_area, crop_census_subquery.c.total_area, 0).label("crop_area"),
+            )
+            .outerjoin(block_crops_subquery, block_crops_subquery.c.crop_id == Crop.id)
+            .outerjoin(crop_census_subquery, crop_census_subquery.c.crop_id == Crop.id)
+        )
+        
         results = query.all()
         if results:
             json_data = [{

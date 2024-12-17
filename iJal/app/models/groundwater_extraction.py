@@ -1,5 +1,9 @@
 from iJal.app.db import db
 from iJal.app.models import Block, District	
+from iJal.app.models.block_ground import BlockGround
+from iJal.app.models.block_territory import BlockTerritory
+from sqlalchemy import func
+
 
 class GroundwaterExtraction(db.Model):
     __tablename__ = "groundwater_extractions"
@@ -59,6 +63,46 @@ class GroundwaterExtraction(db.Model):
         ).join(District, District.id==cls.district_id
         ).filter(cls.block_id==block_id,District.id==district_id)
 
+        results = query.all()
+
+        if results:
+            json_data = [{
+                'extractable': round(row.extractable, 2),
+                'extraction': round(row.extraction, 2),
+                'stage_of_extraction': round(row.stage_of_extraction,2),
+                'category': row.category
+            } for row in results]
+            return json_data
+        return None
+    
+    @classmethod
+    def get_block_or_groundwater_extraction(cls,block_lgd):
+        block_groundwater_subquery = (
+            db.session.query(
+                BlockGround.extraction.label("extraction"),
+                Block.lgd_code.label("lgd_code")
+            )
+            .join(BlockTerritory, BlockTerritory.id == BlockGround.bt_id)
+            .join(Block, Block.id == BlockTerritory.block_id)
+            .filter(Block.lgd_code == block_lgd)
+            .subquery()
+        )
+
+        # Main query
+        query = (
+            db.session.query(
+                GroundwaterExtraction.extractable,
+                func.coalesce(block_groundwater_subquery.c.extraction, GroundwaterExtraction.extraction).label("extraction"),
+                GroundwaterExtraction.stage_of_extraction,
+                GroundwaterExtraction.category,
+                GroundwaterExtraction.block_id.label("block_id"),
+            )
+            .join(Block, Block.id == GroundwaterExtraction.block_id)
+            .join(BlockTerritory, BlockTerritory.block_id == GroundwaterExtraction.block_id)
+            .outerjoin(block_groundwater_subquery, block_groundwater_subquery.c.lgd_code == Block.lgd_code)
+            .filter(Block.lgd_code == block_lgd)
+        )
+        
         results = query.all()
 
         if results:

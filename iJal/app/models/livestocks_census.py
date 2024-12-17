@@ -2,6 +2,9 @@ from sqlalchemy import func
 from iJal.app.db import db
 from iJal.app.models.livestocks import Livestock
 from iJal.app.models.territory import TerritoryJoin
+from iJal.app.models.blocks import Block
+from iJal.app.models.block_territory import BlockTerritory
+from iJal.app.models.block_livestocks import BlockLivestock
 
 class LivestockCensus(db.Model):
     __tablename__ = 'livestock_census'
@@ -64,6 +67,57 @@ class LivestockCensus(db.Model):
         ).order_by(
             Livestock.livestock_name
         )
+        results = query.all()
+        if results:
+            json_data = [{
+                        'entity_id':row.livestock_id,
+                        'entity_value':row.livestock_count, 
+                        'entity_name':row.livestock_name,
+                        'coefficient':row.coefficient } 
+                        for row in results]
+            return json_data
+        return None
+
+    @classmethod
+    def get_block_or_livestock_census(cls,block_lgd):
+        block_livestocks_subquery = (
+            db.session.query(
+                BlockLivestock.livestock_id.label("livestock_id"),
+                func.sum(BlockLivestock.count).label("total_count")
+            )
+            .join(BlockTerritory, BlockTerritory.id == BlockLivestock.bt_id)
+            .join(Block, Block.id == BlockTerritory.block_id)
+            .filter(Block.lgd_code == block_lgd)
+            .group_by(BlockLivestock.livestock_id)
+            .subquery()
+        )
+
+        # Subquery for livestock_census
+        livestock_census_subquery = (
+            db.session.query(
+                LivestockCensus.livestock_id.label("livestock_id"),
+                func.sum(LivestockCensus.livestock_count).label("total_count")
+            )
+            .join(TerritoryJoin, TerritoryJoin.id == LivestockCensus.tj_id)
+            .join(Block, Block.id == TerritoryJoin.block_id)
+            .filter(Block.lgd_code == block_lgd)
+            .group_by(LivestockCensus.livestock_id)
+            .subquery()
+        )
+
+        # Main query
+        query = (
+            db.session.query(
+                Livestock.livestock_name,
+                Livestock.id.label("livestock_id"),
+                Livestock.coefficient.label("coefficient"),
+                func.coalesce(block_livestocks_subquery.c.total_count, livestock_census_subquery.c.total_count, 0).label("livestock_count")
+            )
+            .outerjoin(block_livestocks_subquery, block_livestocks_subquery.c.livestock_id == Livestock.id)
+            .outerjoin(livestock_census_subquery, livestock_census_subquery.c.livestock_id == Livestock.id)
+            .order_by(Livestock.livestock_name)
+        )
+        
         results = query.all()
         if results:
             json_data = [{

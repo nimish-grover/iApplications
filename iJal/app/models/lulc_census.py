@@ -4,6 +4,9 @@ from iJal.app.models.blocks import Block
 from iJal.app.models.districts import District
 from iJal.app.models.lulc import LULC
 from iJal.app.models.territory import TerritoryJoin
+from iJal.app.models.block_territory import BlockTerritory
+from iJal.app.models.block_lulc import BlockLULC
+from iJal.app.models.territory import TerritoryJoin
 
 class LULCCensus(db.Model):
     __tablename__ = 'lulc_census'
@@ -76,6 +79,58 @@ class LULCCensus(db.Model):
             json_data = [{
                 'lulc_id':row.id,
                 'lulc_area':row.lulc_area
+            } for row in results]
+            return json_data
+        return None
+    
+    @classmethod
+    def get_block_or_lulc_census(cls,block_lgd):
+        block_lulc_subquery = (
+            db.session.query(
+                func.sum(BlockLULC.area).label("catchment_area"),
+                BlockLULC.lulc_id.label("lulc_id"),
+            )
+            .join(BlockTerritory, BlockTerritory.id == BlockLULC.bt_id)
+            .join(Block, Block.id == BlockTerritory.block_id)
+            .filter(Block.lgd_code == 4876)
+            .group_by(BlockLULC.lulc_id)
+            .subquery()
+        )
+
+        # Subquery for `lulc_census`
+        lulc_census_subquery = (
+            db.session.query(
+                func.sum(LULCCensus.lulc_area).label("catchment_area"),
+                LULCCensus.lulc_id.label("lulc_id"),
+            )
+            .join(TerritoryJoin, TerritoryJoin.id == LULCCensus.tj_id)
+            .join(Block, Block.id == TerritoryJoin.block_id)
+            .filter(Block.lgd_code == 4876)
+            .group_by(LULCCensus.lulc_id)
+            .subquery()
+        )
+
+        # Main query
+        query = (
+            db.session.query(
+                LULC.catchment.label("catchment"),
+                func.coalesce(
+                    func.sum(block_lulc_subquery.c.catchment_area),
+                    func.sum(lulc_census_subquery.c.catchment_area),
+                    0
+                ).label("catchment_area"),
+            )
+            .outerjoin(block_lulc_subquery, block_lulc_subquery.c.lulc_id == LULC.id)
+            .outerjoin(lulc_census_subquery, lulc_census_subquery.c.lulc_id == LULC.id)
+            .group_by(LULC.catchment)
+        )
+        
+        results = query.all()
+
+        if results:
+            json_data = [{
+                'catchment': row.catchment,
+                'catchment_area': row.catchment_area
             } for row in results]
             return json_data
         return None

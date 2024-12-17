@@ -1,6 +1,9 @@
 # from datetime import datetime
 from sqlalchemy import Numeric, alias, and_, cast, func
 from iJal.app.db import db
+from iJal.app.models.block_rainfall import BlockRainfall
+from iJal.app.models.blocks import Block
+from iJal.app.models.block_territory import BlockTerritory
 
 class Rainfall(db.Model):
     __tablename__ = 'rainfall_data'
@@ -59,3 +62,61 @@ class Rainfall(db.Model):
         #     EXTRACT(YEAR FROM observation_date), EXTRACT(MONTH FROM observation_date);
         # '''
        
+    @classmethod
+    def get_block_or_rainfall_data(cls,block_id,district_id):
+        block_rainfall_subquery = (
+            db.session.query(
+                func.to_char(BlockRainfall.month_year, 'FMMon-YY').label('date'),
+                func.round(func.sum(BlockRainfall.actual).cast(Numeric), 2).label('actual'),
+                func.round(func.sum(BlockRainfall.normal).cast(Numeric), 2).label('normal'),
+            )
+            .join(BlockTerritory, BlockTerritory.id == BlockRainfall.bt_id)
+            .join(Block, Block.id == BlockTerritory.block_id)
+            .filter(Block.id == block_id)
+            .group_by(func.to_char(BlockRainfall.month_year, 'FMMon-YY'))
+            .subquery()
+        )
+
+        # Subquery for rainfall_data
+        rainfall_data_subquery = (
+            db.session.query(
+                func.to_char(Rainfall.observation_date, 'FMMon-YY').label('date'),
+                func.round(func.sum(Rainfall.actual).cast(Numeric), 2).label('actual'),
+                func.round(func.sum(Rainfall.normal).cast(Numeric), 2).label('normal'),
+            )
+            .filter(Rainfall.district_id == district_id)
+            .group_by(func.to_char(Rainfall.observation_date, 'FMMon-YY'))
+            .subquery()
+        )
+
+        # Main query
+        query = (
+            db.session.query(
+                func.to_char(Rainfall.observation_date, 'FMMon-YY').label('month_year'),
+                func.coalesce(block_rainfall_subquery.c.actual, rainfall_data_subquery.c.actual, 0).label('actual'),
+                func.coalesce(block_rainfall_subquery.c.normal, rainfall_data_subquery.c.normal, 0).label('normal'),
+            )
+            .outerjoin(
+                block_rainfall_subquery,
+                func.to_char(Rainfall.observation_date, 'FMMon-YY') == block_rainfall_subquery.c.date,
+            )
+            .outerjoin(
+                rainfall_data_subquery,
+                func.to_char(Rainfall.observation_date, 'FMMon-YY') == rainfall_data_subquery.c.date,
+            )
+            .group_by(
+                func.to_char(Rainfall.observation_date, 'FMMon-YY'),
+                block_rainfall_subquery.c.actual,
+                block_rainfall_subquery.c.normal,
+                rainfall_data_subquery.c.actual,
+                rainfall_data_subquery.c.normal,
+            )
+            .order_by(func.min(Rainfall.observation_date))
+        )
+
+        results = query.all()
+        if results:
+            result = [{'month':result[0],'actual':result[1],'normal':result[2]} for result in results]
+        else: 
+            result = [{'month':0,'actual':0,'normal':0}]
+        return result
