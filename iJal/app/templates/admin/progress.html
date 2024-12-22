@@ -5,127 +5,204 @@ input_hidden,submit_button,progress_bar,tooltip,
 search_input,validation_input,badge%}
 {% block content %}
 
-{{table_title(title='Validation Progress',subtitle=' ')}}
-{{search_input(placeholder='Search Block')}}
-<div class="overflow-y-scroll overflow-x-hidden" style="height:70vh !important;">
+<section>
+    {{table_title(title='Validation Progress', subtitle='(Demand/Supply Components)')}}
+
+    {{search_input(placeholder='Search Block')}}
+    <div class="overflow-y-scroll overflow-x-hidden" style="height:55vh !important;">
+        <table class="table table-bordered table-sm fs-7 mb-0">
+            <thead class="text-center">
+                <tr>
+                    <th style="max-width: 20px;">State</th>
+                    <th style="max-width: 40px;">District</th>
+                    <th style="max-width: 40px;">Block</th>
+                    <th style="max-width: 100px;">Progress</th>
+                </tr>
+            </thead>
+            <tbody id="tablebody">
+                {% for row in progress %}
+                <tr id="row_{{ row['id'] }}">
+                    {{ input_hidden(name='id', value=row['id']) }}
+                    <td class="text-center align-content-center" style="max-width: 20px;">
+                        {{ tooltip(name=row['state_short_name'],full_name=row['state_name']) }}
+                    </td>
+                    <td class="text-start align-content-center text-truncate" style="max-width: 40px;">
+                        {{ tooltip(name=row['district_name']) }}
+                    </td>
+                    <td class="text-start align-content-center text-truncate" style="max-width: 40px;">
+                        {{ tooltip(name=row['block_name']) }}
+                    </td>
+                    <td class="text-center align-content-center" style="max-width: 100px;">
+                        <div class="progress-bar-anchor fetch-row-data style=" cursor: pointer;">
+                            <div class="row">
+                                <div class="col-10">
+                                    {{ progress_bar(completed=row['completed']) }}
+                                </div>
+                                <div class="col-1 p-0 d-grid align-items-center">
+                                    <span class="text-center fs-9">
+
+                                        <i class="fa-solid fa-arrow-up-right-from-square"></i>
+
+                                    </span>
+                                </div>
+                            </div>
+
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <input type="hidden" name="progress_data" id="progressData" value="{{progress_data}}">
+</section>
+<section class="visually-hidden">
+        <div class="container-fluid">
+            <nav style="--bs-breadcrumb-divider: '|';" aria-label="breadcrumb">
+                <ol class="breadcrumb fs-9">
+                    <li class="breadcrumb-item">
+                        <a class="link-underline link-underline-opacity-0" id="state_name">
+                            state
+                        </a>
+                    </li>
+                    <li class="breadcrumb-item">
+                        <a class="link-underline link-underline-opacity-0" id="district_name">
+                            district
+                        </a>
+                    </li>
+                    <li class="breadcrumb-item">
+                        <a class="link-underline link-underline-opacity-0 link-dark" id="block_name">
+                            block
+                        </a>
+                    </li>
+                </ol>
+            </nav>
+        </div>
+    {{table_title(title='Validation Progress', subtitle='(Demand/Supply Components)')}}
+
     <table class="table table-bordered table-sm fs-7 mb-0">
         <thead class="text-center">
             <tr>
-                <th style="max-width: 20px;">State</th>
-                <th style="max-width: 40px;">District</th>
-                <th style="max-width: 40px;">Block</th>
-                <th style="max-width: 100px;">Progress</th>
+                <th>S.No.</th>
+                <th width="50%">Category</th>
+                <th>Status</th>
             </tr>
         </thead>
         <tbody id="tablebody">
-            {% for row in progress %}
-            <tr id="row_{{ row['id'] }}">
-                {{ input_hidden(name='id', value=row['id']) }}
-                <td class="text-center align-content-center" style="max-width: 20px;">
-                    {{ tooltip(name=row['state_short_name'],full_name=row['state_name']) }}
+            {% for row in status %}
+            <tr>
+                <td class="text-center">
+                    {{loop.index}}
                 </td>
-                <td class="text-start align-content-center text-truncate" style="max-width: 40px;">
-                    {{ tooltip(name=row['district_name']) }}
+                <td class="text-start">
+                    {{row['category']}}
                 </td>
-                <td class="text-start align-content-center text-truncate" style="max-width: 40px;">
-                    {{ tooltip(name=row['block_name']) }}
-                </td>
-                <td class="text-center align-content-center" style="max-width: 100px;">
-                    <div class="progress-bar-anchor" style="cursor: pointer;">
-                        <div class="row">
-                            <div class="col-10">
-                                {{ progress_bar(completed=row['completed']) }}
-                            </div>
-                            <div class="col-1 p-0 d-grid align-items-center">
-                                <span class="text-center fs-9">
-                                    
-                                        <i class="fa-solid fa-arrow-up-right-from-square"></i>
-                                    
-                                </span>
-                            </div>
-                        </div>
-                        
-                    </div>
+                <td class="text-center" id="{{row['id']}}">
+
+                    <span class="text-danger"><i class="fa-solid fa-xmark"></i></span>
+
                 </td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
-</div>
-<input type="hidden" name="progress_data" id="progressData" value="{{progress_data}}">
-<input type="hidden" name="redirect_url" id="redirectUrl" value="{{url_for('admin.status')}}">
-</div>
+    <div class="text-end mt-2">
+        <button class="btn btn-outline-dark btn-sm" id="btnBack">Back</button>
+    </div>
+</section>
+
 
 
 {% endblock %}
 {% block scripts %}
 <script>
-    const redirectUrl = document.getElementById('redirectUrl').value;
+    // Elements
+    const sectionProgress = document.querySelector("section:first-of-type");
+    const sectionInput = document.querySelector("section:last-of-type");
+    const btnBack = document.getElementById("btnBack");
+    const populationInput = document.getElementById("population");
+    const livestockInput = document.getElementById("livestock");
+    const cropInput = document.getElementById("crop");
+    const industryInput = document.getElementById("industry");
+    const surfaceInput = document.getElementById("surface");
+    const groundwaterInput = document.getElementById("ground");
+    const lulcInput = document.getElementById("lulc");
+    const rainfallInput = document.getElementById("rainfall");
+    const transferInput = document.getElementById("water_transfer");
+    const state_name = document.getElementById("state_name");
+    const district_name = document.getElementById("district_name");
+    const block_name = document.getElementById("block_name");
 
+    // Progress data
+    let progress = JSON.parse(document.getElementById('progressData').value);
+    let currentRowId = null; // Tracks the currently edited row
 
-    document.addEventListener('DOMContentLoaded', function () {
-        // Get all the progress bar elements
-        const progressBars = document.querySelectorAll('.progress-bar-anchor');
+    // On page load, set initial visibility and button states
+    document.addEventListener("DOMContentLoaded", () => {
+        sectionProgress.classList.remove("visually-hidden");
+        sectionInput.classList.add("visually-hidden");
+    });
 
-        progressBars.forEach(function (progressBar) {
-            // Add event listener for click event
-            progressBar.addEventListener('click', function () {
-                // Get the row ID from the parent row (using the row's ID attribute)
-                const rowId = this.closest('tr').id.replace('row_', ''); // Get the row id without 'row_'
-                const progressData = JSON.parse(document.getElementById('progressData').value); // Get all progress data
+    // Event listener for fetch-row-data elements
+    document.querySelectorAll(".fetch-row-data").forEach(element => {
+        element.addEventListener("click", function (event) {
+            event.preventDefault();
+            toggleSpinner();
 
-                // Find the specific row data based on the row ID
-                const rowData = progressData.find(item => item.id === parseInt(rowId));
+            setTimeout(() => {
+                const row = this.closest("tr");
+                const rowId = parseFloat(row.querySelector('input[name="id"]').value, 10);
+                const progressRow = progress.find(h => h.id === rowId);
 
-                if (rowData) {
-                    // Send the data using a POST request
-                    sendProgressData(rowData);
-                } else {
-                    console.error('Row data not found');
-                }
-            });
+                // Populate input fields in the form
+                currentRowId = rowId;
+
+                const setValue = (element, value) => {
+                    if (value === 1) {
+                        element.innerHTML = '<span class="text-success"><i class="fa-solid fa-check"></i></span>';
+                    } else {
+                        element.innerHTML = '<span class="text-danger"><i class="fa-solid fa-xmark"></i></span>';
+                    }
+                };
+
+                // Set values
+                if (populationInput) setValue(populationInput, progressRow.population);
+                if (livestockInput) setValue(livestockInput, progressRow.livestock);
+                if (cropInput) setValue(cropInput, progressRow.crop);
+                if (industryInput) setValue(industryInput, progressRow.industry);
+                if (surfaceInput) setValue(surfaceInput, progressRow.surface);
+                if (groundwaterInput) setValue(groundwaterInput, progressRow.ground);
+                if (lulcInput) setValue(lulcInput, progressRow.lulc);
+                if (rainfallInput) setValue(rainfallInput, progressRow.rainfall);
+                if (transferInput) setValue(transferInput, progressRow.water_transfer);
+                if (state_name) state_name.innerText = progressRow.state_name;
+                if (district_name) district_name.innerText = progressRow.district_name;
+                if (block_name) block_name.innerText = progressRow.block_name;
+
+                // Switch sections
+                sectionProgress.classList.add("visually-hidden");
+                sectionInput.classList.remove("visually-hidden");
+
+                toggleSpinner(); // Hide spinner after loading
+            }, 500); // Simulate a small delay
         });
     });
 
-    function sendProgressData(data) {
-        // Get the redirect URL dynamically, for example, from a hidden input field or other source
-        // Toggle the spinner before sending the request
+    // Back button event
+    btnBack.addEventListener("click", function (event) {
+        event.preventDefault();
         toggleSpinner();
 
-        fetch(redirectUrl, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data)
-        })
-            .then(response => {
-                // Check if the response is successful
-                if (!response.ok) {
-                    throw new Error(`HTTP error! Status: ${response.status}`);
-                }
-                return response.json(); // Parse JSON response
-            })
-            .then(responseData => {
-                // Ensure there is a redirect URL in the response
-                if (responseData.redirect_url) {
-                    // Toggle the spinner off after receiving the response
-                    
-                    // Redirect to the provided URL
-                    window.location.href = responseData.redirect_url;
-                    toggleSpinner();
-                } else {
-                    // Handle the case where no redirect URL is provided
-                    alert("No redirect URL provided.");
-                    toggleSpinner();
-                }
-            })
-            .catch(error => {
-                // Catch any errors and display an error message
-                console.error("Error submitting data:", error);
-                alert("An error occurred while submitting data.");
-                toggleSpinner(); // Ensure the spinner is stopped on error
-            });
-    }
+        setTimeout(() => {
+            currentRowId = null;
+            sectionInput.classList.add("visually-hidden");
+            sectionProgress.classList.remove("visually-hidden");
 
+            toggleSpinner(); // Hide spinner after returning
+        }, 500); // Simulate a small delay
+    });
+
+    // Search filter
     document.getElementById("searchInput").addEventListener("input", function () {
         const filter = this.value.toLowerCase();
         const rows = document.querySelectorAll("#tablebody tr");
@@ -139,4 +216,5 @@ search_input,validation_input,badge%}
         });
     });
 </script>
+
 {% endblock %}

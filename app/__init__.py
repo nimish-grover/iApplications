@@ -26,8 +26,8 @@ application = DispatcherMiddleware(Core, {
     '/isaksham':Saksham,
     '/esaksham':eSaksham,
     '/esaksham_1':eSaksham_1,
-    '/ijalagam':iJalagam,
-    '/ijal':iJal
+    '/ijal':iJalagam,
+    '/ijalagam':iJal
 })
 
 # application = iCore

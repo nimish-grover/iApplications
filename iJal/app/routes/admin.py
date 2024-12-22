@@ -15,9 +15,18 @@ blp = Blueprint("admin","admin")
 def progress():
     if current_user.isAdmin:
         progress = State.get_all_states_status()
-
+        status_dummy = [{'category':'Human','id':'population'},
+                        {'category':'Livestocks','id':'livestock'},
+                        {'category':'Crops','id':'crop'},
+                        {'category':'Industry','id':'industry'},
+                        {'category':'Surface','id':'surface'},
+                        {'category':'Groundwater','id':'ground'},
+                        {'category':'LULC','id':'lulc'},
+                        {'category':'Rainfall','id':'rainfall'},
+                        {'category':'Water Transfer','id':'water_transfer'}]
         return render_template('admin/progress.html',
                             progress=progress,
+                            status = status_dummy,
                             menu = HelperClass.get_admin_menu(),
                             progress_data = json.dumps(progress))
     else: 
@@ -46,22 +55,7 @@ def home():
         flash('You must be admin to view this page!')
         return redirect(url_for('auth.login'))
     
-@blp.route('/status',methods=['POST','GET'])
-def status():
-    if request.method == 'POST':
-        payload = request.json
-        session['redirect_payload'] = payload
-        return jsonify({'redirect_url': url_for('.status')})
-    
-    payload = session.get('redirect_payload')
-    progress_status = BlockData.get_progress_status(block_id=payload['block_id'], 
-                                            district_id=payload['district_id'], 
-                                            state_id=payload['state_id'])
-    return render_template('admin/status.html',
-                           progress = progress_status,
-                           flash_message = get_message(),
-                           breadcrumbs=HelperClass.get_breadcrumbs(payload),
-                           menu= HelperClass.get_admin_menu())
+
     
 @blp.route('/dashboard',methods=['POST','GET'])
 def dashboard():
