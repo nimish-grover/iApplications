@@ -1,4 +1,5 @@
 from flask_login import UserMixin
+from sqlalchemy import case,func
 from iJal.app.db import db
 from passlib.hash import pbkdf2_sha256
 
@@ -30,6 +31,17 @@ class User(UserMixin, db.Model):
             'isActive': self.isActive,
             'isAdmin': self.isAdmin,
             'state_id': self.state_id
+        }
+    @classmethod
+    def get_active_count(cls):
+        counts = db.session.query(
+            func.count(case((cls.isActive == 'True', 1))).label('active_users'),
+            func.count(case((cls.isActive == 'False', 1))).label('inactive_users')
+        ).one()
+
+        return {
+            'active_users': counts.active_users,
+            'inactive_users': counts.inactive_users
         }
     
     def save_to_db(self):

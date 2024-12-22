@@ -1,4 +1,7 @@
 from flask import url_for
+from iJal.app.models.states import State
+from itertools import cycle
+from iJal.app.models.users import User
 
 
 class HelperClass():
@@ -41,3 +44,37 @@ class HelperClass():
             {'name': payload['district_name'], 'href': '#'},
             {'name': payload['block_name'], 'href': '#'}
         ]
+        
+    def get_admin_menu():
+        return [
+            { "route" : url_for('.dashboard'), "label":"dashboard", "icon":"fa-solid fa-chalkboard-user"},
+            { "route" : url_for('.home'), "label":"home", "icon":"fa-solid fa-house"},
+            { "route" : url_for('.progress'), "label":"progress", "icon":"fa-solid fa-bars-progress"}
+        ]
+    @classmethod
+    def get_dashboard_menu(cls):
+        progress_data = State.get_all_states_status()
+        chart_data = []
+        colors = ['#4b4b4b','#9a77cf','#543884','#262254','#a13670','#ec4176','#ffa45e','#1fa2a5']
+        color_cycle = cycle(colors)
+        for item in progress_data:
+            if item['completed']:
+                color = next(color_cycle)
+                chart_data.append({'state_name':item['state_name'], 'completed':item['completed'],'block_name':item['block_name'],
+                                'color':color,'district_name':item['district_name'],'percentage':str(item['completed'])+'%',
+                                'state_short_name':item['state_short_name']})
+        return chart_data
+    @classmethod
+    def get_card_data(cls,chart_data):
+        completed_blocks = sum(1 for item in chart_data if item.get('completed') == 100)
+        user_status = User.get_active_count()
+        return [
+            {'title': 'Users Active', 'value': cls.format_value(user_status['active_users']), 'icon': 'fa-user-gear'},
+            {'title': 'Users Registered', 'value': cls.format_value(user_status['active_users']+user_status['inactive_users']), 'icon': 'fa-user-check'},
+            {'title': 'Blocks In-Progress', 'value': cls.format_value(len(chart_data)-completed_blocks), 'icon': 'fa-gears'},
+            {'title': 'Blocks Completed', 'value': cls.format_value(completed_blocks), 'icon': 'fa-list-check'}]
+    
+    def format_value(value):
+        if value < 10:
+            return f"{value:02d}"
+        return str(value)

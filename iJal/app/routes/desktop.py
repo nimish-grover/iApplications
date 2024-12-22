@@ -10,13 +10,21 @@ from iJal.app.models.block_pop import BlockPop
 
 blp = Blueprint('desktop','desktop')
 
-@blp.route('/status')
+@blp.route('/status',methods=['POST','GET'])
 def status():
-    session_data = session.get('payload')
+    if request.method == 'POST':
+        payload = request.json
+        session['redirect_payload'] = payload
+        return jsonify({'redirect_url': url_for('.status')})
+    
+    session_data = session.get('redirect_payload')     
     if not session_data:
-        return redirect(url_for('mobile.index'))
-    else:
-        payload = json.loads(session_data)
+        session_data = session.get('payload')
+        if not session_data:
+            return redirect(url_for('mobile.index'))
+        else:
+            payload = json.loads(session_data)
+    payload = json.loads(session_data)
     progress_status = BlockData.get_progress_status(block_id=payload['block_id'], 
                                             district_id=payload['district_id'], 
                                             state_id=payload['state_id'])

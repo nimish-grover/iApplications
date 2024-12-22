@@ -9,6 +9,7 @@ from iJal.app.models import State, District, Block, Village, User
 from iJal.app.routes.auth import blp as authBlueprint
 from iJal.app.routes.desktop import blp as desktopBlueprint
 from iJal.app.routes.mobile import blp as mobileBlueprint
+from iJal.app.routes.admin import blp as adminBlueprint
 
 def create_app():
     app = Flask(__name__)
@@ -38,4 +39,5 @@ def create_app():
     app.register_blueprint(authBlueprint, url_prefix="/auth")
     app.register_blueprint(desktopBlueprint, url_prefix="/block")
     app.register_blueprint(mobileBlueprint)
+    app.register_blueprint(adminBlueprint,url_prefix='/admin')
     return app
