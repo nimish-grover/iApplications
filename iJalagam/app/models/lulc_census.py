@@ -1,5 +1,7 @@
-from sqlalchemy import func
+from sqlalchemy import Numeric, func
 from iJalagam.app.db import db
+from iJalagam.app.models.block_lulc import BlockLULC
+from iJalagam.app.models.block_territory import BlockTerritory
 from iJalagam.app.models.blocks import Block
 from iJalagam.app.models.districts import District
 from iJalagam.app.models.lulc import LULC
@@ -34,18 +36,18 @@ class LULCCensus(db.Model):
         }
     
     @classmethod
-    def get_lulc_by_block(cls, block_id, district_id):
+    def get_census_data_lulc(cls, block_id, district_id):
         query = db.session.query(
                 func.sum(cls.lulc_area).label('catchment_area'),
                 LULC.catchment,
-            ).join(TerritoryJoin, TerritoryJoin.id==cls.tj_id
-            ).join(LULC, LULC.id==cls.lulc_id
-            ).join(Block, Block.id == TerritoryJoin.block_id
-            ).join(District, District.id==TerritoryJoin.district_id
-            ).filter(
-                Block.id == block_id, 
-                District.id == district_id
-            ).group_by(LULC.catchment)
+                ).join(TerritoryJoin, TerritoryJoin.id==cls.tj_id
+                ).join(LULC, LULC.id==cls.lulc_id
+                ).join(Block, Block.id == TerritoryJoin.block_id
+                ).join(District, District.id==TerritoryJoin.district_id
+                ).filter(
+                    Block.id == block_id, 
+                    District.id == district_id
+                ).group_by(LULC.catchment)
         
         results = query.all()
 
@@ -57,29 +59,68 @@ class LULCCensus(db.Model):
             return json_data
         return None
     
-    
     @classmethod
-    def get_area_by_block(cls,block_id,district_id):
-        query = (
-            db.session.query(
-                func.sum(LULCCensus.lulc_area).label('lulc_area'),  # SUM(lulc_area)
-                LULCCensus.lulc_id.label('lulc_id')  # lulc_id
-            )
-            .join(TerritoryJoin, TerritoryJoin.id == LULCCensus.tj_id)  # JOIN territory_joins
-            .join(Block, Block.id == TerritoryJoin.block_id)  # JOIN blocks
-            .join(District, District.id == TerritoryJoin.district_id)  # JOIN districts
-            .filter(
-                Block.id == block_id,  # WHERE blocks.id = 2074
-                District.id == district_id  # WHERE districts.id = 745
-            )
-            .group_by(LULCCensus.lulc_id) )
+    def get_lulc_by_block(cls, block_id, district_id):
+        block_lulc_subquery = db.session.query(
+                func.sum(BlockLULC.area).label("catchment_area"),
+                BlockLULC.lulc_id.label("lulc_id"),
+                ).join(BlockTerritory, BlockTerritory.id == BlockLULC.bt_id
+                ).join(Block, Block.id == BlockTerritory.block_id
+                ).filter(Block.id == block_id
+                ).group_by(BlockLULC.lulc_id
+                ).subquery()
+
+        # Subquery for `lulc_census`
+        lulc_census_subquery = db.session.query(
+                func.sum(LULCCensus.lulc_area).label("catchment_area"),
+                LULCCensus.lulc_id.label("lulc_id"),
+                ).join(TerritoryJoin, TerritoryJoin.id == LULCCensus.tj_id
+                ).join(Block, Block.id == TerritoryJoin.block_id
+                ).filter(Block.id == block_id
+                ).group_by(LULCCensus.lulc_id
+                ).subquery()
+
+        # Main query
+        query = db.session.query(
+                LULC.catchment.label("catchment"),
+                func.coalesce(
+                    func.sum(block_lulc_subquery.c.catchment_area),
+                    func.sum(lulc_census_subquery.c.catchment_area),
+                    0
+                ).label("catchment_area"),
+                ).outerjoin(block_lulc_subquery, block_lulc_subquery.c.lulc_id == LULC.id
+                ).outerjoin(lulc_census_subquery, lulc_census_subquery.c.lulc_id == LULC.id
+                ).group_by(LULC.catchment)
         
         results = query.all()
+
         if results:
             json_data = [{
-            'lulc area':row.lulc_area,
-            'lulc_id':row.lulc_id
+                'catchment': row.catchment,
+                'catchment_area': row.catchment_area
             } for row in results]
             return json_data
         return None
+    
+    @classmethod 
+    def get_lulc(cls,block_id,district_id):
+        query = db.session.query(
+            func.round(func.sum(LULCCensus.lulc_area).cast(Numeric), 2).label('lulc_area'),
+            LULC.id,
+            LULC.display_name
+        ).join(TerritoryJoin, TerritoryJoin.id == LULCCensus.tj_id
+        ).join(LULC, LULC.id == LULCCensus.lulc_id
+        ).join(Block, Block.id == TerritoryJoin.block_id
+        ).join(District, District.id == TerritoryJoin.district_id
+        ).filter(Block.id == block_id, District.id == district_id
+        ).group_by(LULC.id)
         
+        results = query.all()
+        
+        if results:
+            json_data = [{
+                'lulc_id':row.id,
+                'lulc_area':row.lulc_area
+            } for row in results]
+            return json_data
+        return None

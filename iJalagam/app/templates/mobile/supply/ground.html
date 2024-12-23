@@ -12,17 +12,17 @@
         <table class="table table-bordered table-sm fs-7 mb-0">
             <thead>
                 <tr>
-                    {% for row in table_data %}
-                    <th>{{row.name | title}}</th>
-                    {% endfor %}
+                    <th>Description</th>
+                    <th>Value</th>
                 </tr>
             </thead>
             <tbody>                  
-                <tr>
-                    {% for row in table_data %}
-                    <td class="text-end">{{row.value}}</td>
-                    {% endfor %}
-                </tr>                    
+                {% for row in groundwater %}
+                    <tr></tr>
+                        <td class="text-start">{{row.name | title}}</td>
+                        <td class="text-end">{{row.value}}</td>
+                    </tr>
+                {% endfor %}                
             </tbody>
         </table>
       </div>
@@ -34,7 +34,8 @@
 <script>
     var chartDom = document.getElementById('main');
     var myChart = echarts.init(chartDom);
-    let chart_data = JSON.parse(document.getElementById('chartData').value)
+    let chart_data = JSON.parse(document.getElementById('chartData').value);
+    chart_data = chart_data.slice(0,2);
     var option;
 
     option = {

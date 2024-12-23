@@ -55,7 +55,8 @@ class HelperClass():
     def get_dashboard_menu(cls):
         progress_data = State.get_all_states_status()
         chart_data = []
-        colors = ['#4b4b4b','#9a77cf','#543884','#262254','#a13670','#ec4176','#ffa45e','#1fa2a5']
+        # colors = ['#4b4b4b','#9a77cf','#543884','#262254','#a13670','#ec4176','#ffa45e','#1fa2a5']
+        colors = ['#31f5c9','#faf424','#8132fa','#fa582c','#f5b12b','#ff2dc4','#3cc720','#3c86f6']
         color_cycle = cycle(colors)
         for item in progress_data:
             if item['completed']:

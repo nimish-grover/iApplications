@@ -30,22 +30,3 @@ class District(db.Model):
             "district_name": self.district_name,
             "census_code": self.census_code
         }
-        
-    @classmethod
-    def get_aspirational_districts(cls, state_lgd_code):
-        results = cls.query.filter(cls.lgd_code.in_([745,196,641,72,20,338,563,9,434,398,431,426,405,500,92,115,112,227,583,596,610,721,129,119,132]), 
-                                   cls.state_lgd_code==state_lgd_code).order_by(cls.district_name).all()
-        if results:
-            json_data = [result.json() for result in results]
-            return json_data
-        else:
-            return None
-        
-        
-    @classmethod
-    def get_lgd_code(cls,district_id):
-        query = db.session.query(cls.lgd_code).filter_by(id=district_id).scalar()
-        if query:
-            return query
-        else:
-            return None

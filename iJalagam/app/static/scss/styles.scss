@@ -4,7 +4,7 @@
 
 $primary: #9e29fb;
 $secondary:#f564ff;
-$success:#9ee56c;
+$success:#53b011;
 $danger:#f54a4a;
 $warning:#feaf3b;
 $info:#b3e7f8;
@@ -56,19 +56,29 @@ $dark:#142527;
 .mt-n2{
   margin-top: -0.2em;
 }
+.mt-6{
+  margin-top: 6rem !important;
+}
 .fs-7{
     font-size: 0.8rem;
 }
 .fs-8{
     font-size: 0.7rem;
 }
+.fs-9{
+    font-size: 0.65rem;
+}
 .h-80{
-  height: 80%;
+  height: 70vh;
   max-height: 75vh;
 }
 .h-70{
-  height: 70%;
+  height: 60vh;
   max-height: 70%;
+}
+.h-60{
+  height: 50vh;
+  max-height: 60%;
 }
 .form-floating > label::after {
   background-color: transparent !important;
@@ -98,7 +108,120 @@ body {
 }
 
 /* END CSS Animated Background */
+/* Chart Table Toggle Button */
+:root {
+  --primary-color: #fff;
+  --secondary-color: #9e29fb;
+}
 
+*,
+*::after,
+*::before {
+  box-sizing: border-box;
+}
+
+.center-center {
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tabs {
+  display: flex;
+  position: relative;
+  background-color: #fff;
+  box-shadow: 0 0 1px 0 rgba(#185ee0, 0.15), 0 6px 12px 0 rgba(#185ee0, 0.15);
+  padding: 0.75rem;
+  border-radius: 99px; // High number for pill effect
+
+  * {
+      z-index: 2;
+  }
+
+  @media (max-width: 700px) {
+      transform: scale(0.6);
+  }
+}
+
+input[type="radio"] {
+  display: none;
+
+  &:checked {
+      & + label {
+          color: var(--primary-color);
+
+          .notification {
+              background-color: var(--primary-color);
+              color: #fff;
+          }
+      }
+  }
+}
+
+.tab {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 54px;
+  width: 200px;
+  font-size: 1.25rem;
+  font-weight: 500;
+  border-radius: 0px; // High number for pill effect
+  cursor: pointer;
+  transition: color 0.15s ease-in;
+}
+
+.notification {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  margin-left: 0.75rem;
+  border-radius: 50%;
+  background-color: var(--secondary-color);
+  transition: 0.15s ease-in;
+}
+
+input[id="radio-1"]:checked ~ .glider {
+  transform: translateX(0);
+}
+
+input[id="radio-2"]:checked ~ .glider {
+  transform: translateX(100%);
+}
+
+.glider {
+  position: absolute;
+  display: flex;
+  height: 54px;
+  width: 200px;
+  background-color: var(--secondary-color);
+  z-index: 1;
+  border-radius: 99px; // High number for pill effect
+  transition: 0.25s ease-out;
+}
+
+// Bottom Menu
+.bottom-menu {
+  &.fade-in {
+      width: 1px;
+      opacity: 0;
+      transition: all 0.75s ease;
+
+      &.show {
+          opacity: 1;
+          width: 100%;
+      }
+  }
+}
+
+/* End Toggle Button */
 /* Variables */
 $overlay-bg: rgba(0, 0, 0, 0.5);
 $spinner-border-color: #4D658D;
@@ -334,3 +457,17 @@ $font-family: 'PT Sans Narrow', sans-serif;
   }
 }
 /* custome dropdown */
+
+/* Remove spinners */
+input[type="number"] {
+  appearance: textfield; // Standard property for compatibility
+  &::-webkit-inner-spin-button, 
+  &::-webkit-outer-spin-button {
+    -webkit-appearance: none; // Remove default spinner buttons
+    margin: 0; // Optional: Remove margin for better layout
+  }
+
+  -moz-appearance: textfield; // Firefox: Remove spinner buttons
+}
+
+/* Remove spinners*/

@@ -10,126 +10,7 @@
     <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='scss/styles.css')}}">
     <style>
 
-    .center-center {
-        position: absolute;
-        left: 0;
-        top: 0;
-        right: 0;
-        bottom: 0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-    :root {
-        --primary-color: #fff;
-        --secondary-color: #f564ff;
-    }
-
-    *,
-    *:after,
-    *:before {
-        box-sizing: border-box;
-    }
-    .tabs {
-	display: flex;
-	position: relative;
-	background-color: #fff;
-	box-shadow: 0 0 1px 0 rgba(#185ee0, 0.15), 0 6px 12px 0 rgba(#185ee0, 0.15);
-	padding: 0.75rem;
-	border-radius: 99px; /* just a high number to create pill effect*/
-        * {
-            z-index: 2;
-        }
-    }
-
-    input[type="radio"] {
-        display: none;
-    }
     
-    
-
-    .tab {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        height: 54px;
-        width: 200px;
-        font-size: 1.25rem;
-        font-weight: 500;
-        border-radius: 0px; /* just a high number to create pill effect*/
-        cursor: pointer;
-        transition: color 0.15s ease-in;
-    }
-
-    .notification {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: 2rem;
-        height: 2rem;
-        margin-left: 0.75rem;
-        border-radius: 50%;
-        background-color: var(--secondary-color);
-        transition: 0.15s ease-in;
-    }
-
-    input[type="radio"] {
-        &:checked {
-            & + label {
-                color: var(--primary-color);
-                & > .notification {
-                    background-color: var(--primary-color);
-                    color: #fff;
-                }
-            }
-        }
-    }
-
-    input[id="radio-1"] {
-        &:checked {
-            & ~ .glider {
-                transform: translateX(0);
-            }
-        }
-    }
-
-    input[id="radio-2"] {
-        &:checked {
-            & ~ .glider {
-                transform: translateX(100%);
-            }
-        }
-    }
-
-    .glider {
-        position: absolute;
-        display: flex;
-        height: 54px;
-        width: 200px;
-        background-color: var(--secondary-color);
-        z-index: 1;
-        border-radius: 99px; /* just a high number to create pill effect*/
-        transition: 0.25s ease-out;
-    }
-
-    @media (max-width: 700px) {
-        .tabs {
-            transform: scale(0.6);
-        }
-    }
-    /*Bottom Menu*/
-    .bottom-menu{
-        &.fade-in{
-            width: 1px;
-            opacity: 0;
-            transition: all .75s ease;
-
-            &.show{
-                opacity: 1;
-                width: 100%; 
-            }
-        }
-    }
     /*End Bottom Menu*/
     </style>
 </head>
@@ -142,52 +23,126 @@
           <div id="loading-content"></div>
         </div>
     </div>
-    <nav class="navbar fixed-top bg-primary">
-        <div class="container-fluid">
-          <a class="navbar-brand text-white" href="#">Jalagam</a>
+    <nav class="navbar fixed-top bg-primary justify-content-between">        
+        <div class="ms-2">
+            <a class="navbar-brand text-white" href="{{url_for('mobile.index')}}">
+                <span class="me-2"><i class="fa-solid fa-droplet"></i></span>Jalagam</a>
+        </div>
+        <div>
+            <button class="btn text-white" type="button" data-bs-toggle="offcanvas" 
+            data-bs-target="#offcanvasMenu" aria-controls="offcanvasMenu">
+            <i class="fa-solid fa-bars"></i>
+            </button>
         </div>
       </nav>
 
-      <div class="center-center">
-        <div class="card border-primary text-center mx-2 h-50 w-100">
-            <div class="card-header bg-primary p-1">
-            </div>
-            <div class="card-body">
-                {% if breadcrumbs %}
-                <div class="container-fluid">
-                <nav style="--bs-breadcrumb-divider: '|';" aria-label="breadcrumb">
-                    <ol class="breadcrumb fs-7">
-                        <!-- <li class="breadcrumb-item "><a class=" link-underline link-underline-opacity-0" href="/home"><strong>Home</strong></a></li> -->
-                    {% for breadcrumb in breadcrumbs %}
-                    <li class="breadcrumb-item">
-                        <a class="link-underline link-underline-opacity-0 {% if loop.index == breadcrumbs | length %} link-dark {% endif %}" href="{{breadcrumb.href}}">
-                            {{breadcrumb.name}}
-                        </a>
-                    </li>
-                    {% endfor %}
-                    </ol>
-                </nav> 
-                </div>
-                {% endif %} 
-                {% block content %}
-                {% endblock %}
-            </div>
-            <div class="card-footer bg-primary p-1">
-            </div>
-          </div>
-    </div>
-    {% from 'mobile/components.html' import bottom_menu, toggle_button %}
-    <div class="fixed-bottom">
-        <div class="mb-3">
-            {{toggle_button(labels=toggle_labels)}}
+    {% from 'mobile/components.html' import bottom_menu, toggle_button, progress_bar, approve_button %}    
+   <div class="container-fluid h-100">
+    <div class="mt-5">&nbsp;</div>
+   <!-- {#<div class="mt-6">
+        {% if 'index' in request.path or 'home' in request.path or 'auth/' in request.path %}
+        <div class="mt-5">&nbsp;</div> 
+        {% else %}
+        <label for="progress_bar" class="text-white fs-8 fw-bold">Validation Progress</label>
+        {{progress_bar()}}
+        {% endif %}
+    </div>#} -->
+    <div class="col-lg-4 col-md-6 col-sm-12 col-xs-12 mx-auto">   
+    <div class="card border-primary text-center h-60 mt-3">
+        <div class="card-header bg-primary p-1">
         </div>
-        
+        <div class="card-body">
+            {% if breadcrumbs %}
+            <div class="container-fluid">
+            <nav style="--bs-breadcrumb-divider: '|';" aria-label="breadcrumb">
+                <ol class="breadcrumb fs-9">
+                    <!-- <li class="breadcrumb-item "><a class=" link-underline link-underline-opacity-0" href="/home"><strong>Home</strong></a></li> -->
+                {% for breadcrumb in breadcrumbs %}
+                <li class="breadcrumb-item">
+                    <a class="link-underline link-underline-opacity-0 {% if loop.index == breadcrumbs | length %} link-dark {% endif %}" href="{{breadcrumb.href}}">
+                        {{breadcrumb.name}}
+                    </a>
+                </li>
+                {% endfor %}
+                </ol>
+            </nav> 
+            </div>
+            {% endif %} 
+            {% block content %}
+            {% endblock %}
+            {% if 'index' in request.path or 'home' in request.path or 'auth/' in request.path%}
+            <div>&nbsp;</div>
+            {% else %}
+            {{approve_button()}}
+            {% endif %}
+        </div>
+        <div class="card-footer bg-primary p-1">
+        </div>
+    </div>     
+</div>
+   </div>
+    <div class="fixed-bottom">
+        {{toggle_button(labels=toggle_labels)}}        
         {{ bottom_menu(menu_array=menu|default([])) }}
     </div>
+    <div class="offcanvas offcanvas-start" data-bs-scroll="true" tabindex="-1" id="offcanvasMenu" aria-labelledby="offcanvasMenu">
+        <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="offcanvasMenuLabel">Jalagam</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+        <div class="offcanvas-body">
+            <p>Please click on the desired link.</p>
+            <div class="list-group list-group-flush">
+                {% if current_user.is_authenticated %}
+                    {% if current_user.isAdmin %}
+                    <a class="list-group-item list-group-item-action" href="{{url_for('auth.approve')}}">Approve</a>
+                    <a class="list-group-item list-group-item-action" href="{{url_for('auth.reset_password')}}">Reset Password</a>
+                    {% endif %}
+                    <a class="list-group-item list-group-item-action" href="{{url_for('auth.change_password')}}">Change Password</a>
+                    <a href="{{url_for('mobile.home')}}" class="list-group-item list-group-item-action">Budget</a>
+                    <a href="{{url_for('auth.logout')}}" class="list-group-item list-group-item-action">Logout</a>
+                {% else %}
+                <a href="{{url_for('auth.login')}}" class="list-group-item list-group-item-action">Login</a>
+                <a href="{{url_for('mobile.index')}}" class="list-group-item list-group-item-action">Home</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% for message in flash_message %}
+    {% if message %}
+    <div class="toast-container position-fixed bottom-0 end-0 p-3 mb-6">
+        <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+          <div class="toast-header">
+            <span class="me-2"><i class="fa-solid fa-droplet"></i></span>
+            <strong class="me-auto">Jalagam says...</strong>
+            <small></small>
+            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+          </div>
+          <div class="toast-body" id="flashMesssageDiv">
+            {{message}}
+          </div>
+        </div>
+      </div> 
+      {% endif %}   
+      {% endfor %}
     <!--SCRIPTs -->
     <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.1/dist/echarts.min.js"></script>
+    <script src="{{url_for('static', filename='js/popper.min.js')}}"></script> 
     <script src="{{url_for('static', filename='js/bootstrap.min.js')}}"></script>    
     <script>
+        // Toggle dropdown
+        const dropdownElementList = document.querySelectorAll('.dropdown-toggle')
+        const dropdownList = [...dropdownElementList].map(dropdownToggleEl => new bootstrap.Dropdown(dropdownToggleEl))
+
+        // toggle toast
+        const toastDiv = document.getElementById('liveToast');
+        const flash_message = document.getElementById('flashMesssageDiv')
+        if (flash_message) {
+                if (flash_message.innerText.trim() !== 'false' && flash_message.innerText.trim() !== '') {
+                const toastBootstrap = bootstrap.Toast.getOrCreateInstance(toastDiv);
+                toastBootstrap.show();
+            }
+        }
         document.addEventListener('DOMContentLoaded', () => {
             const bottomMenu = document.querySelector('.fixed-bottom.bg-dark.bottom-menu.fade-in');
             if (bottomMenu){bottomMenu.classList.add('show')}            

@@ -1,45 +1,71 @@
-from datetime import datetime
-
-from sqlalchemy import func
-from iJalagam.app import db
+from iJalagam.app.db import db
 
 
 class Industry(db.Model):
-    __tablename__ = "industries"
 
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(),nullable=False)
-    short_name = db.Column(db.String(100), nullable=False) # sc, st, male, female
-    display_name = db.Column(db.String(100), nullable=False)
+    __tablename__ = 'industries'
 
-    
+    id=db.Column(db.Integer, primary_key=True, autoincrement=True)
+    industry_sector = db.Column(db.String(200), nullable=False, unique=True)
 
-    def __init__(self, name,short_name,display_name):
-        self.name = name
-        self.display_name = display_name
-        self.short_name = short_name
-
+    def __init__(self, industry_sector):
+        self.industry_sector = industry_sector
 
     def json(self):
         return {
-            'id':self.id,
-            'name': self.name,
-            'display_name':self.display_name,
-            'short_name':self.short_name
+            'id': self.id,
+            'industry_sector' : self.industry_sector
         }
     
     @classmethod
-    def get_all(cls):
-        query = cls.query.order_by(cls.id).all()
-        json_data = [result.json() for result in query]
-        if json_data:
-            return json_data
+    def get_all_industries(cls):
+        results = cls.query.all()
+
+        if results:
+            return results
         else:
-            return None
+            data = cls.json_data["industries"]
+            for industry_name in data:
+                industry = Industry(industry_sector=industry_name)
+                db.session.add(industry)
+            db.session.commit()
+            return cls.query.all()
 
-    def update_to_db():
-        db.session.commit()
-
-    def save_to_db(self):
-        db.session.add(self)
-        # db.session.commit()
+    json_data = {
+        "industries": [
+            "Aerospace and Aviation",
+            "Agriculture",
+            "Apparel Made Ups & Home Furnishing",
+            "Automotive",
+            "Beauty & Wellness",
+            "Banking Financial Services and Insurance",
+            "Capital Goods",
+            "Cement",
+            "Construction",
+            "Electronics",
+            "Food Industry",
+            "Furniture & Fittings",
+            "Gem & Jewellery",
+            "Handicrafts and Carpet",
+            "Healthcare",
+            "Hydrocarbon",
+            "Indian Iron and Steel",
+            "Infrastructure Equipment",
+            "Instrumentation Automation",
+            "IT ITeS",
+            "Leather",
+            "Life Sciences",
+            "Logistics",
+            "Media & Entertainment",
+            "Power",
+            "Retailers Association's",
+            "Rubber Chemical & Petrochemical",
+            "Green Industries",
+            "Mining",
+            "Sports Physical Education Fitness & Leisure",
+            "Telecom",
+            "Textile",
+            "Tourism and Hospitality",
+            "Water Management & Plumbing"
+        ]
+    }

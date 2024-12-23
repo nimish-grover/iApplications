@@ -23,12 +23,3 @@ class Population(db.Model):
             "display_name": self.display_name,
             "short_name": self.short_name
         }
-        
-    @classmethod
-    def get_all(cls):
-        query = cls.query.order_by(cls.id).all()
-        json_data = [result.json() for result in query]
-        if json_data:
-            return json_data
-        else:
-            return None

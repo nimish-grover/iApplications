@@ -9,12 +9,14 @@ class State(db.Model):
     state_name = db.Column(db.String(255), nullable=True)
     census_code = db.Column(db.Integer, nullable=True)
     is_state = db.Column(db.Boolean, nullable=True, default=True)
+    short_name = db.Column(db.String(10), nullable=True)
 
-    def __init__(self, lgd_code, state_name=None, census_code=None, is_state=None):
+    def __init__(self, lgd_code, state_name=None, census_code=None, is_state=None, short_name=None):
         self.lgd_code = lgd_code
         self.state_name = state_name
         self.census_code = census_code
         self.is_state = is_state
+        self.short_name = short_name
 
     def __repr__(self):
         return f"<State(id={self.id}, lgd_code={self.lgd_code}, state_name={self.state_name})>"
@@ -25,23 +27,17 @@ class State(db.Model):
             "lgd_code": self.lgd_code,
             "state_name": self.state_name,
             "census_code": self.census_code,
-            "is_state": self.is_state
+            "is_state": self.is_state,
+            "short_name": self.short_name
         }
     
     @classmethod
-    def get_aspirational_states(cls):
-        results = cls.query.join(District, District.state_lgd_code==cls.lgd_code
-                                ).filter(District.lgd_code.in_([745,196,641,72,20,338,563,9,434,398,431,426,405,500,92,115,112,227,583,596,610,721,129,119,132])
-                                ).order_by(cls.state_name).all()
+    def get_states_by_id(cls, state_id):
+        results = cls.query.filter_by(id=state_id).all()
         if results:
-            return [result.json() for result in results]
+            json_data = [{'tj_id':0,'id':item.id,'name':item.state_name,'code':item.lgd_code} for item in results]
+            return json_data
         else:
             return None
 
-    @classmethod
-    def get_lgd_code(cls,state_id):
-        query = db.session.query(cls.lgd_code).filter_by(id=state_id).scalar()
-        if query:
-            return query
-        else:
-            return None
+

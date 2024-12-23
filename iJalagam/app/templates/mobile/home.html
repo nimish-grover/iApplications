@@ -1,6 +1,6 @@
 {% extends 'mobile/base.html' %}
 {% block title %} Water Budget {% endblock %}
-{% from 'mobile/components.html' import toggle_button, chart %}
+{% from 'mobile/components.html' import chart, table_title %}
 {% block content %}
 <div id="cardCarousel" class="carousel slide">
     <div class="carousel-inner">
@@ -8,7 +8,7 @@
         {{chart()}}
       </div>
       <div class="carousel-item">
-        <h6>Water Budget</h6>
+        {{table_title(title='Block Level Water Budget', subtitle='(all values are in Ha M)')}}
         <table class="table table-bordered table-sm fs-7 mb-0">
           <thead class="text-center">
               <tr class="bg-light">
@@ -22,39 +22,37 @@
               </tr>
               {% for row in demand_side %}
               <tr>
-                  <td class="text-start">{{row.category | title}}</td>
-                  <td class="text-end">{{'%0.2f'|format(row.value|float)}}</td>
+                  <td class="text-start py-0">{{row.category | title}}</td>
+                  <td class="text-end py-0">{{'%0.2f'|format(row.water_value|float)}}</td>
               </tr>
               {% endfor %}
               <tr>
                   <td colspan="2" class="fw-bold bg-success bg-opacity-50 p-0">Supply</td>
               </tr>
               {% for row in supply_side %}
-              {% if row.category %}
               <tr>
-                  <td class="text-start">{{row.category | title}}</td>
-                  <td class="text-end">{{'%0.2f'|format(row.value|float)}}</td>
+                  <td class="text-start py-0">{{row.category | title}}</td>
+                  <td class="text-end py-0">{{'%0.2f'|format(row.water_value|float)}}</td>
               </tr>
-              {% endif %}
               {% endfor %}
               <tr>
                   <td colspan="2" class="fw-bold bg-info bg-opacity-50 text-center p-0">Water Budget</td>
               </tr>
-              {% for row in budget_side %}
-              {% if loop.index == 1%}
+              {% for row in water_budget %}
               <tr>
-                  <td class="text-start">{{row.description | title}}</td>
-                  <td class="text-end">{{'%0.2f'|format(row.value|float)}}</td>
+                  <td class="text-start py-0">{{row.category | title}}</td>
+                  <td class="text-end py-0">{{'%0.2f'|format(row.water_value|float)}}</td>
               </tr>
-              {% endif %}
               {% endfor %}
+              <tr>
+                {% set total_supply = water_budget[1]['water_value'] %}
+                {% set total_demand = water_budget[0]['water_value'] %}
+                {% set water_budget = total_supply - total_demand %}
+                <td class="text-start py-0 text-{% if water_budget < 0 %}danger{% else %}success{% endif %}-emphasis">{% if water_budget < 0 %}Deficient{% else %}Surplus{% endif %}</td>
+                <td class="text-end py-0 text-{% if water_budget < 0 %}danger{% else %}success{% endif %}-emphasis">{{'%0.2f'|format(water_budget|float)}}</td>
+              </tr>
           </tbody>
       </table>
-      </div>
-      <div class="carousel-item">
-        <div class="h-25">
-          Slide 2
-        </div>
       </div>
     </div>
   </div>
@@ -66,16 +64,17 @@
 var chartDom = document.getElementById('main');
     var myChart = echarts.init(chartDom);
     let chart_data = JSON.parse(document.getElementById('chartData').value);
+    const chart_titles = ['Total Water Demand','Total Water Supply', 'Water Budget']
     var option;
     const data = chart_data;        
     option = {
         title:{
-            text: data[0]['title'],
+            text: chart_titles[0],
             left: 'center',
         },
         xAxis: {
             type: 'category',
-            data: getCategories(data[0]['data']),
+            data: getCategories(data[0]),
             axisLabel: {
                 show: true,
                 rotate: 45,
@@ -103,7 +102,7 @@ var chartDom = document.getElementById('main');
                 fontSize: 8,
                 }
             },
-            data: transformArray(data[0]['data']),
+            data: transformArray(data[0]),
             type: 'bar'
             }
         ]
@@ -113,12 +112,12 @@ var chartDom = document.getElementById('main');
         setInterval(() => {
         myChart.setOption({
             title:{
-                text: data[idx]['title'],
+                text: chart_titles[idx],
                 left: 'center',
             },
             xAxis: {
             type: 'category',
-            data: getCategories(data[idx]['data']),
+            data: getCategories(data[idx]),
             axisLabel: {
                 show: true,
                 rotate: 45,
@@ -149,7 +148,7 @@ var chartDom = document.getElementById('main');
                 fontSize: 8,
                 }
                 },
-                data: transformArray(data[idx]['data']),
+                data: transformArray(data[idx]),
                 type: 'bar'
             }
             ]
@@ -166,7 +165,7 @@ var chartDom = document.getElementById('main');
                 object = {
                 value: value['value'],
                 itemStyle: {
-                    color: value['color']
+                    color: value['background']
                 }
                 }
                 output_array.push(object);
@@ -175,10 +174,11 @@ var chartDom = document.getElementById('main');
             }
 
         function getCategories(input_array) {
-        output_array=[];
-        input_array.forEach((element, idx)=>{
-            output_array.push(element['category'])
-        });
+            const output_array = input_array.map(item => item.category);
+        // output_array=[];
+        // input_array.forEach((element, idx)=>{
+        //     output_array.push(element['category'])
+        // });
         return output_array;
         }
 

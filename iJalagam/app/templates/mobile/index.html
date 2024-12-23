@@ -73,6 +73,9 @@
         let dd_blocks = document.getElementById('dd_block');
         let btn_submit = document.getElementById('btn_submit');
 
+        // disable submit button on load
+        btn_submit.setAttribute('disabled','disabled');
+
         // Enable dropdown state on page load
         dd_states.removeAttribute('disabled','disabled');
 
@@ -98,16 +101,27 @@
             const blocks = await fetchData(url, payload);
             populateSelect(dd_blocks, blocks, 'Select Block');
         });
+        
+        dd_blocks.addEventListener('change', ()=>{
+            btn_submit.removeAttribute('disabled');
+        })
 
         // submit data
         btn_submit.addEventListener('click', async (event)=>{
             event.preventDefault();
             const state_id = dd_states.value;
+            const state_name = dd_states.options[dd_states.selectedIndex].text;
             const district_id = dd_districts.value;
+            const district_name = dd_districts.options[dd_districts.selectedIndex].text;
             const block_id = dd_blocks.value;
+            const block_name = dd_blocks.options[dd_blocks.selectedIndex].text;
             const url = home_url.value;
             toggleSpinner();
-            payload = {'state_id': state_id, 'district_id':district_id, 'block_id': block_id}
+            payload = {
+                'state_id': state_id, 'state_name':state_name,
+                'district_id':district_id, 'district_name':district_name,
+                'block_id': block_id, 'block_name':block_name
+            }
             const redirect_url = await fetchData(url, payload);
             window.location.href = redirect_url;
         });

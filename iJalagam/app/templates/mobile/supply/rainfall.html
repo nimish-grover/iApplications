@@ -9,24 +9,33 @@
       </div>
       <div class="carousel-item">
         <h6>Rainfall</h6>
-        <table class="table table-bordered table-sm fs-7 mb-0">
-            <thead class="text-center">
+        <div class="overflow-y-scroll" style="height:30vh !important;">
+          <table class="table table-bordered table-sm fs-7 mb-0">
+              <thead class="text-center">
+                  <tr>
+                      <th>Observation Month</th>
+                      <th>Normal</th>
+                      <th>Actual</th>
+                  </tr>
+              </thead>
+              <tbody>
+                  {% for rainfall in monthwise_rainfall %}
+                  <tr>
+                      <td class="text-start">{{rainfall.month}}</td>
+                      <td class="text-end">{{rainfall.normal}}</td>
+                      <td class="text-end">{{rainfall.actual}}</td>
+                  </tr>
+                  {% endfor %}
+              </tbody>
+              <tfoot>
                 <tr>
-                    <th>Observation Month</th>
-                    <th>Normal</th>
-                    <th>Actual</th>
+                    <td>Total Rainfall</td>
+                    <td class="text-end">{{ monthwise_rainfall | map(attribute='normal') | sum | round(0) }}</td>
+                    <td class="text-end">{{ monthwise_rainfall | map(attribute='actual') | sum | round(0) }}</td>
                 </tr>
-            </thead>
-            <tbody>
-                {% for rainfall in monthwise_rainfall %}
-                <tr>
-                    <td class="text-start p-0 ps-1">{{rainfall.month}}</td>
-                    <td class="text-center p-0">{{rainfall.normal}}</td>
-                    <td class="text-center p-0">{{rainfall.actual}}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+            </tfoot>
+          </table>
+        </div>
       </div>
     </div>
   </div>
@@ -36,12 +45,21 @@
 {% block scripts %}
 <script>
     let chart_data = JSON.parse(document.getElementById('chartData').value);
+    const months = chart_data.map(item => item.month);
+    const actuals = chart_data.map(item => item.actual);
+    const normals = chart_data.map(item => item.normal);
     var chartDom = document.getElementById('main');
     var myChart = echarts.init(chartDom);
     var option;
-    y_axis_max = Math.ceil(Math.max(...chart_data['actual'])/100)*100
+    actual_max = Math.max(...actuals)
+    normal_max = Math.max(...normals)
+    y_axis_max = Math.ceil(Math.max(actual_max, normal_max)/100)*100
     console.log(y_axis_max);
     option = {
+      legend: {
+        right: 'center',
+        top: 'bottom'
+      },
       title:{
         text: "Annual Rainfall - Actual vs Normal",
         left: 'center',
@@ -63,14 +81,14 @@
           saveAsImage: { show: false }
         }
       },
-      legend: {
-        show: false,
-        data: ['Month', 'Rainfall']
-      },
+      // legend: {
+      //   show: false,
+      //   data: ['Month', 'Rainfall']
+      // },
       xAxis: [
         {
           type: 'category',
-          data: chart_data['months'],
+          data: months,
           axisPointer: {
             type: 'shadow'
           },
@@ -124,7 +142,7 @@
               return value + ' mm';
             }
           },
-          data: chart_data['normal'],
+          data: normals,
         },
         {
           name: 'Actual',
@@ -150,7 +168,7 @@
               return value + ' mm';
             }
           },
-          data: chart_data['actual'],
+          data: actuals,
         }
       ]
     };

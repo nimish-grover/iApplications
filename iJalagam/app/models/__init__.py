@@ -26,15 +26,20 @@ from iJalagam.app.models.strange_table import StrangeTable
 
 
 # Block Data Tables
-from iJalagam.app.models.desktop.block_crops import BlockCrop
-from iJalagam.app.models.desktop.block_groundwater import BlockGroundwater
-from iJalagam.app.models.desktop.block_industries import BlockIndustry
-from iJalagam.app.models.desktop.block_livestocks import BlockLivestock
-from iJalagam.app.models.desktop.block_lulc import BlockLulc
-from iJalagam.app.models.desktop.block_populations import BlockPopulation
-from iJalagam.app.models.desktop.block_rainfall import BlockRainfall
-from iJalagam.app.models.desktop.block_territory import BlockTerritory
-from iJalagam.app.models.desktop.block_waterbodies import BlockWaterbody
+from iJalagam.app.models.block_territory import BlockTerritory
+from iJalagam.app.models.block_livestocks import BlockLivestock
+from iJalagam.app.models.block_pop import BlockPop
+from iJalagam.app.models.block_crops import BlockCrop
+from iJalagam.app.models.block_industries import BlockIndustry
+from iJalagam.app.models.block_ground import BlockGround
+from iJalagam.app.models.block_lulc import BlockLULC
+
+
+from iJalagam.app.models.block_rainfall import BlockRainfall
+from iJalagam.app.models.block_transfer_type import BlockTransferType
+from iJalagam.app.models.block_transfer_sector import BlockTransferSector
+from iJalagam.app.models.block_transfer import BlockWaterTransfer
+
 
 
 # Auth Tables

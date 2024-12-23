@@ -1,6 +1,6 @@
 {% extends 'mobile/base.html' %}
 {% block title %} Runoff {% endblock %}
-{% from 'mobile/components.html' import chart %}
+{% from 'mobile/components.html' import chart, table_title %}
 {% block content %}
 <div id="cardCarousel" class="carousel slide">
     <div class="carousel-inner">
@@ -8,26 +8,33 @@
         {{chart()}}
       </div>
       <div class="carousel-item">
-        <h6>Runoff</h6>
+        {{table_title(title='Available Runoff', subtitle='(in Th Ha M)')}}
         <table class="table table-bordered table-sm fs-7 mb-0">
             <thead class="text-center">
                 <tr>
                     <th>Catchment</th>
-                    <th>Area</th>
                     <th>% Runoff</th>
-                    <th>Runoff</th>
+                    <th>Yield</th>
+                    <th>Available</th>
                 </tr>
             </thead>
             <tbody>
                 {% for row in catchments %}
                 <tr>
-                    <td class="text-start">{{row.name | title}}</td>
-                    <td class="text-end">{{row.area}}</td>
-                    <td class="text-end">{{row.percent_runoff}}</td>
+                    <td class="text-start">{{row.catchment | title}}</td>
                     <td class="text-end">{{row.runoff}}</td>
+                    <td class="text-end">{{row.runoff_yield}}</td>
+                    <td class="text-end">{{row.supply}}</td>
                 </tr>
                 {% endfor %}
             </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="2">Total</td>
+                    <td class="text-end">{{ catchments | map(attribute='runoff_yield') | sum | round(0) }}</td>
+                    <td class="text-end">{{ catchments | map(attribute='supply') | sum | round(0) }}</td>
+                </tr>
+            </tfoot>
         </table>
       </div>
     </div>
@@ -38,42 +45,43 @@
 <script>
 var chartDom = document.getElementById('main');
     let chart_data = JSON.parse(document.getElementById('chartData').value)
+    const yields = chart_data.map(item => item.runoff_yield);
     var myChart = echarts.init(chartDom);
     var option;
 
     const gaugeData = [
     {
-        value: chart_data[0]['percent'],
-        name: chart_data[0]['runoff_type'],
+        value: get_yield_percent(0, yields),
+        name: chart_data[0]['catchment'],
         title: {
         offsetCenter: ['-40%', '80%']
         },
         detail: {
         offsetCenter: ['-40%', '95%']
         },
-        actualValue: chart_data[0]['percent'],
+        // actualValue: chart_data[0]['percent'],
     },
     {
-        value: chart_data[1]['percent'],
-        name: chart_data[1]['runoff_type'],
+        value: get_yield_percent(1, yields),
+        name: chart_data[1]['catchment'],
         title: {
         offsetCenter: ['0%', '80%']
         },
         detail: {
         offsetCenter: ['0%', '95%']
         },
-        actualValue: chart_data[1]['percent'],
+        // actualValue: chart_data[1]['percent'],
     },
     {
-        value: chart_data[2]['percent'],
-        name: chart_data[2]['runoff_type'],
+        value: get_yield_percent(2, yields),
+        name: chart_data[2]['catchment'],
         title: {
         offsetCenter: ['40%', '80%']
         },
         detail: {
         offsetCenter: ['40%', '95%']
         },
-        actualValue: chart_data[2]['percent'],
+        // actualValue: chart_data[2]['percent'],
     }
     ];
     option = {
@@ -124,5 +132,19 @@ var chartDom = document.getElementById('main');
     };
 
     option && myChart.setOption(option);
+
+    function get_yield_percent(index, yields) {
+        // Calculate the sum of yields
+        const sum = yields.reduce((acc, yieldValue) => acc + yieldValue, 0);
+        
+        // Accumulate yield percentage up to the given index
+        let cumulativeSum = 0;
+        for (let i = 0; i <= index; i++) {
+            cumulativeSum += yields[i];
+        }
+        
+        // Calculate and return the cumulative percentage
+        return ((cumulativeSum / sum)*98).toFixed(1); // Using .toFixed(2) for two decimal places
+    }
 </script>
 {% endblock %}

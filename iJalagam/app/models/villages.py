@@ -11,8 +11,8 @@ class Village(db.Model):
     census_code = db.Column(db.Integer, nullable=False)
 
     # Relationships (if needed)
-    state = db.relationship('State', backref=db.backref('villages', lazy=True))
-    district = db.relationship('District', backref=db.backref('villages', lazy=True))
+    state = db.relationship('State', backref=db.backref('villages', lazy='dynamic'))
+    district = db.relationship('District', backref=db.backref('villages', lazy='dynamic'))
     # territory = db.relationship('TerritoryJoin', backref=db.backref('villages', lazy=True), uselist=False, foreign_keys="[TerritoryJoin.village_id]")
 
     def __init__(self, state_lgd_code, district_lgd_code, lgd_code, village_name, census_code):

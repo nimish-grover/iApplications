@@ -1,14 +1,14 @@
 {% extends 'mobile/base.html' %}
 {% block title %} Human {% endblock %}
-{% from 'mobile/components.html' import select, block_button, chart %}
+{% from 'mobile/components.html' import select, block_button, chart, table_title %}
 {% block content %}
 <div id="cardCarousel" class="carousel slide">
     <div class="carousel-inner">
       <div class="carousel-item active">        
         {{chart()}}
-      </div>
+      </div>      
       <div class="carousel-item">
-        <h6>Human Consumption</h6>
+        {{table_title(title='Human Consumption', subtitle='(in Ha M)')}}
         <table class="table table-bordered table-sm fs-7 mb-0">
             <thead class="text-center">
                 <tr>
@@ -22,12 +22,19 @@
                 {% for row in human %}
                 <tr>
                     <td class="text-center">{{loop.index}}</td>
-                    <td>{{row['name'] | title}}</td>
+                    <td class="text-start">{{row['category'] | title}}</td>
                     <td class="text-end">{{row['count']}}</td>
-                    <td class="text-end">{{row['consumption']}}</td>
+                    <td class="text-end">{{row['value']}}</td>
                 </tr>
                 {% endfor %}
             </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="2">Total</td>
+                    <td class="text-end">{{ human | map(attribute='count') | sum | round(0) }}</td>
+                    <td class="text-end">{{ human | map(attribute='value') | sum | round(0) }}</td>
+                </tr>
+            </tfoot>
         </table>
       </div>
     </div>
@@ -83,7 +90,7 @@
             verticalAlign:'middle',
             formatter:'{c} Ha M'
         },
-        color:['#dd6b66']
+        color:[chart_data[0]['background']]
         },
         {
         name: chart_data[1]['category'],
@@ -96,7 +103,7 @@
             verticalAlign:'middle',
             formatter:'{c} Ha M'
         },
-        color:['#37A2DA']
+        color:[chart_data[1]['background']]
         }
     ]
     };
