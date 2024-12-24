@@ -50,14 +50,29 @@ class BlockRainfall(db.Model):
     
     @classmethod
     def get_rainfall_data(cls, bt_id):
-        # query = db.session.query()
+        query = (
+            db.session.query(
+                func.to_char(cls.month_year, 'FMMon-YY').label('month'),
+                func.round(func.sum(cls.actual).cast(db.Numeric), 2).label('actual'),
+                func.round(func.sum(cls.normal).cast(db.Numeric), 2).label('normal'),
+                cls.is_approved
+            )
+            .filter(cls.bt_id == bt_id)
+            .group_by(func.to_char(cls.month_year, 'FMMon-YY'),cls.is_approved)
+            .order_by(func.min(cls.month_year))
+        )
 
-        # results = query.all()
+        # Execute the query
+        results = query.all()
 
-        # if results:
-        #     json_data = results
-        #     return json_data
-        # else:
+        if results:
+            json_data = [{
+                'month': row.month,
+                'actual': row.actual,
+                'normal': row.normal,
+                'is_approved': row.is_approved
+                } for row in results]
+            return json_data
         return None
         
     @classmethod

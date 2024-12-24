@@ -108,7 +108,7 @@ class BudgetData:
     def get_runoff(cls, block_id, district_id):
         rainfall_in_mm = 820
         runoff_data = StrangeTable.get_runoff_by_rainfall(rainfall_in_mm)
-        lulc_data = LULCCensus.get_lulc_by_block(block_id, district_id)
+        lulc_data = LULCCensus.get_census_data_lulc(block_id, district_id)
         runoff_array = []
         for key,value in runoff_data[0].items():
             if not key=='rainfall_in_mm':
@@ -126,7 +126,7 @@ class BudgetData:
     
     @classmethod
     def get_rainfall(cls, block_id, district_id):
-        rainfall_data = Rainfall.get_monthwise_rainfall(block_id, district_id)
+        rainfall_data = Rainfall.get_census_data_rainfall(district_id)
         return rainfall_data
     
     @classmethod
@@ -172,7 +172,7 @@ class BudgetData:
     @classmethod
     def get_water_budget(cls, block_id, district_id, state_id):
         water_budget = []
-        demand_side = cls.get_demand_side(block_id, district_id)
+        demand_side = cls.get_demand_side(block_id, district_id,state_id)
         total_demand = sum([item['water_value'] for item in demand_side])
         supply_side = cls.get_supply_side(block_id, district_id, state_id)
         total_supply = sum([item['water_value'] for item in supply_side])

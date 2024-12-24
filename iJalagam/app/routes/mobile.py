@@ -66,9 +66,9 @@ def home():
         return redirect(url_for('.index'))
     else:
         payload = json.loads(payload)
-    demand_side = BudgetData.get_demand_side(payload['block_id'], payload['district_id'])
-    supply_side = BudgetData.get_supply_side(payload['block_id'], payload['district_id'], payload['state_id'])
-    budget = BudgetData.get_water_budget(payload['block_id'], payload['district_id'], payload['state_id'])
+    demand_side = BlockOrCensus.get_demand_side_data(payload['block_id'], payload['district_id'],payload['state_id'])
+    supply_side = BlockOrCensus.get_supply_side_data(payload['block_id'], payload['district_id'], payload['state_id'])
+    budget = BlockOrCensus.get_water_budget_data(payload['block_id'], payload['district_id'], payload['state_id'])
     budget_data = []
     budget_data.append(demand_side)
     budget_data.append(supply_side)
@@ -167,6 +167,7 @@ def industry():
     return render_template("mobile/demand/industry.html",
                         subtitle = '(in Ha M)' if has_value > 0 else 'There are no industry in this block',
                         industries = industry_demand, 
+                        is_approved = True if has_value > 0 else False,
                         chart_data = json.dumps(industry_demand),
                         breadcrumbs= get_breadcrumbs(payload), 
                         menu= get_demand_menu(),
@@ -232,9 +233,10 @@ def rainfall():
         return redirect(url_for('.index'))
     else:
         payload = json.loads(payload)
-    rainfall_data = BlockOrCensus.get_rainfall_data(payload['block_id'], payload['district_id'], payload['state_id'])
+    rainfall_data,is_approved = BlockOrCensus.get_rainfall_data(payload['block_id'], payload['district_id'], payload['state_id'])
     return render_template("mobile/supply/rainfall.html", 
                            monthwise_rainfall = rainfall_data,
+                           is_approved = is_approved,
                            chart_data = json.dumps(rainfall_data),
                            breadcrumbs = get_breadcrumbs(payload),
                            menu= get_supply_menu(),
@@ -247,9 +249,10 @@ def runoff():
         return redirect(url_for('.index'))
     else:
         payload = json.loads(payload)
-    runoff_data = BudgetData.get_runoff(payload['block_id'], payload['district_id'])
+    runoff_data,is_approved = BlockOrCensus.get_runoff_data(payload['block_id'], payload['district_id'],payload['state_id'])
     return render_template("mobile/supply/runoff.html", 
                            catchments=runoff_data,
+                           is_approved = is_approved,
                            chart_data = json.dumps(runoff_data),
                            breadcrumbs = get_breadcrumbs(payload),
                            menu= get_supply_menu(),

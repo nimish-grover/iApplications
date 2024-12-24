@@ -1,4 +1,6 @@
 from iJalagam.app.db import db
+from iJalagam.app.models.territory import TerritoryJoin
+from sqlalchemy import func
 
 class Village(db.Model):
     __tablename__ = 'villages'
@@ -47,3 +49,15 @@ class Village(db.Model):
             "village_name": self.village_name,
             "census_code": self.census_code
         }
+        
+    @classmethod
+    def get_villages_number_by_block(cls,block_id,district_id):
+        query = db.session.query(
+            func.count(Village.id).label("village_count")
+            ).join(TerritoryJoin, TerritoryJoin.village_id == Village.id
+            ).filter(
+                TerritoryJoin.block_id == block_id,
+                TerritoryJoin.district_id == district_id
+            )
+        results = query.first()
+        return results.village_count
