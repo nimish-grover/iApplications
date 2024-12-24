@@ -81,7 +81,33 @@ class BlockWaterbody(db.Model):
             return json_data
         else:
             return None
-        
+    
+    @classmethod
+    def get_block_waterbody_data(cls, bt_id):
+        query = db.session.query(
+            WaterbodyType.id,
+            WaterbodyType.waterbody_name,
+            cls.storage,
+            cls.count,
+            cls.is_approved
+        ).join(WaterbodyType, WaterbodyType.id == cls.wb_type_id
+        ).filter(cls.bt_id == bt_id
+        ).order_by(cls.storage)
+
+        results = query.all()
+
+        if results:
+            json_data = [{
+                'entity_id':item.id,
+                'entity_name': item.waterbody_name,
+                'entity_count': item.count,
+                'entity_consumption': item.storage,
+                'is_approved': item.is_approved
+            } for item in results]
+            return json_data
+        else:
+            return None
+
     @classmethod  
     def get_by_id(cls, id):
         return cls.query.filter(cls.id==id).first()

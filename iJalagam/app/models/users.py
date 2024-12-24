@@ -1,4 +1,5 @@
 from flask_login import UserMixin
+from sqlalchemy import case, func
 from iJalagam.app.db import db
 from passlib.hash import pbkdf2_sha256
 
@@ -75,4 +76,16 @@ class User(UserMixin, db.Model):
     @classmethod
     def get_by_id(cls, id):
         return cls.query.filter(cls.id==id).first()
+    
+    @classmethod
+    def get_active_count(cls):
+        counts = db.session.query(
+            func.count(case((cls.isActive == 'True', 1))).label('active_users'),
+            func.count(case((cls.isActive == 'False', 1))).label('inactive_users')
+        ).one()
+
+        return {
+            'active_users': counts.active_users,
+            'inactive_users': counts.inactive_users
+        }
     

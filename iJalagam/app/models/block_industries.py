@@ -1,7 +1,7 @@
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
-from sqlalchemy import case, func
+from sqlalchemy import case, desc, func
 from iJalagam.app.db import db
 from iJalagam.app.models.industries import Industry
 
@@ -83,9 +83,44 @@ class BlockIndustry(db.Model):
             } for index, item in enumerate(results)]
             return json_data
         return None
+    
     @classmethod
     def get_by_id(cls, id):
         return cls.query.filter(cls.id==id).first()
+    
+    @classmethod
+    def get_industry_by_block(cls, bt_id):
+        query = db.session.query(
+        Industry.id,
+        Industry.industry_sector,
+        func.coalesce(
+            func.sum(cls.allocation),0
+        ).label('allocation'),
+        func.coalesce(
+            func.sum(cls.count),0
+        ).label('count')
+        ).outerjoin( 
+                    cls, 
+                    (Industry.id == cls.industry_id) & 
+                    (cls.bt_id==bt_id)
+        ).group_by(Industry.id,Industry.industry_sector
+        ).order_by(desc(func.coalesce(
+            func.sum(cls.allocation),0
+        ).label('allocation')))
+
+        results = query.all()
+
+        if results:
+            # json_data = [result for result in results]
+            json_data = [{
+                        'entity_id':row.id,
+                        'entity_value':row.count, 
+                        'entity_name':row.industry_sector,
+                        'entity_consumption':row.allocation } 
+                        for row in results]
+            return json_data
+        else:
+            return None
     
     @classmethod
     def check_duplicate(cls, industry_id, bt_id):

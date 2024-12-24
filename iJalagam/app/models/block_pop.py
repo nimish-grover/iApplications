@@ -77,6 +77,29 @@ class BlockPop(db.Model):
         return cls.query.filter(cls.id==id).first()
     
     @classmethod
+    def get_block_population_data(cls, bt_id):
+        query = db.session.query(
+            cls.population_id,
+            cls.count,
+            Population.display_name,
+            cls.is_approved    
+        ).join(Population, Population.id==cls.population_id
+        ).filter(cls.bt_id == bt_id)
+
+        results = query.all()
+
+        if results:
+            json_data = [{
+                'entity_id': item.population_id,
+                'entity_count': item.count,
+                'entity_name': item.display_name,
+                'is_approved': item.is_approved
+            } for item in results]
+            return json_data
+        else:
+            return None
+    
+    @classmethod
     def check_duplicate(cls, population_id, bt_id):
         return cls.query.filter(cls.population_id==population_id, cls.bt_id==bt_id).first()
 

@@ -1,14 +1,24 @@
 {% extends 'mobile/base.html' %}
 {% block title %} Groundwater {% endblock %}
-{% from 'mobile/components.html' import chart %}
+{% from 'mobile/components.html' import chart, badge, table_title %}
 {% block content %}
+<div class="row">
+    <div class="col"></div>
+    <div class="col-8 text-center">
+        {{table_title(title='Ground Water Supply', subtitle='(in Ha M)')}}
+    </div>
+    <div class="col">
+        {% if is_approved %}
+        {{badge()}}
+        {% endif %}
+    </div>
+</div>
 <div id="cardCarousel" class="carousel slide">
     <div class="carousel-inner">
       <div class="carousel-item active">        
         {{chart()}}
       </div>
       <div class="carousel-item">
-        <h6>Ground Water Supply</h6>
         <table class="table table-bordered table-sm fs-7 mb-0">
             <thead>
                 <tr>

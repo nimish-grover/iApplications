@@ -1,7 +1,18 @@
 {% extends 'mobile/base.html' %}
 {% block title %} Crops {% endblock %}
-{% from 'mobile/components.html' import chart, table_title %}
+{% from 'mobile/components.html' import chart, table_title, badge %}
 {% block content %}
+<div class="row">
+    <div class="col"></div>
+    <div class="col-8 text-center">
+        {{table_title(title='Crops Consumption', subtitle='(in Ha M)')}}
+    </div>
+    <div class="col">
+        {% if is_approved %}
+        {{badge()}}
+        {% endif %}
+    </div>
+</div>
 <div id="cardCarousel" class="carousel slide">
     <div class="carousel-inner">
       <div class="carousel-item active">        

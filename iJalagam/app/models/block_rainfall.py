@@ -41,14 +41,25 @@ class BlockRainfall(db.Model):
             "bt_id":self.bt_id,
             "is_approved":self.is_approved,
             "created_by":self.created_by,
-            "creatd_on":self.created_on
+            "created_on":self.created_on
         }
     
     @classmethod
     def get_by_id(cls, id):
         return cls.query.filter(cls.id==id).first()
     
-    
+    @classmethod
+    def get_rainfall_data(cls, bt_id):
+        # query = db.session.query()
+
+        # results = query.all()
+
+        # if results:
+        #     json_data = results
+        #     return json_data
+        # else:
+        return None
+        
     @classmethod
     def get_by_bt_id(cls, bt_id):
         query = db.session.query(

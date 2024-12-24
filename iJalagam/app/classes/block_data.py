@@ -168,27 +168,63 @@ class BlockData:
         industries = BlockIndustry.get_by_bt_id(bt_id=bt_id)
         # results =[{'id': item.id, 'category':item.industry_sector } for item in industries]
         return industries
-
+    
     def update_industries(json_data, user_id):
-        for item in json_data: 
-            block_industries = BlockIndustry(
-                    industry_id=item['industry_id'],
-                    allocation=item['allocation'],
-                    unit = item['unit'],
-                    count = item['count'],
-                    bt_id=item['bt_id'],
-                    is_approved=True, 
-                    created_by=user_id)
-            if item['allocation']>0:
+            bt_id = 0 
+            for item in json_data: 
+                bt_id = item['bt_id']
+                block_industries = BlockIndustry(
+                        industry_id=item['industry_id'],
+                        allocation=item['allocation'],
+                        unit = item['unit'],
+                        count = item['count'],
+                        bt_id=item['bt_id'],
+                        is_approved=True, 
+                        created_by=user_id)
+                if item['allocation']>0:
+                    block_industries.save_to_db()
+                else:
+                    if item['allocation']==0:
+                        if item['table_id']:
+                            block_industries = None
+                            block_industries = BlockIndustry.get_by_id(item['table_id']) 
+                            if block_industries:
+                                block_industries.delete_from_db()  
+                                
+            # if there is no entry (all zeros) then enter a single row with zero                        
+            filtered_json_data = [item for item in json_data if item['count'] > 0]
+            if len(filtered_json_data) == 0:
+                block_industries = BlockIndustry(
+                        industry_id=1,
+                        allocation=0,
+                        unit = "HaM",
+                        count = 0,
+                        bt_id=bt_id,
+                        is_approved=True, 
+                        created_by=1)
                 block_industries.save_to_db()
-            else:
-                if item['allocation']==0:
-                    if item['table_id']:
-                        block_industries = None
-                        block_industries = BlockIndustry.get_by_id(item['table_id']) 
-                        if block_industries:
-                            block_industries.delete_from_db()  
-        return True
+            return True
+
+    # def update_industries(json_data, user_id):
+    #     for item in json_data: 
+    #         block_industries = BlockIndustry(
+    #                 industry_id=item['industry_id'],
+    #                 allocation=item['allocation'],
+    #                 unit = item['unit'],
+    #                 count = item['count'],
+    #                 bt_id=item['bt_id'],
+    #                 is_approved=True, 
+    #                 created_by=user_id)
+    #         if item['allocation']>0:
+    #             block_industries.save_to_db()
+    #         else:
+    #             if item['allocation']==0:
+    #                 if item['table_id']:
+    #                     block_industries = None
+    #                     block_industries = BlockIndustry.get_by_id(item['table_id']) 
+    #                     if block_industries:
+    #                         block_industries.delete_from_db()  
+    #     return True
 
     @classmethod
     def get_surface_supply(cls, block_id, district_id, state_id, user_id):

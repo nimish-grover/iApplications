@@ -1,8 +1,7 @@
-{% extends 'admin/base.html' %}
+{% extends 'desktop/base.html' %}
 {% block title %} Progress {% endblock %}
 {% from 'mobile/components.html' import chart, table_title, floating_input, validate_button,
-input_hidden,submit_button,progress_bar,tooltip,
-search_input,validation_input,badge%}
+input_hidden, submit_button, progress_bar, tooltip, search_input, validation_input, badge%}
 {% block content %}
 
 <section>
@@ -33,16 +32,14 @@ search_input,validation_input,badge%}
                         {{ tooltip(name=row['block_name']) }}
                     </td>
                     <td class="text-center align-content-center" style="max-width: 100px;">
-                        <div class="progress-bar-anchor fetch-row-data style=" cursor: pointer;">
+                        <div class="progress-bar-anchor fetch-row-data style="cursor: pointer;">
                             <div class="row">
                                 <div class="col-10">
                                     {{ progress_bar(completed=row['completed']) }}
                                 </div>
                                 <div class="col-1 p-0 d-grid align-items-center">
                                     <span class="text-center fs-9">
-
-                                        <i class="fa-solid fa-arrow-up-right-from-square"></i>
-
+                                        <i class="fa-solid fa-arrow-up-right-from-square"></i>s
                                     </span>
                                 </div>
                             </div>

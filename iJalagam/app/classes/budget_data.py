@@ -1,4 +1,7 @@
 import random
+
+from iJalagam.app.models.block_industries import BlockIndustry
+from iJalagam.app.models.block_transfer import BlockWaterTransfer
 from iJalagam.app.models.crop_census import CropCensus
 from iJalagam.app.models.groundwater_extraction import GroundwaterExtraction
 from iJalagam.app.models.livestocks_census import LivestockCensus
@@ -57,6 +60,18 @@ class BudgetData:
         return crops_consumption
     
     @classmethod
+    def get_industry_demand(cls, block_id, district_id, state_id):
+        from iJalagam.app.classes.block_data import BlockData
+        bt_id = BlockData.get_bt_id(block_id=block_id, district_id=district_id, state_id=state_id)
+        entity = BlockIndustry.get_industry_by_block(bt_id)
+        # for item in entity:
+        #     item['entity_consumption'] = item['entity_count']        
+        bg_colors = cls.COLORS
+        sorted_data = sorted(entity, key=lambda x: x['entity_consumption'], reverse=True)
+        industry_demand = cls.get_entity_consumption(sorted_data, bg_colors)
+        return industry_demand
+    
+    @classmethod
     def get_surface_supply(cls, block_id, district_id):
         entity = WaterbodyCensus.get_waterbody_by_block(block_id, district_id)
         bg_colors = cls.COLORS
@@ -68,15 +83,26 @@ class BudgetData:
     def get_ground_supply(cls, block_id, district_id):
         entity = GroundwaterExtraction.get_groudwater_by_block(block_id, district_id)
         gw_array=[]
-        for key,value in entity[0].items():
-            item = {
-                'name': key,
-                'value': value
-            }
-            gw_array.append(item)
-        bg_colors = cls.COLORS
-        ground_supply = [{**item, 'background': bg} for item, bg in zip(gw_array, bg_colors)]
-        return ground_supply
+        if entity:
+            for key,value in entity[0].items():
+                item = {
+                    'name': key,
+                    'value': value
+                }
+                gw_array.append(item)
+            bg_colors = cls.COLORS
+            ground_supply = [{**item, 'background': bg} for item, bg in zip(gw_array, bg_colors)]
+            return ground_supply
+        else:
+            return None
+    
+    @classmethod
+    def get_water_transfer(cls, block_id, district_id, state_id):
+        from iJalagam.app.classes.block_data import BlockData
+        bt_id = BlockData.get_bt_id(block_id=block_id, district_id=district_id, state_id=state_id)
+        entity = BlockWaterTransfer.get_water_transfer_by_block(bt_id)
+        block_water_transfer = entity
+        return block_water_transfer
     
     @classmethod
     def get_runoff(cls, block_id, district_id):
@@ -104,15 +130,23 @@ class BudgetData:
         return rainfall_data
     
     @classmethod
-    def get_supply_side(cls, block_id, district_id):
+    def get_supply_side(cls, block_id, district_id, state_id):
         supply_side = []
         surface = cls.get_surface_supply(block_id, district_id)
         total_surface = sum([item['value'] for item in surface])
         ground = cls.get_ground_supply(block_id, district_id)
-        total_ground = [item['value'] for item in ground if item['name'] == 'extraction'][0]
-        total_supply = total_surface + total_ground
+        total_ground=0
+        if ground:
+            total_ground = [item['value'] for item in ground if item['name'] == 'extraction'][0]
+        transfer = cls.get_water_transfer(block_id, district_id, state_id)
+        total_transfer = sum([item['entity_value'] for item in transfer])
+        positive_transfer = 0
+        if total_transfer > 0: 
+            positive_transfer = total_transfer
+        total_supply = total_surface + total_ground + total_transfer
         supply_side.append({'category':'Surface', 'value':round((total_surface*100)/(total_supply),0),'water_value':total_surface})
         supply_side.append({'category':'Ground', 'value':round((total_ground*100)/(total_supply),0),'water_value':total_ground})
+        supply_side.append({'category':'Transfer', 'value':round((positive_transfer*100)/(total_supply),0),'water_value':total_transfer})
         bg_colors = cls.COLORS
         supply_with_colors = [{**item, 'background': bg} for item, bg in zip(supply_side, bg_colors)]
         return supply_with_colors
@@ -136,11 +170,11 @@ class BudgetData:
         return demand_with_colors
     
     @classmethod
-    def get_water_budget(cls, block_id, district_id):
+    def get_water_budget(cls, block_id, district_id, state_id):
         water_budget = []
         demand_side = cls.get_demand_side(block_id, district_id)
         total_demand = sum([item['water_value'] for item in demand_side])
-        supply_side = cls.get_supply_side(block_id, district_id)
+        supply_side = cls.get_supply_side(block_id, district_id, state_id)
         total_supply = sum([item['water_value'] for item in supply_side])
         water_budget.append({'category':'demand', 'value': round((total_demand*100)/(total_demand + total_supply),0),'water_value':total_demand})
         water_budget.append({'category':'supply', 'value': round((total_supply*100)/(total_demand + total_supply),0),'water_value':total_supply})

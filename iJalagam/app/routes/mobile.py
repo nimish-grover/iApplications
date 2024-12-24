@@ -1,6 +1,7 @@
 from flask import Blueprint, json, make_response, redirect, render_template, request, session, url_for
 from flask_login import current_user
 
+from iJalagam.app.classes.block_or_census import BlockOrCensus
 from iJalagam.app.classes.budget_data import BudgetData
 from iJalagam.app.models import TerritoryJoin
 from iJalagam.app.models.states import State
@@ -66,8 +67,8 @@ def home():
     else:
         payload = json.loads(payload)
     demand_side = BudgetData.get_demand_side(payload['block_id'], payload['district_id'])
-    supply_side = BudgetData.get_supply_side(payload['block_id'], payload['district_id'])
-    budget = BudgetData.get_water_budget(payload['block_id'], payload['district_id'])
+    supply_side = BudgetData.get_supply_side(payload['block_id'], payload['district_id'], payload['state_id'])
+    budget = BudgetData.get_water_budget(payload['block_id'], payload['district_id'], payload['state_id'])
     budget_data = []
     budget_data.append(demand_side)
     budget_data.append(supply_side)
@@ -83,30 +84,76 @@ def home():
 
 @blp.route('/human')
 def human():
-    """
-    Handle human demand route.
-    """
-    return render_demand_template(
-        "mobile/demand/human.html",
-        demand_function=BudgetData.get_human_consumption,
-        template_data_key='human'
-    )
+    payload = session.get('payload')
+    if not payload:
+        return redirect(url_for('.index'))
+    else:
+        payload = json.loads(payload)
+    human, is_approved = BlockOrCensus.get_human_data(payload['block_id'],payload['district_id'],payload['state_id'])
+    return render_template('mobile/demand/human.html',
+        is_approved = is_approved, 
+        human = human,
+        chart_data= json.dumps(human),
+        toggle_labels= ['chart', 'table'],
+        breadcrumbs= get_breadcrumbs(payload), 
+        menu= get_demand_menu())
+# @blp.route('/human')
+# def human():
+#     """
+#     Handle human demand route.
+#     """
+#     return render_demand_template(
+#         "mobile/demand/human.html",
+#         demand_function=BudgetData.get_human_consumption,
+#         template_data_key='human'
+    # )
 
 @blp.route('/livestocks')
 def livestocks():
-    return render_demand_template(
-        "mobile/demand/livestocks.html",
-        demand_function=BudgetData.get_livestock_consumption,
-        template_data_key='livestocks'
-    )
+    payload = session.get('payload')
+    if not payload:
+        return redirect(url_for('.index'))
+    else:
+        payload = json.loads(payload)
+    livestock, is_approved = BlockOrCensus.get_livestock_data(payload['block_id'],payload['district_id'],payload['state_id'])  
+    return render_template('mobile/demand/livestocks.html',
+        is_approved = is_approved, 
+        livestocks = livestock,
+        chart_data= json.dumps(livestock),
+        toggle_labels= ['chart', 'table'],
+        breadcrumbs= get_breadcrumbs(payload), 
+        menu= get_demand_menu())  
+# @blp.route('/livestocks')
+# def livestocks():
+#     return render_demand_template(
+#         "mobile/demand/livestocks.html",
+#         demand_function=BudgetData.get_livestock_consumption,
+#         template_data_key='livestocks'
+#     )
 
 @blp.route('/crops')
 def crops():
-    return render_demand_template(
-        "mobile/demand/crops.html",
-        demand_function=BudgetData.get_crops_consumption,
-        template_data_key='crops'
-    )
+    payload = session.get('payload')
+    if not payload:
+        return redirect(url_for('.index'))
+    else:
+        payload = json.loads(payload)
+    crops, is_approved = BlockOrCensus.get_crop_data(payload['block_id'],payload['district_id'],payload['state_id']) 
+    return render_template('mobile/demand/crops.html',
+        is_approved = is_approved, 
+        crops = crops,
+        chart_data= json.dumps(crops),
+        toggle_labels= ['chart', 'table'],
+        breadcrumbs= get_breadcrumbs(payload), 
+        menu= get_demand_menu())
+
+# @blp.route('/crops')
+# def crops():
+#     return render_demand_template(
+#         "mobile/demand/crops.html",
+#         demand_function=BudgetData.get_crops_consumption,
+#         template_data_key='crops'
+#     )
 
 @blp.route('/industry')
 def industry():
@@ -115,26 +162,68 @@ def industry():
         return redirect(url_for('.index'))
     else:
         payload = json.loads(payload)
-    return render_template("mobile/demand/industry.html", 
+    industry_demand = BudgetData.get_industry_demand(payload['block_id'], payload['district_id'], payload['state_id'])
+    has_value = sum(item['count'] for item in industry_demand)
+    return render_template("mobile/demand/industry.html",
+                        subtitle = '(in Ha M)' if has_value > 0 else 'There are no industry in this block',
+                        industries = industry_demand, 
+                        chart_data = json.dumps(industry_demand),
                         breadcrumbs= get_breadcrumbs(payload), 
                         menu= get_demand_menu(),
                         toggle_labels=['chart', 'table'])
 
 @blp.route('/surface')
 def surface():
-    return render_supply_template(
-        "mobile/supply/surface.html",
-        supply_function=BudgetData.get_surface_supply,
-        template_data_key='waterbodies'
-    )
+    payload = session.get('payload')
+    if not payload:
+        return redirect(url_for('.index'))
+    else:
+        payload = json.loads(payload)
+    surface_water_supply, is_approved = BlockOrCensus.get_surface_data(payload['block_id'], payload['district_id'], payload['state_id'])
+    return render_template('mobile/supply/surface.html',
+                        is_approved = is_approved,   
+                        waterbodies= sorted(surface_water_supply, key = lambda x: x['value'], reverse=True),
+                        chart_data= json.dumps(surface_water_supply),
+                        toggle_labels= ['chart', 'table'],
+                        breadcrumbs=get_breadcrumbs(payload), 
+                        menu=get_supply_menu()
+                           )
+
+# @blp.route('/surface')
+# def surface():
+#     return render_supply_template(
+#         "mobile/supply/surface.html",
+#         supply_function=BudgetData.get_surface_supply,
+#         template_data_key='waterbodies'
+    # )
 
 @blp.route('/ground')
 def ground():
-    return render_supply_template(
-        "mobile/supply/ground.html",
-        supply_function=BudgetData.get_ground_supply,
-        template_data_key='groundwater'
-    )
+    payload = session.get('payload')
+    if not payload:
+        return redirect(url_for('.index'))
+    else:
+        payload = json.loads(payload)
+    ground_water_supply, is_approved = BlockOrCensus.get_ground_data(
+                                                payload['block_id'],
+                                                payload['district_id'], 
+                                                payload['state_id'])
+    
+    return render_template('mobile/supply/ground.html',
+                        is_approved = is_approved,   
+                        groundwater= ground_water_supply,
+                        chart_data= json.dumps(ground_water_supply),
+                        toggle_labels= ['chart', 'table'],
+                        breadcrumbs=get_breadcrumbs(payload), 
+                        menu=get_supply_menu())
+
+# @blp.route('/ground')
+# def ground():
+#     return render_supply_template(
+#         "mobile/supply/ground.html",
+#         supply_function=BudgetData.get_ground_supply,
+#         template_data_key='groundwater'
+#     )
 
 @blp.route('/rainfall')
 def rainfall():
@@ -143,7 +232,7 @@ def rainfall():
         return redirect(url_for('.index'))
     else:
         payload = json.loads(payload)
-    rainfall_data = BudgetData.get_rainfall(payload['block_id'], payload['district_id'])
+    rainfall_data = BlockOrCensus.get_rainfall_data(payload['block_id'], payload['district_id'], payload['state_id'])
     return render_template("mobile/supply/rainfall.html", 
                            monthwise_rainfall = rainfall_data,
                            chart_data = json.dumps(rainfall_data),
