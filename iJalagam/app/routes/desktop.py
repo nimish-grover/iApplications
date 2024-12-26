@@ -349,7 +349,7 @@ def print():
     water_budget_rename = {'demand':'Total Demand','supply':'Total Supply'}
     water_budget = [{**item, 'category':water_budget_rename[item['category']]} for item in water_budget]
     
-    return render_template('desktop/print.html',village_count=village_count,tga=round(tga,2),human_data=human,
+    return render_template('desktop/print.html',village_count=village_count,tga=round(tga,2),human_data=human,human=json.dumps(human),
                            livestock_data=filtered_livestock,crop_data=filtered_crops,
                            surface_water_data=filtered_surface_water,industry_data=filtered_industries,
                            groundwater_data=groundwater,runoff_data=runoff,rainfall_data=rainfall,transfer_indicator=transfer_indicator,

@@ -99,7 +99,7 @@ class BudgetData:
     
     @classmethod
     def get_rainfall(cls, block_id, district_id):
-        rainfall_data = Rainfall.get_block_or_rainfall_data(block_id,district_id)
+        rainfall_data = Rainfall.get_monthwise_rainfall(district_id)
         return rainfall_data
     
     @classmethod

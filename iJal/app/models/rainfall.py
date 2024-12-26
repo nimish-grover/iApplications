@@ -35,7 +35,7 @@ class Rainfall(db.Model):
     def get_monthwise_rainfall(cls, district_id):
         query = (
             db.session.query(
-                func.to_char(cls.observation_date, 'FMMon-YY').label('month_year'),     # TO_CHAR
+                func.to_char(cls.observation_date, 'FMMon-YY').label('month'),     # TO_CHAR
                 func.round(cast(func.sum(cls.actual), Numeric), 2).label('actual'),      # SUM and ROUND
                 func.round(cast(func.sum(cls.normal), Numeric), 2).label('normal')       # SUM and ROUND
             ).filter(cls.district_id==district_id)                                       # WHERE 
