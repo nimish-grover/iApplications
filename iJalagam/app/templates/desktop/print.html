@@ -187,6 +187,30 @@
                     </table>
                 </div>
 
+                <div class="text-center fw-bold fs-5" style="background:#dee2e6;">WATER TRANSFER</div>
+                <div class="container justify-content-center m-0 p-0 fs-7">
+                    <table class="table table-sm table-fixed-size my-1">
+                        <tr>
+                            <th>Water Transfer</th>
+                            <th class="text-end">Quantity</th>
+                        </tr>
+                        {% for item in transfer_data %}
+                        <tr>
+                            <td>{{item['entity_name'] | title}}</td>
+                            <td class="text-end">{{item['entity_value']}}</td>
+                        </tr>
+                        {%endfor%}
+
+                        <tr>
+                            <td colspan="1" class="text-center fw-semibold">Total</td>
+                            <td class="text-end fw-semibold">{{ transfer_data | map(attribute='entity_value') | sum | round(0)
+                                }}
+                            </td>
+                        </tr>
+
+                    </table>
+                </div>
+
 
                 <div class="text-center fw-bold fs-5" style="background:#dee2e6;">WATER BUDGET</div>
                 <div class="container-fluid justify-content-center m-0 p-0 fs-7">
@@ -529,7 +553,29 @@
                         </tr>
                     </table>
                 </div>
+                <div class="text-center fw-bold fs-5" style="background:#dee2e6;">WATER TRANSFER</div>
+                <div class="container justify-content-center m-0 p-0 fs-7">
+                    <table class="table table-sm table-fixed-size my-1">
+                        <tr>
+                            <th>Water Transfer</th>
+                            <th class="text-end">Quantity</th>
+                        </tr>
+                        {% for item in transfer_data %}
+                        <tr>
+                            <td>{{item['entity_name'] | title}}</td>
+                            <td class="text-end">{{item['entity_value']}}</td>
+                        </tr>
+                        {%endfor%}
 
+                        <tr>
+                            <td colspan="1" class="text-center fw-semibold">Total</td>
+                            <td class="text-end fw-semibold">{{ transfer_data | map(attribute='entity_value') | sum | round(0)
+                                }}
+                            </td>
+                        </tr>
+
+                    </table>
+                </div>
 
                 <div class="text-center fw-bold fs-5" style="background:#dee2e6;">WATER BUDGET</div>
                 <div class="container-fluid justify-content-center m-0 p-0 fs-7">

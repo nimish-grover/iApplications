@@ -204,7 +204,7 @@ class BlockOrCensus:
         demand_side.append({'category': 'human','value':round((total_human*100)/(total_demand),0),'water_value':total_human})
         demand_side.append({'category': 'livestock','value':round((total_livestock*100)/(total_demand),0),'water_value':total_livestock})
         demand_side.append({'category': 'crop','value':round((total_crop*100)/(total_demand),0),'water_value':total_crop})
-        demand_side.append({'category': 'industry','value':round((total_crop*100)/(total_demand),0),'water_value':total_industry}) 
+        demand_side.append({'category': 'industry','value':round((total_industry*100)/(total_demand),0),'water_value':total_industry}) 
         bg_colors = cls.COLORS
         demand_with_colors = [{**item, 'background': bg} for item, bg in zip(demand_side, bg_colors)]       
         return demand_with_colors

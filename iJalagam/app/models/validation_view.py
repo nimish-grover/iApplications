@@ -26,7 +26,8 @@ class ValidationView(db.Model):
     water_transfer = db.Column(db.Integer)
 
     # Function to create the materialized view
-    def create_validation_view():
+    @classmethod
+    def create_validation_view(cls):
         view_query = text("""
         CREATE MATERIALIZED VIEW validation_view AS
         SELECT 
@@ -79,9 +80,11 @@ class ValidationView(db.Model):
         
         db.session.execute(view_query)
         db.session.commit()
+        print('Validation view created successfully')
 
     # Function to refresh the materialized view
-    def refresh_validation_view():
+    @classmethod
+    def refresh_validation_view(cls):
         refresh_query = text("REFRESH MATERIALIZED VIEW validation_view;")
         db.session.execute(refresh_query)
         db.session.commit()

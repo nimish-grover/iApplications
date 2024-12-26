@@ -86,8 +86,7 @@ class PopulationCensus(db.Model):
             ).join(Block, BlockTerritory.block_id == Block.id
             #).filter(Block.lgd_code == block_lgd)
             ).filter(
-                Block.id == block_id,
-                District.id == district_id
+                Block.id == block_id
             ).group_by(BlockPop.population_id
             ).subquery()
 
@@ -99,8 +98,7 @@ class PopulationCensus(db.Model):
             ).join(Block, TerritoryJoin.block_id == Block.id
             #).filter(Block.lgd_code == block_lgd)
             ).filter(
-                Block.id == block_id,
-                District.id == district_id
+                Block.id == block_id
             ).group_by(PopulationCensus.population_id
             ).subquery()
 

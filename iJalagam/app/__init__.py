@@ -35,6 +35,7 @@ def create_app():
     @login_manager.user_loader
     def load_user(user_id):
         return User.query.get(int(user_id))
+    
     # register blueprints
     app.register_blueprint(authBlueprint, url_prefix="/auth")
     app.register_blueprint(desktopBlueprint, url_prefix="/block")

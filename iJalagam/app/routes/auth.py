@@ -4,6 +4,7 @@ from iJalagam.app.classes.helper import HelperClass
 from iJalagam.app.models.states import State
 from iJalagam.app.models.territory import TerritoryJoin
 from iJalagam.app.models.users import User
+from iJalagam.app.classes.block_or_census import BlockOrCensus
 
 blp = Blueprint("auth","auth")
 
@@ -192,6 +193,26 @@ def progress():
     else: 
         flash('You must be admin to view this page!')
         return redirect(url_for('auth.login'))
+    
+@blp.route('/budget',methods=['POST','GET'])
+def budget():
+    filtered_blocks = State.get_all_states_status()
+    budget_array = []
+    for idx,block in enumerate(filtered_blocks):
+        if block['completed'] == 100:
+            demand_side = BlockOrCensus.get_demand_side_data(block['block_id'],block['district_id'],block['state_id'])
+            total_demand = int(sum([item['water_value'] for item in demand_side]))
+            supply_side = BlockOrCensus.get_supply_side_data(block['block_id'],block['district_id'],block['state_id'])
+            total_supply = int(sum([item['water_value'] for item in supply_side]))
+            budget = int(total_supply - total_demand)
+            
+            budget_array.append({'id':idx+1,'state_id':block['state_id'],'block_id':block['block_id'],'district_id':block['district_id'],
+                            'state_short_name':block['state_short_name'],'state_name':block['state_name'],'district_name':block['district_name'],
+                            'block_name':block['block_name'],'total_demand':total_demand,
+                            'total_supply':total_supply,'budget':budget})
+        
+    return render_template('auth/budget.html',budget = budget_array,menu= HelperClass.get_admin_menu())    
+    
 
 def get_message():
     messages = get_flashed_messages()

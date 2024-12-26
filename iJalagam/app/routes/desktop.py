@@ -8,9 +8,18 @@ from iJalagam.app.models import BlockTerritory
 from iJalagam.app.models.block_pop import BlockPop
 from iJalagam.app.classes.block_or_census import BlockOrCensus
 from iJalagam.app.models.villages import Village
+from iJalagam.app.models.states import State
+from iJalagam.app.models.validation_view import ValidationView
+
+
 
 
 blp = Blueprint('desktop','desktop')
+
+# @blp.before_request
+# def before_request():
+#     if '/block' in request.path:
+#         ValidationView.refresh_validation_view()
 
 @blp.route('/status')
 def status():
@@ -326,6 +335,7 @@ def print():
         full_month_name = rainfall_rename.get(month_abbr, month_abbr)
         item['month'] = f"{full_month_name}-{year}"
 
+    water_transfer = BudgetData.get_water_transfer(payload['block_id'],payload['district_id'],payload['state_id'])
     
     demand_side = BlockOrCensus.get_demand_side_data(payload['block_id'],payload['district_id'],payload['state_id'])
     demand_rename = {'human':'Human Population Consumption','livestock':'Livestock Population Consumption'
@@ -350,10 +360,12 @@ def print():
     water_budget = [{**item, 'category':water_budget_rename[item['category']]} for item in water_budget]
     
     return render_template('desktop/print.html',village_count=village_count,tga=round(tga,2),human_data=human,human=json.dumps(human),
-                           livestock_data=filtered_livestock,crop_data=filtered_crops,
+                           livestock_data=filtered_livestock,crop_data=filtered_crops,transfer_data = water_transfer,
                            surface_water_data=filtered_surface_water,industry_data=filtered_industries,
                            groundwater_data=groundwater,runoff_data=runoff,rainfall_data=rainfall,transfer_indicator=transfer_indicator,
                            water_budget=water_budget,demand_side=demand_side,supply_side=supply_side,payload=payload)
+    
+
 
 def get_message():
     messages = get_flashed_messages()
