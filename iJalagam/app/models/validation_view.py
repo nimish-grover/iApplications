@@ -1,6 +1,8 @@
 from iJalagam.app.db import db
+import asyncio
 from sqlalchemy import text
 
+# import asyncpg
 class ValidationView(db.Model):
     __tablename__ = 'validation_view'
     
@@ -24,67 +26,77 @@ class ValidationView(db.Model):
     lulc = db.Column(db.Integer)
     rainfall = db.Column(db.Integer)
     water_transfer = db.Column(db.Integer)
+    updated_time = db.Column(db.DateTime)
 
-    # Function to create the materialized view
-    @classmethod
-    def create_validation_view(cls):
-        view_query = text("""
-        CREATE MATERIALIZED VIEW validation_view AS
-        SELECT 
-            s.state_name,
-            s.id AS state_id,
-            s.short_name AS state_short_name,
-            d.district_name,
-            d.id AS district_id,
-            b.block_name,
-            b.id AS block_id,
-            COALESCE(bt.id, 0) AS bt_id,
-            COALESCE(MAX(CASE WHEN bp.is_approved = 'True' THEN 1 ELSE 0 END), 0) AS population,
-            COALESCE(MAX(CASE WHEN bl.is_approved = 'True' THEN 1 ELSE 0 END), 0) AS livestock,
-            COALESCE(MAX(CASE WHEN bc.is_approved = 'True' THEN 1 ELSE 0 END), 0) AS crop,
-            COALESCE(MAX(CASE WHEN bi.is_approved = 'True' THEN 1 ELSE 0 END), 0) AS industry,
-            COALESCE(MAX(CASE WHEN bwb.is_approved = 'True' THEN 1 ELSE 0 END), 0) AS surface,
-            COALESCE(MAX(CASE WHEN bg.is_approved = 'True' THEN 1 ELSE 0 END), 0) AS ground,
-            COALESCE(MAX(CASE WHEN blulc.is_approved = 'True' THEN 1 ELSE 0 END), 0) AS lulc,
-            COALESCE(MAX(CASE WHEN br.is_approved = 'True' THEN 1 ELSE 0 END), 0) AS rainfall,
-            COALESCE(MAX(CASE WHEN bwt.is_approved = 'True' THEN 1 ELSE 0 END), 0) AS water_transfer
-        FROM 
-            states s
-        LEFT JOIN districts d ON d.state_lgd_code = s.lgd_code
-        LEFT JOIN blocks b ON b.district_lgd_code = d.lgd_code
-        LEFT JOIN block_territory bt ON bt.block_id = b.id
-        LEFT JOIN block_pops bp ON bp.bt_id = bt.id
-        LEFT JOIN block_crops bc ON bc.bt_id = bt.id
-        LEFT JOIN block_livestocks bl ON bl.bt_id = bt.id
-        LEFT JOIN block_industries bi ON bi.bt_id = bt.id
-        LEFT JOIN block_waterbodies bwb ON bwb.bt_id = bt.id
-        LEFT JOIN block_groundwater bg ON bg.bt_id = bt.id
-        LEFT JOIN block_lulc blulc ON blulc.bt_id = bt.id
-        LEFT JOIN block_rainfall br ON br.bt_id = bt.id
-        LEFT JOIN block_water_transfers bwt ON bwt.bt_id = bt.id
-        WHERE 
-            b.lgd_code IN (4876, 1740, 7130, 539, 172, 3209, 6050, 7047, 3784, 3837, 3979, 4010, 4027, 4628, 624, 762, 781, 2157, 6255, 6287, 6468, 5250, 823, 951, 994)
-            AND d.lgd_code IN (745, 196, 641, 72, 20, 338, 563, 9, 434, 398, 431, 426, 405, 500, 92, 115, 112, 227, 583, 596, 610, 721, 129, 119, 132)
-        GROUP BY 
-            s.state_name,
-            d.district_name,
-            b.block_name,
-            bt.id,
-            s.id,
-            d.id,
-            b.id,
-            s.short_name
-        ORDER BY 
-            s.state_name;
-        """)
+
+    
+    @classmethod 
+    def get_validation_view_data(cls):
+        query = cls.query.order_by(
+            cls.state_name,
+            cls.district_name,
+            cls.block_name
+        )
         
-        db.session.execute(view_query)
-        db.session.commit()
-        print('Validation view created successfully')
+        results = query.all()
+        results_dict = []
+        
+        for row in results:
+            row_dict = {
+                'state_name': row.state_name,
+                'state_short_name': row.state_short_name,
+                'district_name': row.district_name,
+                'block_name': row.block_name,
+                'population': row.population,
+                'livestock': row.livestock,
+                'crop': row.crop,
+                'industry': row.industry,
+                'surface': row.surface,
+                'ground': row.ground,
+                'lulc': row.lulc,
+                'rainfall': row.rainfall,
+                'water_transfer': row.water_transfer,
+                'updated_time': row.updated_time
+            }
+            
+            status_count = 0 
+            category = ['population','livestock','crop','industry','surface','ground','lulc','rainfall','water_transfer']
+            for item in category:
+                if row_dict[item]:
+                    status_count += 1
+            if status_count < 9 and status_count > 0:
+                row_dict['completed'] = 11 * status_count
+            elif status_count == 9:
+                row_dict['completed'] = 100
+            else:
+                row_dict['completed'] = 0 
+                
+            dt_object = row_dict['updated_time']
+            row_dict['updated_time'] = dt_object.strftime("%d-%m-%y, %H:%M:%S")
+            results_dict.append(row_dict)
+        
+        sorted_dict = sorted(results_dict, key=lambda x: x["completed"])
+        for idx, item in enumerate(sorted_dict):
+            item['id'] = idx + 1
+        
+        return sorted_dict
 
-    # Function to refresh the materialized view
+    @classmethod
+    async def refresh_validation_view_async(cls):
+        """Async method to refresh the materialized view."""
+        try:
+            # Just the command to refresh the materialized view asynchronously
+            # Your existing logic to run refresh operation (no database connection here)
+            sql = text("REFRESH MATERIALIZED VIEW CONCURRENTLY validation_view")
+            result = db.session.execute(sql)
+
+            print("Materialized view refresh triggered.")  # Placeholder for the actual refresh command
+        except Exception as e:
+            print(f"Error refreshing materialized view: {e}")
+
     @classmethod
     def refresh_validation_view(cls):
-        refresh_query = text("REFRESH MATERIALIZED VIEW validation_view;")
-        db.session.execute(refresh_query)
-        db.session.commit()
+        """Method to run the refresh asynchronously in a separate thread."""
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        loop.run_until_complete(cls.refresh_validation_view_async())

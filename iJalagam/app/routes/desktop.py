@@ -16,10 +16,15 @@ from iJalagam.app.models.validation_view import ValidationView
 
 blp = Blueprint('desktop','desktop')
 
-# @blp.before_request
-# def before_request():
+# @blp.after_request
+# def trigger_refresh_view(response):
+#     # Check if the request is for /block or /auth paths
 #     if '/block' in request.path:
-#         ValidationView.refresh_validation_view()
+#         # Run the refresh function in a separate thread to avoid blocking
+#         thread = Thread(target=ValidationView.refresh_validation_view())
+#         thread.start()
+    
+#     return response
 
 @blp.route('/status')
 def status():

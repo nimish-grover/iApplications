@@ -2,6 +2,7 @@ from itertools import cycle
 from flask import url_for
 
 from iJalagam.app.models.states import State
+from iJalagam.app.models.validation_view import ValidationView
 from iJalagam.app.models.users import User
 
 
@@ -10,7 +11,7 @@ class HelperClass():
 
     @classmethod
     def get_dashboard_menu(cls):
-        progress_data = State.get_all_states_status()
+        progress_data = ValidationView.get_validation_view_data()
         chart_data = []
         
         color_cycle = cycle(cls.COLORS)

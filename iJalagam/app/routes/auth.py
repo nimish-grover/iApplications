@@ -1,3 +1,4 @@
+from threading import Thread
 from flask import Blueprint, flash, get_flashed_messages, json, jsonify, redirect, render_template, request, session, url_for
 from flask_login import current_user, login_required, login_user, logout_user
 from iJalagam.app.classes.helper import HelperClass
@@ -5,6 +6,10 @@ from iJalagam.app.models.states import State
 from iJalagam.app.models.territory import TerritoryJoin
 from iJalagam.app.models.users import User
 from iJalagam.app.classes.block_or_census import BlockOrCensus
+from iJalagam.app.models.validation_view import ValidationView
+from datetime import datetime
+
+
 
 blp = Blueprint("auth","auth")
 
@@ -175,7 +180,7 @@ def dashboard():
 @login_required
 def progress():
     if current_user.isAdmin:
-        progress = State.get_all_states_status()
+        progress = ValidationView.get_validation_view_data()
         status_dummy = [{'category':'Human','id':'population'},
                         {'category':'Livestocks','id':'livestock'},
                         {'category':'Crops','id':'crop'},
@@ -186,6 +191,7 @@ def progress():
                         {'category':'Rainfall','id':'rainfall'},
                         {'category':'Water Transfer','id':'water_transfer'}]
         return render_template('auth/progress.html',
+                            time = progress[0]['updated_time'],
                             progress=sorted(progress, key=lambda x: x["completed"], reverse=True),
                             status = status_dummy,
                             menu = HelperClass.get_admin_menu(),
@@ -196,7 +202,7 @@ def progress():
     
 @blp.route('/budget',methods=['POST','GET'])
 def budget():
-    filtered_blocks = State.get_all_states_status()
+    filtered_blocks = ValidationView.get_validation_view_data()
     budget_array = []
     for idx,block in enumerate(filtered_blocks):
         if block['completed'] == 100:
