@@ -72,6 +72,31 @@ class BlockLivestock(db.Model):
             return json_data
         else:
             return None
+    
+    @classmethod
+    def get_block_livestock_data(cls, bt_id):
+        query = db.session.query(
+            cls.livestock_id,
+            Livestock.livestock_name,
+            Livestock.coefficient,
+            cls.count,
+            cls.is_approved
+        ).join(Livestock, Livestock.id==cls.livestock_id
+        ).filter(cls.bt_id == bt_id).order_by(Livestock.id)
+
+        results = query.all()
+
+        if results:
+            json_data = [{
+                'entity_id': item.livestock_id,
+                'entity_count': item.count,
+                'entity_name': item.livestock_name,
+                'is_approved': item.is_approved,
+                'coefficient': item.coefficient
+            } for item in results]
+            return json_data
+        else:
+            return None
         
     @classmethod
     def get_by_id(cls, id):

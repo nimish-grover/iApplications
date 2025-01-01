@@ -1,9 +1,8 @@
-from iJal.app.db import db
-from iJal.app.models import Block, District	
-from iJal.app.models.block_ground import BlockGround
-from iJal.app.models.block_territory import BlockTerritory
 from sqlalchemy import func
-
+from iJal.app.db import db
+from iJal.app.models import Block, District
+from iJal.app.models.block_ground import BlockGround
+from iJal.app.models.block_territory import BlockTerritory	
 
 class GroundwaterExtraction(db.Model):
     __tablename__ = "groundwater_extractions"
@@ -50,9 +49,8 @@ class GroundwaterExtraction(db.Model):
             'block_id': self.block_id,
             'district_id': self.district_id
         }
-    
     @classmethod
-    def get_groudwater_by_block(cls, block_id, district_id):
+    def get_census_data_groundwater(cls, block_id, district_id):
         query = db.session.query(
                 cls.extractable,
                 cls.extraction,
@@ -61,7 +59,7 @@ class GroundwaterExtraction(db.Model):
                 cls.block_id.label('block_id')
         ).join(Block, Block.id==cls.block_id
         ).join(District, District.id==cls.district_id
-        ).filter(cls.block_id==block_id,District.id==district_id)
+        ).filter(cls.block_id==block_id, District.id==district_id)
 
         results = query.all()
 
@@ -74,34 +72,28 @@ class GroundwaterExtraction(db.Model):
             } for row in results]
             return json_data
         return None
-    
+        
     @classmethod
-    def get_block_or_groundwater_extraction(cls,block_lgd):
-        block_groundwater_subquery = (
-            db.session.query(
+    def get_groudwater_by_block(cls, block_id, district_id):
+        block_groundwater_subquery = db.session.query(
                 BlockGround.extraction.label("extraction"),
-                Block.lgd_code.label("lgd_code")
-            )
-            .join(BlockTerritory, BlockTerritory.id == BlockGround.bt_id)
-            .join(Block, Block.id == BlockTerritory.block_id)
-            .filter(Block.lgd_code == block_lgd)
-            .subquery()
-        )
+                Block.lgd_code.label("lgd_code")            
+            ).join(BlockTerritory, BlockTerritory.id == BlockGround.bt_id
+            ).join(Block, Block.id == BlockTerritory.block_id
+            ).filter(Block.id == block_id
+            ).subquery()
 
         # Main query
-        query = (
-            db.session.query(
+        query = db.session.query(
                 GroundwaterExtraction.extractable,
                 func.coalesce(block_groundwater_subquery.c.extraction, GroundwaterExtraction.extraction).label("extraction"),
                 GroundwaterExtraction.stage_of_extraction,
                 GroundwaterExtraction.category,
-                GroundwaterExtraction.block_id.label("block_id"),
-            )
-            .join(Block, Block.id == GroundwaterExtraction.block_id)
-            .join(BlockTerritory, BlockTerritory.block_id == GroundwaterExtraction.block_id)
-            .outerjoin(block_groundwater_subquery, block_groundwater_subquery.c.lgd_code == Block.lgd_code)
-            .filter(Block.lgd_code == block_lgd)
-        )
+                GroundwaterExtraction.block_id.label("block_id"),            
+            ).join(Block, Block.id == GroundwaterExtraction.block_id
+            ).join(BlockTerritory, BlockTerritory.block_id == GroundwaterExtraction.block_id
+            ).outerjoin(block_groundwater_subquery, block_groundwater_subquery.c.lgd_code == Block.lgd_code
+            ).filter(Block.id == block_id)
         
         results = query.all()
 

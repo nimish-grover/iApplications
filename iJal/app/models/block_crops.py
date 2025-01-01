@@ -71,7 +71,33 @@ class BlockCrop(db.Model):
             return json_data        
         else:
             return None
-        
+    
+    @classmethod
+    def get_block_crop_data(cls, bt_id):
+        query = db.session.query(
+            cls.area,
+            cls.crop_id,
+            Crop.crop_name,
+            cls.is_approved,
+            Crop.coefficient
+        ).join(Crop, Crop.id==cls.crop_id            
+        ).filter(cls.bt_id == bt_id
+        ).order_by(desc(cls.area * Crop.coefficient))
+
+        results = query.all()
+
+        if results:
+            json_data = [{
+                'entity_id': item.crop_id,
+                'entity_count': item.area,
+                'entity_name': item.crop_name,
+                'is_approved': item.is_approved,
+                'coefficient': item.coefficient
+            } for item in results]
+            return json_data
+        else:
+            return None
+
     @classmethod    
     def get_by_id(cls, id):
         return cls.query.filter(cls.id==id).first()

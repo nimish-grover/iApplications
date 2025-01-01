@@ -1,9 +1,6 @@
-from iJal.app.db import db
-from sqlalchemy import and_, case, func
 from flask import url_for
-from iJal.app.models.districts import District
-from iJal.app.models.blocks import Block
-from iJal.app.models.block_territory import BlockTerritory
+from sqlalchemy import case, func
+from iJal.app.db import db
 from iJal.app.models.block_crops import BlockCrop
 from iJal.app.models.block_ground import BlockGround
 from iJal.app.models.block_industries import BlockIndustry
@@ -12,7 +9,10 @@ from iJal.app.models.block_lulc import BlockLULC
 from iJal.app.models.block_pop import BlockPop
 from iJal.app.models.block_rainfall import BlockRainfall
 from iJal.app.models.block_surface import BlockWaterbody
+from iJal.app.models.block_territory import BlockTerritory
 from iJal.app.models.block_transfer import BlockWaterTransfer
+from iJal.app.models.blocks import Block
+from iJal.app.models.districts import District
 
 class State(db.Model):
     __tablename__ = 'states'
@@ -52,9 +52,7 @@ class State(db.Model):
             return json_data
         else:
             return None
-
-
-
+        
     @classmethod
     def get_all_states_status(cls):
         block_lgd_codes = [4876, 1740, 7130, 539, 172, 3209, 6050, 7047, 3784, 3837, 3979, 4010, 4027, 4628, 624, 762, 781, 2157, 6255, 6287, 6468, 5250, 823, 951, 994]
@@ -138,7 +136,9 @@ class State(db.Model):
             else:
                 row['completed'] = 0 
             row['url'] = url_for('desktop.human')
-        sorted_dict = sorted(results_dict, key=lambda x: x["completed"], reverse=True)
+        sorted_dict = sorted(results_dict, key=lambda x: x["completed"])
         for idx, item in enumerate(sorted_dict):
             item['id'] = idx + 1
         return sorted_dict
+
+

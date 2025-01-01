@@ -9,15 +9,14 @@ from iJal.app.models import State, District, Block, Village, User
 from iJal.app.routes.auth import blp as authBlueprint
 from iJal.app.routes.desktop import blp as desktopBlueprint
 from iJal.app.routes.mobile import blp as mobileBlueprint
-from iJal.app.routes.admin import blp as adminBlueprint
-from iJal.app.routes.controllers import blp as controllersBlueprint
 
 def create_app():
     app = Flask(__name__)
     load_dotenv()
     
     # configuration
-    app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("JALAGAM_DATABASE_URL")
+    # app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("JAL_DATABASE_URL") #PRODUCTION DB
+    app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("JALAGAM_DATABASE_URL") #DEVELOPMENT DB
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
     app.config['SESSION_COOKIE_SAMESITE'] = 'None'  # or 'Lax' or 'Strict'
     app.config['SESSION_COOKIE_SECURE'] = True  # Required if SameSite=None
@@ -40,6 +39,4 @@ def create_app():
     app.register_blueprint(authBlueprint, url_prefix="/auth")
     app.register_blueprint(desktopBlueprint, url_prefix="/block")
     app.register_blueprint(mobileBlueprint)
-    app.register_blueprint(adminBlueprint,url_prefix='/admin')
-    app.register_blueprint(controllersBlueprint)
     return app

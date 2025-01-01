@@ -13,8 +13,6 @@
         {% endif %}
     </div>
 </div>
-
-
 <section>
     <div class="overflow-y-scroll" style="height:30vh !important;">    
         <table class="table table-bordered table-sm fs-7 mb-0">
@@ -60,8 +58,7 @@
 <section>
     {{floating_input(label='Month Year', placeholder='', input_id='month_year', input_type='text', isdisabled='true' )}}
     {{floating_input(label='Normal Rainfall', placeholder='Normal Rainfall', input_id='normal', input_type='number', pattern='', error_message='Must be a whole number', isdisabled='true' )}}
-    {{validation_input(label = 'Actual Rainfall',id = 'actual',type='number',valid = 'Looks Good!',invalid = 'Must be a whole number',min='0')}}
-    {#{{floating_input(label='Actual Rainfall', placeholder='Actual Rainfall', input_id='actual', input_type='number', pattern='', error_message='Must be a whole number' )}}#}
+    {{validation_input(label = 'Actual Rainfall', id = 'actual',type='number',valid = 'Looks Good!',invalid = 'Must be a whole number',min='0')}}
     <div class="text-end">
         <button class="btn btn-outline-dark btn-sm me-2" id="btnBack">Back</button>
         <button class="btn btn-dark btn-sm" id="btnUpdate">Update</button>

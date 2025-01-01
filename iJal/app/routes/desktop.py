@@ -10,21 +10,13 @@ from iJal.app.models.block_pop import BlockPop
 
 blp = Blueprint('desktop','desktop')
 
-@blp.route('/status',methods=['POST','GET'])
+@blp.route('/status')
 def status():
-    if request.method == 'POST':
-        payload = request.json
-        session['redirect_payload'] = payload
-        return jsonify({'redirect_url': url_for('.status')})
-    
-    session_data = session.get('redirect_payload')     
+    session_data = session.get('payload')
     if not session_data:
-        session_data = session.get('payload')
-        if not session_data:
-            return redirect(url_for('mobile.index'))
-        else:
-            payload = json.loads(session_data)
-    payload = json.loads(session_data)
+        return redirect(url_for('mobile.index'))
+    else:
+        payload = json.loads(session_data)
     progress_status = BlockData.get_progress_status(block_id=payload['block_id'], 
                                             district_id=payload['district_id'], 
                                             state_id=payload['state_id'])
@@ -297,37 +289,3 @@ def get_message():
         message = ''
 
     return message
-    
-@blp.route('/print')
-def print():
-    session_data = session.get('payload')
-    if not session_data:
-        return redirect(url_for('mobile.index'))
-    else:
-        payload = json.loads(session_data)
-    
-    human = BudgetData.get_human_consumption(payload['block_id'],payload['district_id'])
-    livestocks = BudgetData.get_livestock_consumption(payload['block_id'],payload['district_id'])
-    filtered_livestock = [livestock for livestock in livestocks if livestock['count'] > 0]
-    crops = BudgetData.get_crops_consumption(payload['block_id'],payload['district_id'])
-    filtered_crops = [crop for crop in crops if crop['count'] > 0]
-    surface_water = BudgetData.get_surface_supply(payload['block_id'],payload['district_id'])
-    filtered_surface_water = [waterbody for waterbody in surface_water if waterbody['count'] > 0]
-    
-    surface_rename = {'whs':'Water Harvesting Structure','lakes':'Lakes','ponds':'Ponds','tanks':'Tanks','reservoirs':'Resevoirs','others':'Others'}
-    filtered_surface_water = [{**item, 'category':surface_rename[item['category']]} for item in filtered_surface_water]
-
-    
-    groundwater = BudgetData.get_ground_supply(payload['block_id'],payload['district_id'])
-    groundwater_rename = {'extraction':'Extracted Groundwater','extractable':'Extractable Groundwater','stage_of_extraction':'Stage of Extraction','category':'Category'}
-    groundwater = [{**item, 'name':groundwater_rename[item['name']]} for item in groundwater]
-    runoff = BudgetData.get_runoff(payload['block_id'],payload['district_id'])
-    rainfall = BudgetData.get_rainfall(payload['block_id'],payload['district_id'])
-    demand_side = BudgetData.get_demand_side(payload['block_id'],payload['district_id'])
-    supply_side = BudgetData.get_supply_side(payload['block_id'],payload['district_id'])
-    water_budget = BudgetData.get_water_budget(payload['block_id'],payload['district_id'])
-
-    return render_template('desktop/print.html',human_data=human,livestock_data=filtered_livestock,crop_data=filtered_crops,
-                           surface_water_data=filtered_surface_water,
-                           groundwater_data=groundwater,runoff_data=runoff,rainfall_data=rainfall,
-                           water_budget=water_budget,demand_side=demand_side,supply_side=supply_side,payload=payload)

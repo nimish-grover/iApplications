@@ -9,7 +9,7 @@
       </div>
       <div class="carousel-item">
         {{table_title(title='Block Level Water Budget', subtitle='(all values are in Ha M)')}}
-        <table class="table table-bordered table-sm fs-7 mb-0">
+        <table class="table table-bordered table-sm fs-8 mb-0">
           <thead class="text-center">
               <tr class="bg-light">
                   <th>Description</th>
@@ -53,6 +53,9 @@
               </tr>
           </tbody>
       </table>
+      {% if current_user.is_authenticated %}
+      <div class="d-none d-md-block"><a href="{{url_for('mobile.print')}}" target="_blank" class="btn btn-outline-dark mx-auto btn-sm mt-3">Print</a></div>  
+      {% endif %}    
       </div>
     </div>
   </div>

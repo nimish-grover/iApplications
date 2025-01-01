@@ -79,6 +79,30 @@ class BlockLULC(db.Model):
         return None
     
     @classmethod
+    def get_block_lulc_data(cls,bt_id):
+        query = (
+            db.session.query(
+                LULC.catchment,
+                func.sum(cls.area).label('catchment_area'),
+                cls.is_approved
+            )
+            .join(LULC, LULC.id == cls.lulc_id)
+            .filter(cls.bt_id == bt_id)
+            .group_by(LULC.catchment, cls.is_approved)
+        )
+
+        # Execute the query
+        results = query.all()
+        if results:
+            json_data = [{
+                'catchment': row.catchment,
+                'catchment_area': row.catchment_area,
+                'is_approved': row.is_approved
+            } for row in results]
+            return json_data
+        return None
+    
+    @classmethod
     def get_all(cls):
         query=cls.query.order_by(cls.id.desc())
         return query

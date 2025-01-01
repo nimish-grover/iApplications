@@ -34,7 +34,21 @@ class BlockGround(db.Model):
             "created_by":self.created_by,
             "creatd_on":self.created_on
         }
-    
+    @classmethod
+    def get_block_groundwater_data(cls, bt_id):
+        query = db.session.query(
+            cls.extraction,
+            cls.is_approved
+        ).filter(cls.bt_id == bt_id)
+
+        results = query.first()
+
+        if results:
+            json_data = {'extraction': results[0],'is_approved':results[1]} 
+            return json_data
+        else:
+            return None
+
     @classmethod
     def get_by_bt_id(cls, bt_id):
         query =  cls.query.filter(cls.bt_id==bt_id)

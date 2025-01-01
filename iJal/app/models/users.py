@@ -1,5 +1,5 @@
 from flask_login import UserMixin
-from sqlalchemy import case,func
+from sqlalchemy import case, func
 from iJal.app.db import db
 from passlib.hash import pbkdf2_sha256
 
@@ -32,17 +32,6 @@ class User(UserMixin, db.Model):
             'isAdmin': self.isAdmin,
             'state_id': self.state_id
         }
-    @classmethod
-    def get_active_count(cls):
-        counts = db.session.query(
-            func.count(case((cls.isActive == 'True', 1))).label('active_users'),
-            func.count(case((cls.isActive == 'False', 1))).label('inactive_users')
-        ).one()
-
-        return {
-            'active_users': counts.active_users,
-            'inactive_users': counts.inactive_users
-        }
     
     def save_to_db(self):
         db.session.add(self)
@@ -63,14 +52,16 @@ class User(UserMixin, db.Model):
     
     @classmethod
     def get_all(cls):
-        results = db.session.query(
+        query = db.session.query(
             cls.id, 
             cls.username,
             cls.isActive,
             State.short_name
         ).join(
             State, State.id==cls.state_id
-        ).all()
+        ).order_by(State.short_name)
+        
+        results = query.all()
         
         if results:
             json_data = [{
@@ -85,4 +76,16 @@ class User(UserMixin, db.Model):
     @classmethod
     def get_by_id(cls, id):
         return cls.query.filter(cls.id==id).first()
+    
+    @classmethod
+    def get_active_count(cls):
+        counts = db.session.query(
+            func.count(case((cls.isActive == 'True', 1))).label('active_users'),
+            func.count(case((cls.isActive == 'False', 1))).label('inactive_users')
+        ).one()
+
+        return {
+            'active_users': counts.active_users,
+            'inactive_users': counts.inactive_users
+        }
     

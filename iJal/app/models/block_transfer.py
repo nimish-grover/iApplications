@@ -80,6 +80,31 @@ class BlockWaterTransfer(db.Model):
         return None
     
     @classmethod
+    def get_water_transfer_by_block(cls, bt_id):
+        query = db.session.query(
+            func.concat(BlockTransferType.transfer_type, ' (', BlockTransferSector.sector, ')').label('transfer_type_sector'),
+            func.coalesce(cls.transfer_quantity, 0).label('transfer_quantity')
+            ).select_from(BlockTransferType
+            ).join(BlockTransferSector, text("1=1")
+            ).outerjoin(
+                cls, 
+                (BlockTransferType.id == cls.transfer_type_id) & 
+                (BlockTransferSector.id == cls.transfer_sector_id) & 
+                (cls.bt_id == bt_id)
+            ).order_by('transfer_type_sector')
+
+        results = query.all()
+
+        if results:
+            json_data = [{
+                'entity_name': result.transfer_type_sector,
+                'entity_value': result.transfer_quantity
+                } for result in results]
+            return json_data
+        else:
+            return None
+
+    @classmethod
     def check_duplicate(cls, transfer_type_id, transfer_sector_id, bt_id):
         return cls.query.filter(cls.transfer_type_id==transfer_type_id, 
                                 cls.transfer_sector_id==transfer_sector_id,

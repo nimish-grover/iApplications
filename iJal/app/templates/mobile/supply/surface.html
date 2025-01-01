@@ -1,14 +1,24 @@
 {% extends 'mobile/base.html' %}
 {% block title %} Surface Water {% endblock %}
-{% from 'mobile/components.html' import select, block_button, chart %}
+{% from 'mobile/components.html' import select, block_button, chart, table_title, badge %}
 {% block content %}
+<div class="row">
+    <div class="col"></div>
+    <div class="col-8 text-center">
+        {{table_title(title='Surface Water Supply', subtitle='(in Ha M)')}}
+    </div>
+    <div class="col">
+        {% if is_approved %}
+        {{badge()}}
+        {% endif %}
+    </div>
+</div>
 <div id="cardCarousel" class="carousel slide">
     <div class="carousel-inner">
       <div class="carousel-item active">        
         {{chart()}}
       </div>
       <div class="carousel-item">
-        <h6>Surface Water Supply</h6>
         <table class="table table-bordered table-sm fs-7 mb-0">
             <thead>
                 <tr>
@@ -56,6 +66,7 @@
         },
         title:{
             text:'Waterbody Storage',
+            top:'bottom',
             left:'center'
         },
         xAxis: {
@@ -72,19 +83,22 @@
             {
             name: 'Storage',
             type: 'bar',
-            data: transformArray(values, [
-                '#c23531',
-                '#2f4554',
-                '#61a0a8',
-                '#d48265',
-                '#91c7ae',
-                '#749f83',
-                '#ca8622',
-                '#bda29a',
-                '#6e7074',
-                '#546570',
-                '#c4ccd3'
-            ]),
+            data: transformArray(values,
+            chart_data.map(item => item.background) 
+            // [  
+                // '#c23531',
+                // '#2f4554',
+                // '#61a0a8',
+                // '#d48265',
+                // '#91c7ae',
+                // '#749f83',
+                // '#ca8622',
+                // '#bda29a',
+                // '#6e7074',
+                // '#546570',
+                // '#c4ccd3'
+            // ]
+        ),
             // label: {
             //     show: true,
             //     position: 'right',

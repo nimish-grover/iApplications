@@ -1,10 +1,10 @@
 from sqlalchemy import func
 from iJal.app.db import db
+from iJal.app.models.block_crops import BlockCrop
+from iJal.app.models.block_territory import BlockTerritory
+from iJal.app.models.blocks import Block
 from iJal.app.models.crops import Crop
 from iJal.app.models.territory import TerritoryJoin
-from iJal.app.models.block_crops import BlockCrop
-from iJal.app.models.blocks import Block
-from iJal.app.models.block_territory import BlockTerritory
 
 class CropCensus(db.Model):
     __tablename__ = 'crop_census'
@@ -60,7 +60,7 @@ class CropCensus(db.Model):
         }
     
     @classmethod
-    def get_crops_by_block(cls, block_id, district_id):
+    def get_census_data_crops(cls, block_id, district_id):
         query = db.session.query(
             func.sum(cls.crop_area).label('crop_area'),
             Crop.id.label('crop_id'),
@@ -86,7 +86,7 @@ class CropCensus(db.Model):
         return None
     
     @classmethod
-    def get_block_or_crops_census(cls,block_lgd):
+    def get_crops_by_block(cls, block_id, district_id):
         block_crops_subquery = (
             db.session.query(
                 BlockCrop.crop_id.label("crop_id"),
@@ -94,36 +94,30 @@ class CropCensus(db.Model):
             )
             .join(BlockTerritory, BlockTerritory.id == BlockCrop.bt_id)
             .join(Block, Block.id == BlockTerritory.block_id)
-            .filter(Block.lgd_code == block_lgd)
+            .filter(Block.id == block_id)
             .group_by(BlockCrop.crop_id)
             .subquery()
         )
 
         # Subquery for crop_census
-        crop_census_subquery = (
-            db.session.query(
+        crop_census_subquery = db.session.query(
                 CropCensus.crop_id.label("crop_id"),
                 func.sum(CropCensus.crop_area).label("total_area")
-            )
-            .join(TerritoryJoin, TerritoryJoin.id == CropCensus.territory_id)
-            .join(Block, Block.id == TerritoryJoin.block_id)
-            .filter(Block.lgd_code == block_lgd)
-            .group_by(CropCensus.crop_id)
-            .subquery()
-        )
+                ).join(TerritoryJoin, TerritoryJoin.id == CropCensus.territory_id
+                ).join(Block, Block.id == TerritoryJoin.block_id\
+                ).filter(Block.id == block_id
+                ).group_by(CropCensus.crop_id
+                ).subquery()
 
         # Main query
-        query = (
-            db.session.query(
+        query = db.session.query(
                 Crop.crop_name,
                 Crop.id.label("crop_id"),
                 Crop.coefficient,
                 func.coalesce(block_crops_subquery.c.total_area, crop_census_subquery.c.total_area, 0).label("crop_area"),
-            )
-            .outerjoin(block_crops_subquery, block_crops_subquery.c.crop_id == Crop.id)
-            .outerjoin(crop_census_subquery, crop_census_subquery.c.crop_id == Crop.id)
-        )
-        
+                ).outerjoin(block_crops_subquery, block_crops_subquery.c.crop_id == Crop.id
+                ).outerjoin(crop_census_subquery, crop_census_subquery.c.crop_id == Crop.id)
+            
         results = query.all()
         if results:
             json_data = [{

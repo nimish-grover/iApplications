@@ -1,6 +1,7 @@
 {% extends 'desktop/base.html' %}
 {% block title %} Approve {% endblock %}
-{% from 'mobile/components.html' import chart, table_title, floating_input, submit_button, input_hidden, floating_select, search_input,validation_input,validation_select%}
+{% from 'mobile/components.html' import chart, table_title, floating_input, submit_button, 
+input_hidden, floating_select, search_input,validation_input,validation_select%}
 {% block content %}
 {{table_title(title='Approve Users')}}
 {{search_input(placeholder='Search User')}}
@@ -24,11 +25,11 @@
                 <td class="text-start text-truncate" style="max-width: 150px;">
                     {{row['username']}}
                 </td>
-                <td class="text-start" id="userState">
+                <td class="text-center" id="userState">
                     {{row['state_name']}}
                 </td>
-                <td class="text-center" id="userStatus">                        
-                    <div class="form-check form-switch">
+                <td id="userStatus">                        
+                    <div class="form-check form-switch d-flex justify-content-center align-items-center">
                         <input class="form-check-input" type="checkbox" data-id="{{ row['id'] }}" 
                         role="switch" id="userIsActive" {% if row["isActive"] %} checked {% endif %}
                         onchange="toggleUserStatus(this)">
@@ -65,6 +66,20 @@ function toggleUserStatus(checkbox) {
         // console.log("Updated users array:", users);
     }
 }
+
+// Search Input
+document.getElementById("searchInput").addEventListener("input", function () {
+    const filter = this.value.toLowerCase();
+    const rows = document.querySelectorAll("#tablebody tr");
+    rows.forEach(row => {
+        const cropName = row.cells[1].textContent.toLowerCase();
+        if (cropName.includes(filter)) {
+            row.style.display = "";
+        } else {
+            row.style.display = "none";
+        }
+    });
+});
 
 // Submit button event
 btnSubmit.addEventListener("click", (event) => {

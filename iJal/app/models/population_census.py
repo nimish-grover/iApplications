@@ -1,9 +1,10 @@
 from sqlalchemy import func
 from iJal.app.db import db
 from iJal.app.models import Population, TerritoryJoin
-from iJal.app.models.block_territory import BlockTerritory
 from iJal.app.models.block_pop import BlockPop
+from iJal.app.models.block_territory import BlockTerritory
 from iJal.app.models.blocks import Block
+from iJal.app.models.districts import District
 
 class PopulationCensus(db.Model):
     __tablename__ = 'population_census'
@@ -42,27 +43,25 @@ class PopulationCensus(db.Model):
             "population_count": self.population_count,
             "territory_id": self.territory_id
         }
-
-
     @classmethod
-    def get_population_by_block(cls, block_id, district_id):
+    def get_census_data_population(cls, block_id, district_id):
         query = db.session.query(
-        func.sum(PopulationCensus.population_count).label("population_count"),
-        Population.id,
-        Population.display_name
-        ).join(TerritoryJoin, TerritoryJoin.id == PopulationCensus.territory_id
-        ).join(Population, Population.id == PopulationCensus.population_id
-        ).filter(
-            TerritoryJoin.block_id == block_id,
-            TerritoryJoin.district_id == district_id,
-            Population.id.in_([2, 3]) # 2 = 'male', 3 = 'female'
-        ).group_by(
-            TerritoryJoin.block_id,
-            TerritoryJoin.district_id,
+            func.sum(PopulationCensus.population_count).label("population_count"),
             Population.id,
-            Population.display_name,
-            Population.population_type
-        )
+            Population.display_name
+            ).join(TerritoryJoin, TerritoryJoin.id == PopulationCensus.territory_id
+            ).join(Population, Population.id == PopulationCensus.population_id
+            ).filter(
+                TerritoryJoin.block_id == block_id,
+                TerritoryJoin.district_id == district_id,
+                Population.id.in_([2, 3]) # 2 = 'male', 3 = 'female'
+            ).group_by(
+                TerritoryJoin.block_id,
+                TerritoryJoin.district_id,
+                Population.id,
+                Population.display_name,
+                Population.population_type
+            )
         results = query.all()
 
         if results:
@@ -76,38 +75,37 @@ class PopulationCensus(db.Model):
             ]
             return result
         else:
-            return None
-        
+            return None  
+
     @classmethod
-    def get_block_or_population_census(cls,block_lgd):
-        subquery_bp = (
-            db.session.query(
+    def get_population_by_block(cls, block_id, district_id):
+        subquery_bp = db.session.query(
                 BlockPop.population_id.label("population_id"),
                 func.sum(BlockPop.count).label("total_count")
-            )
-            .join(BlockTerritory, BlockPop.bt_id == BlockTerritory.id)
-            .join(Block, BlockTerritory.block_id == Block.id)
-            .filter(Block.lgd_code == block_lgd)
-            .group_by(BlockPop.population_id)
-            .subquery()
-        )
+            ).join(BlockTerritory, BlockPop.bt_id == BlockTerritory.id
+            ).join(Block, BlockTerritory.block_id == Block.id
+            #).filter(Block.lgd_code == block_lgd)
+            ).filter(
+                Block.id == block_id,
+                District.id == district_id
+            ).group_by(BlockPop.population_id
+            ).subquery()
 
         # Subquery for population_census
-        subquery_pc = (
-            db.session.query(
+        subquery_pc = db.session.query(
                 PopulationCensus.population_id.label("population_id"),
                 func.sum(PopulationCensus.population_count).label("total_count")
-            )
-            .join(TerritoryJoin, PopulationCensus.territory_id == TerritoryJoin.id)
-            .join(Block, TerritoryJoin.block_id == Block.id)
-            .filter(Block.lgd_code == block_lgd)
-            .group_by(PopulationCensus.population_id)
-            .subquery()
-        )
+            ).join(TerritoryJoin, PopulationCensus.territory_id == TerritoryJoin.id
+            ).join(Block, TerritoryJoin.block_id == Block.id
+            #).filter(Block.lgd_code == block_lgd)
+            ).filter(
+                Block.id == block_id,
+                District.id == district_id
+            ).group_by(PopulationCensus.population_id
+            ).subquery()
 
         # Main query
-        query = (
-            db.session.query(
+        query = db.session.query(
                 Population.display_name.label("display_name"),
                 Population.id.label("id"),
                 func.coalesce(
@@ -115,11 +113,10 @@ class PopulationCensus(db.Model):
                     subquery_pc.c.total_count,
                     0
                 ).label("population_count")
-            )
-            .outerjoin(subquery_bp, subquery_bp.c.population_id == Population.id)
-            .outerjoin(subquery_pc, subquery_pc.c.population_id == Population.id)
-            .filter(Population.id.in_([2, 3]))
-        )
+            ).outerjoin(subquery_bp, subquery_bp.c.population_id == Population.id
+            ).outerjoin(subquery_pc, subquery_pc.c.population_id == Population.id
+            ).filter(Population.id.in_([2, 3])
+            ).order_by(Population.id)
         
         results = query.all()
 

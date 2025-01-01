@@ -41,14 +41,40 @@ class BlockRainfall(db.Model):
             "bt_id":self.bt_id,
             "is_approved":self.is_approved,
             "created_by":self.created_by,
-            "creatd_on":self.created_on
+            "created_on":self.created_on
         }
     
     @classmethod
     def get_by_id(cls, id):
         return cls.query.filter(cls.id==id).first()
     
-    
+    @classmethod
+    def get_rainfall_data(cls, bt_id):
+        query = (
+            db.session.query(
+                cls.month_year,
+                func.round(func.sum(cls.actual).cast(db.Numeric), 2).label('actual'),
+                func.round(func.sum(cls.normal).cast(db.Numeric), 2).label('normal'),
+                cls.is_approved
+            )
+            .filter(cls.bt_id == bt_id)
+            .group_by(cls.month_year,cls.is_approved)
+            .order_by(func.min(cls.month_year))
+        )
+
+        # Execute the query
+        results = query.all()
+
+        if results:
+            json_data = [{
+                'month': row.month_year.strftime('%b-%y'),
+                'actual': row.actual,
+                'normal': row.normal,
+                'is_approved': row.is_approved
+                } for row in results]
+            return json_data
+        return None
+        
     @classmethod
     def get_by_bt_id(cls, bt_id):
         query = db.session.query(

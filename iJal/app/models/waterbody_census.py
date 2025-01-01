@@ -1,10 +1,10 @@
 from sqlalchemy import func
 from iJal.app.db import db
+from iJal.app.models.block_surface import BlockWaterbody
+from iJal.app.models.block_territory import BlockTerritory
+from iJal.app.models.blocks import Block
 from iJal.app.models.territory import TerritoryJoin
 from iJal.app.models.waterbody import WaterbodyType
-from iJal.app.models.blocks import Block
-from iJal.app.models.block_territory import BlockTerritory
-from iJal.app.models.block_surface import BlockWaterbody
 
 class WaterbodyCensus(db.Model):
     __tablename__ = 'waterbodies_census'
@@ -74,7 +74,7 @@ class WaterbodyCensus(db.Model):
         }
     
     @classmethod
-    def get_waterbody_by_block(cls, block_id, district_id):
+    def get_census_data_waterbody(cls, block_id, district_id):
         query = db.session.query(
                 func.sum(cls.storage_capacity).label('storage_capacity'),
                 func.count(cls.waterbody_id).label('waterbody_count'),
@@ -97,48 +97,38 @@ class WaterbodyCensus(db.Model):
                          for row in results]
             return json_data
         return None
-
-
+    
     @classmethod
-    def get_block_or_waterbody_census(cls,block_lgd):
-        block_waterbodies_subquery = (
-            db.session.query(
+    def get_waterbody_by_block(cls, block_id, district_id):
+        block_waterbodies_subquery = db.session.query(
                 BlockWaterbody.wb_type_id.label("waterbody_id"),
                 func.sum(BlockWaterbody.storage).label("total_storage"),
                 func.sum(BlockWaterbody.count).label("total_count")
-            )
-            .join(BlockTerritory, BlockTerritory.id == BlockWaterbody.bt_id)
-            .join(Block, Block.id == BlockTerritory.block_id)
-            .filter(Block.lgd_code == block_lgd)
-            .group_by(BlockWaterbody.wb_type_id)
-            .subquery()
-        )
+                ).join(BlockTerritory, BlockTerritory.id == BlockWaterbody.bt_id
+                ).join(Block, Block.id == BlockTerritory.block_id
+                ).filter(Block.id == block_id
+                ).group_by(BlockWaterbody.wb_type_id
+                ).subquery()
 
         # Subquery for waterbodies_census
-        waterbodies_census_subquery = (
-            db.session.query(
+        waterbodies_census_subquery = db.session.query(
                 WaterbodyCensus.waterbody_id.label("waterbody_id"),
                 func.sum(WaterbodyCensus.storage_capacity).label("total_storage"),
                 func.count(WaterbodyCensus.waterbody_id).label("total_count")
-            )
-            .join(TerritoryJoin, TerritoryJoin.id == WaterbodyCensus.tj_id)
-            .join(Block, Block.id == TerritoryJoin.block_id)
-            .filter(Block.lgd_code == block_lgd)
-            .group_by(WaterbodyCensus.waterbody_id)
-            .subquery()
-        )
+                ).join(TerritoryJoin, TerritoryJoin.id == WaterbodyCensus.tj_id
+                ).join(Block, Block.id == TerritoryJoin.block_id
+                ).filter(Block.id == block_id
+                ).group_by(WaterbodyCensus.waterbody_id
+                ).subquery()
 
         # Main query
-        query = (
-            db.session.query(
+        query = db.session.query(
                 WaterbodyType.waterbody_name,
                 WaterbodyType.id.label("waterbody_id"),
                 func.coalesce(block_waterbodies_subquery.c.total_storage, waterbodies_census_subquery.c.total_storage, 0).label("storage_capacity"),
                 func.coalesce(block_waterbodies_subquery.c.total_count, waterbodies_census_subquery.c.total_count, 0).label("waterbody_count"),
-            )
-            .outerjoin(block_waterbodies_subquery, block_waterbodies_subquery.c.waterbody_id == WaterbodyType.id)
-            .outerjoin(waterbodies_census_subquery, waterbodies_census_subquery.c.waterbody_id == WaterbodyType.id)
-        )
+                ).outerjoin(block_waterbodies_subquery, block_waterbodies_subquery.c.waterbody_id == WaterbodyType.id
+                ).outerjoin(waterbodies_census_subquery, waterbodies_census_subquery.c.waterbody_id == WaterbodyType.id)
 
         results = query.all()
         if results:

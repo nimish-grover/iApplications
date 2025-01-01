@@ -1,14 +1,24 @@
 {% extends 'mobile/base.html' %}
 {% block title %} Livestock {% endblock %}
-{% from 'mobile/components.html' import chart, table_title %}
+{% from 'mobile/components.html' import chart, table_title, badge %}
 {% block content %}
+<div class="row">
+    <div class="col"></div>
+    <div class="col-8 text-center">
+        {{table_title(title='Livestocks Consumption', subtitle='(in Ha M)')}}
+    </div>
+    <div class="col">
+        {% if is_approved %}
+        {{badge()}}
+        {% endif %}
+    </div>
+</div>
 <div id="cardCarousel" class="carousel slide">
     <div class="carousel-inner">
       <div class="carousel-item active">        
         {{chart()}}
       </div>
       <div class="carousel-item">
-        {{table_title(title='Livestock Consumption', subtitle='(in Ha M)')}}
         <table class="table table-bordered table-sm fs-7 mb-0">
             <thead>
                 <tr>
