@@ -140,9 +140,9 @@
     </div>
     <div class="container px-5 d-print-none">
         <nav class="navbar navbar-expand-lg bg-transparent border-bottom p-0 border-dark">
-            <div class="container-fluid d-flex justify-content-between mb-3">
+            <div class="container-fluid d-flex justify-content-between my-2">
                 <img src="{{url_for('static',filename='assets/niti_logo.png')}}" alt="niti_logo" height="40px" class="ms-3">
-                <img src="{{url_for('static',filename='assets/jalagam.png')}}" alt="jalagam" height="40px" class="me-4">
+                <img src="{{url_for('static',filename='assets/jalagam.png')}}" alt="jalagam" height="40px" class="ms-5">
                 <img src="{{url_for('static',filename='assets/giz_logo.png')}}" alt="giz_logo" height="40px">
             </div>
         </nav>
@@ -155,23 +155,23 @@
                     <table class="table table-sm table-fixed-sizes">
                         <tr>
                             <th>State</th>
-                            <td class="text-start">{{payload['state_name']}}</td>
+                            <td class="text-start">{{basic_info['state_name']}}</td>
                         </tr>
                         <tr>
                             <th>District</th>
-                            <td class="text-start">{{payload['district_name']}}</td>
+                            <td class="text-start">{{basic_info['district_name']}}</td>
                         </tr>
                         <tr>
                             <th>Block</th>
-                            <td class="text-start">{{payload['block_name']}}</td>
+                            <td class="text-start">{{basic_info['block_name']}}</td>
                         </tr>
                         <tr>
                             <th>No. of Villages</th>
-                            <td class="text-start">{{village_count}}</td>
+                            <td class="text-start">{{basic_info['village_count']}}</td>
                         </tr>
                         <tr>
                             <th>TGA</th>
-                            <td class="text-start">{{tga}}</td>
+                            <td class="text-start">{{basic_info['tga']}}</td>
                         </tr>
                     </table>
                 </div>
@@ -255,32 +255,7 @@
                 <div class="text-center fw-bold fs-5" style="background:#dee2e6;">DEMAND</div>
                 <div class="fw-semibold fs-6 fw-semibold ms-1 mt-1">a) Human(in HaM)</div>
                 <div class="container justify-content-center m-0 p-0 fs-7">
-                    <!-- <div class="row mt-1 fs-6">
-                        <div class="text-start">Coefficient for comsumption per day</div>
-                        <div class="col justify-content-center d-grid">
-                            <div class="form-check">
-                                <input class="form-check-input coefficient-radio" type="radio" name="inlineRadio"
-                                    id="55" value="55" checked>
-                                <label class="form-check-label" for="55">55 L</label>
-                            </div>
-                        </div>
-                        <div class="col justify-content-center d-grid">
-                            <div class="form-check">
-                                <input class="form-check-input coefficient-radio" type="radio" name="inlineRadio"
-                                    id="70" value="70">
-                                <label class="form-check-label" for="70">70 L</label>
-                            </div>
-                        </div>
-                        <div class="col justify-content-center d-grid">
-                            <div class="form-check">
-                                <input class="form-check-input coefficient-radio" type="radio" name="inlineRadio"
-                                    id="130" value="130">
-                                <label class="form-check-label" for="130">130 L</label>
-                            </div>
-                        </div>
-
-                    </div> -->
-
+                    <div class="text-start ps-1 text-coefficient">* Coefficient Used for Calulation is {{coefficient}}L/day</div>
                     <table class="table table-sm table-fixed-size mb-1 human_data table_display">
                         <tr>
                             <th>Description</th>
@@ -493,9 +468,9 @@
 
     <div class="print d-none d-print-block">
         <nav class="navbar navbar-expand-lg bg-transparent border-bottom p-0 border-dark">
-            <div class="container-fluid d-flex justify-content-between mb-3">
+            <div class="container-fluid d-flex justify-content-between my-2">
                 <img src="{{url_for('static',filename='assets/niti_logo.png')}}" alt="niti_logo" height="40px" class="ms-3">
-                <img src="{{url_for('static',filename='assets/jalagam.png')}}" alt="jalagam" height="40px" class="me-4">
+                <img src="{{url_for('static',filename='assets/jalagam.png')}}" alt="jalagam" height="40px" class="ms-5">
                 <img src="{{url_for('static',filename='assets/giz_logo.png')}}" alt="giz_logo" height="40px">
             </div>
         </nav>
@@ -506,23 +481,23 @@
                     <table class="table table-sm table-fixed-sizes">
                         <tr>
                             <th>State</th>
-                            <td class="text-start">{{payload['state_name']}}</td>
+                            <td class="text-start">{{basic_info['state_name']}}</td>
                         </tr>
                         <tr>
                             <th>District</th>
-                            <td class="text-start">{{payload['district_name']}}</td>
+                            <td class="text-start">{{basic_info['district_name']}}</td>
                         </tr>
                         <tr>
                             <th>Block</th>
-                            <td class="text-start">{{payload['block_name']}}</td>
+                            <td class="text-start">{{basic_info['block_name']}}</td>
                         </tr>
                         <tr>
                             <th>No. of Villages</th>
-                            <td class="text-start">{{village_count}}</td>
+                            <td class="text-start">{{basic_info['village_count']}}</td>
                         </tr>
                         <tr>
                             <th>TGA</th>
-                            <td class="text-start">{{tga}}</td>
+                            <td class="text-start">{{basic_info['tga']}}</td>
                         </tr>
                     </table>
                 </div>
@@ -603,7 +578,7 @@
                 <div class="text-center fw-bold fs-5" style="background:#dee2e6;">DEMAND</div>
                 <div class="fw-semibold fs-6 fw-semibold ms-1 mt-1">a) Human(in HaM)</div>
                 <div class="container justify-content-center m-0 p-0 fs-7">
-                    <div class="text-start ps-1 text-coefficient">* Coefficient Used for Calulation is 55L/day</div>
+                    <div class="text-start ps-1 text-coefficient">* Coefficient Used for Calulation is {{coefficient}}L/day</div>
 
                     <table class="table table-sm table-fixed-size my-1 human_data table_print">
                         <tr>
@@ -814,93 +789,93 @@
     </div>
 
     <script>
-    const coefficientRadios = document.querySelectorAll('.coefficient-radio');
-    const maleRow = document.querySelectorAll('#humanTable')[0];
-    const femaleRow = document.querySelectorAll('#humanTable')[1];
-    const totalRow = maleRow.parentElement.querySelector('tr:nth-last-child(1)');
-    const humanPopulationRow = findRowWithText('Human Population Consumption');
-    const totalDemandRow = findRowWithText('Total Demand');
-    const demandRows = [
-        findRowWithText('Human Population Consumption'),
-        findRowWithText('Livestock Population Consumption'),
-        findRowWithText('Crops Consumption'),
-        findRowWithText('Industry Consumption'),
-    ];
-    // Constants
-    const NUMBER_OF_DAYS = 365;
-    const DECADAL_GROWTH = 1.25;
+    // const coefficientRadios = document.querySelectorAll('.coefficient-radio');
+    // const maleRow = document.querySelectorAll('#humanTable')[0];
+    // const femaleRow = document.querySelectorAll('#humanTable')[1];
+    // const totalRow = maleRow.parentElement.querySelector('tr:nth-last-child(1)');
+    // const humanPopulationRow = findRowWithText('Human Population Consumption');
+    // const totalDemandRow = findRowWithText('Total Demand');
+    // const demandRows = [
+    //     findRowWithText('Human Population Consumption'),
+    //     findRowWithText('Livestock Population Consumption'),
+    //     findRowWithText('Crops Consumption'),
+    //     findRowWithText('Industry Consumption'),
+    // ];
+    // // Constants
+    // const NUMBER_OF_DAYS = 365;
+    // const DECADAL_GROWTH = 1.25;
 
-    function toggleSpinner() {
-        const spinner = document.getElementById('loading-spinner');
-        spinner.style.display = (spinner.style.display === 'none' || spinner.style.display === '') ? 'block' : 'none';
-    }
+    // function toggleSpinner() {
+    //     const spinner = document.getElementById('loading-spinner');
+    //     spinner.style.display = (spinner.style.display === 'none' || spinner.style.display === '') ? 'block' : 'none';
+    // }
 
-    function findRowWithText(text) {
-        const rows = document.querySelectorAll('tr');
-        for (let row of rows) {
-            const cells = row.querySelectorAll('td');
-            if (cells.length > 0 && cells[0].innerText.trim() === text) {
-                return cells; // Return all cells of the row
-            }
-        }
-        return null;
-    }
+    // function findRowWithText(text) {
+    //     const rows = document.querySelectorAll('tr');
+    //     for (let row of rows) {
+    //         const cells = row.querySelectorAll('td');
+    //         if (cells.length > 0 && cells[0].innerText.trim() === text) {
+    //             return cells; // Return all cells of the row
+    //         }
+    //     }
+    //     return null;
+    // }
 
-    function updateTotalDemand() {
-        let totalDemand = 0;
-        demandRows.forEach(row => {
-            if (row) {
-                const value = parseFloat(row[1].innerText) || 0;
-                totalDemand += value;
-            }
-        });
+    // function updateTotalDemand() {
+    //     let totalDemand = 0;
+    //     demandRows.forEach(row => {
+    //         if (row) {
+    //             const value = parseFloat(row[1].innerText) || 0;
+    //             totalDemand += value;
+    //         }
+    //     });
 
-        // Update Total Demand row last cell
-        if (totalDemandRow) {
-            totalDemandRow[1].innerText = totalDemand.toFixed(2);
-        }
-    }
+    //     // Update Total Demand row last cell
+    //     if (totalDemandRow) {
+    //         totalDemandRow[1].innerText = totalDemand.toFixed(2);
+    //     }
+    // }
 
-    // const originalHumanData = JSON.parse(document.getElementById('humanData').value);
-    function calculateConsumption(population, coefficient) {
-        return ((population * coefficient * NUMBER_OF_DAYS * DECADAL_GROWTH) / 10000000).toFixed(2);
-    }
+    // // const originalHumanData = JSON.parse(document.getElementById('humanData').value);
+    // function calculateConsumption(population, coefficient) {
+    //     return ((population * coefficient * NUMBER_OF_DAYS * DECADAL_GROWTH) / 10000000).toFixed(2);
+    // }
 
-    function updateTables() {
-        const selectedCoefficient = document.querySelector('.coefficient-radio:checked').value;
+    // function updateTables() {
+    //     const selectedCoefficient = document.querySelector('.coefficient-radio:checked').value;
 
-        // Recalculate for male
-        const malePopulation = parseInt(maleRow.children[1].innerText);
-        const maleConsumption = calculateConsumption(malePopulation, selectedCoefficient);
-        maleRow.children[2].innerText = maleConsumption;
+    //     // Recalculate for male
+    //     const malePopulation = parseInt(maleRow.children[1].innerText);
+    //     const maleConsumption = calculateConsumption(malePopulation, selectedCoefficient);
+    //     maleRow.children[2].innerText = maleConsumption;
 
-        // Recalculate for female
-        const femalePopulation = parseInt(femaleRow.children[1].innerText);
-        const femaleConsumption = calculateConsumption(femalePopulation, selectedCoefficient);
-        femaleRow.children[2].innerText = femaleConsumption;
+    //     // Recalculate for female
+    //     const femalePopulation = parseInt(femaleRow.children[1].innerText);
+    //     const femaleConsumption = calculateConsumption(femalePopulation, selectedCoefficient);
+    //     femaleRow.children[2].innerText = femaleConsumption;
 
-        // Update total consumption
-        const totalConsumption = (parseFloat(maleConsumption) + parseFloat(femaleConsumption)).toFixed(2);
-        totalRow.children[2].innerText = totalConsumption;
+    //     // Update total consumption
+    //     const totalConsumption = (parseFloat(maleConsumption) + parseFloat(femaleConsumption)).toFixed(2);
+    //     totalRow.children[2].innerText = totalConsumption;
 
-        // Update Human Population Consumption in the main table
-        if (humanPopulationRow) {
-            humanPopulationRow[1].innerText = totalConsumption;
-        }
+    //     // Update Human Population Consumption in the main table
+    //     if (humanPopulationRow) {
+    //         humanPopulationRow[1].innerText = totalConsumption;
+    //     }
 
-        // Update Total Demand
-        updateTotalDemand();
-    }
+    //     // Update Total Demand
+    //     updateTotalDemand();
+    // }
 
-    document.querySelectorAll('.coefficient-radio').forEach(radio => {
-        radio.addEventListener('change', () => {
-            toggleSpinner();
-            updateTables();
-            setTimeout(() => {
-                toggleSpinner();
-            }, 500); // 1 second delay
-        });
-    });
+    // document.querySelectorAll('.coefficient-radio').forEach(radio => {
+    //     radio.addEventListener('change', () => {
+    //         toggleSpinner();
+    //         updateTables();
+    //         setTimeout(() => {
+    //             toggleSpinner();
+    //         }, 500); // 1 second delay
+    //     });
+    // });
 
     document.getElementById("btnPrint").addEventListener("click", function () {
         window.print();

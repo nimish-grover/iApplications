@@ -26,7 +26,7 @@ class BlockOrCensus:
         return value/cls.LITRE_TO_HECTARE
 
     @classmethod
-    def get_human_data(cls, block_id, district_id, state_id):
+    def get_human_data(cls, block_id, district_id, state_id,coeff = 55):
         #return block data
         bt_id = BlockData.get_bt_id(block_id=block_id, district_id=district_id, state_id=state_id)
         if bt_id:
@@ -35,7 +35,7 @@ class BlockOrCensus:
                 for item in human:
                     item['entity_consumption'] = round(
                         cls.litre_to_hectare_meters(
-                        (int(item['entity_count']) * cls.RURAL_CONSUMPTION 
+                        (int(item['entity_count']) * coeff 
                         * cls.DECADAL_GROWTH * cls.NUMBER_OF_DAYS)),2)
                 human_consumption = cls.get_entity_consumption(human, cls.COLORS)
                 is_approved = (
@@ -187,6 +187,7 @@ class BlockOrCensus:
         demand_side = []
         human,is_approved = cls.get_human_data(block_id, district_id,state_id)
         total_human = round(sum([float(item['value']) for item in human]), 2)
+        total_human_count = round(sum([float(item['count']) for item in human]), 2)
         livestocks,is_approved = cls.get_livestock_data(block_id, district_id,state_id)
         total_livestock = round(sum([item['value']for item in livestocks]),2)
         crops,is_approved = cls.get_crop_data(block_id, district_id,state_id)
@@ -194,7 +195,7 @@ class BlockOrCensus:
         industry = BudgetData.get_industry_demand(block_id, district_id,state_id)
         total_industry = round(sum([float(item['value']) for item in industry]), 2)
         total_demand = total_human + total_livestock + total_crop + total_industry
-        demand_side.append({'category': 'human','value':round((total_human*100)/(total_demand),0),'water_value':total_human})
+        demand_side.append({'category': 'human','value':round((total_human*100)/(total_demand),0),'water_value':total_human,'human_count':total_human_count})
         demand_side.append({'category': 'livestock','value':round((total_livestock*100)/(total_demand),0),'water_value':total_livestock})
         demand_side.append({'category': 'crop','value':round((total_crop*100)/(total_demand),0),'water_value':total_crop})
         demand_side.append({'category': 'industry','value':round((total_industry*100)/(total_demand),0),'water_value':total_industry}) 
