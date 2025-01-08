@@ -16,6 +16,8 @@ from datetime import datetime, timezone
 from iJal.app.models.block_transfer import BlockWaterTransfer
 from iJal.app.models.industries import Industry
 from iJal.app.models.lulc_census import LULCCensus
+from iJal.app.models.block_progress import BlockProgress
+from iJal.app.models.block_category import BlockCategory
 
 class BlockData:
     @classmethod
@@ -29,6 +31,17 @@ class BlockData:
             bt_id = BlockTerritory.get_bt_id(block_id, district_id, state_id)
             return bt_id
         
+        
+    # @classmethod
+    # def insert_block_progress(cls,bt_id,category_id,data):
+    #     data = 
+        
+    #     return None
+    @classmethod
+    def get_category_id(cls,catgeory):
+        category_id = BlockCategory.get_category_id(catgeory)
+        return category_id
+    
     @classmethod
     def get_human_consumption(cls, block_id, district_id, state_id, user_id):
         bt_id = cls.get_bt_id(block_id=block_id, district_id=district_id, state_id=state_id)
@@ -37,7 +50,17 @@ class BlockData:
     # inserted by system
     def get_or_insert_human(block_id, district_id, bt_id, user_id):
         human = BlockPop.get_by_bt_id(bt_id)
+        category_id = BlockData.get_category_id('human')
         if human:
+            for item in human:
+                if item['count']:
+                    block_progress = BlockProgress(bt_id=item['bt_id'],
+                                                    is_approved=item['is_approved'],
+                                                    value=item['count'],
+                                                    table_id=item['population_id'],
+                                                    category_id = category_id)
+                    block_progress.save_to_db()
+                
             return human
         else:
             human_consumption = BudgetData.get_human_consumption(block_id=block_id, district_id=district_id)
@@ -50,7 +73,15 @@ class BlockData:
                                         is_approved=False, 
                                         created_by=user_id)
                     block_population.save_to_db()
-                human = BlockPop.get_by_bt_id(bt_id)     
+                human = BlockPop.get_by_bt_id(bt_id)  
+                for item in human:
+                    if item['count'] > 0:
+                        block_progress = BlockProgress(bt_id=item['bt_id'],
+                                                        is_approved=item['is_approved'],
+                                                        value=item['count'],
+                                                        table_id=item['population_id'],
+                                                        category_id = category_id)
+                        block_progress.save_to_db()
                 return human
 
     # updated / inserted by user
@@ -81,6 +112,8 @@ class BlockData:
     # inserted by system
     def get_or_insert_livestock(block_id, district_id, bt_id, user_id):
         livestock = BlockLivestock.get_by_bt_id(bt_id)
+        category_id = BlockData.get_category_id('livestock')
+
         if all(row['table_id'] is None for row in livestock):
             livestock_consumption = BudgetData.get_livestock_consumption(block_id=block_id, district_id=district_id)
             if livestock_consumption:
@@ -92,9 +125,25 @@ class BlockData:
                                 is_approved=False, 
                                 created_by=user_id)
                     block_livestock.save_to_db()
-                livestock = BlockLivestock.get_by_bt_id(bt_id)     
+                livestock = BlockLivestock.get_by_bt_id(bt_id)
+                for item in livestock:
+                    if item['count'] > 0:
+                        block_progress = BlockProgress(bt_id=item['bt_id'],
+                                                        is_approved=item['is_approved'],
+                                                        value=item['count'],
+                                                        table_id=item['livestock_id'],
+                                                        category_id = category_id)
+                        block_progress.save_to_db()     
                 return livestock
         else:
+            for item in livestock:
+                if item['count']:
+                    block_progress = BlockProgress(bt_id=item['bt_id'],
+                                                    is_approved=item['is_approved'],
+                                                    value=item['count'],
+                                                    table_id=item['livestock_id'],
+                                                    category_id = category_id)
+                    block_progress.save_to_db()
             return livestock
             
     # updated / inserted by user
@@ -124,6 +173,8 @@ class BlockData:
     
     def get_or_insert_crops(block_id, district_id, bt_id, user_id):
         crops = BlockCrop.get_by_bt_id(bt_id)
+        category_id = BlockData.get_category_id('crop')
+
         if all(row['table_id'] is None for row in crops):
             crops_consumption = BudgetData.get_crops_consumption(block_id=block_id, district_id=district_id)
             if crops_consumption:
@@ -136,8 +187,24 @@ class BlockData:
                                 created_by=user_id)
                     block_crops.save_to_db()
                 crops = BlockCrop.get_by_bt_id(bt_id)     
+                for item in crops:
+                    if item['crop_area']:
+                        block_progress = BlockProgress(bt_id=item['bt_id'],
+                                                        is_approved=item['is_approved'],
+                                                        value=item['crop_area'],
+                                                        table_id=item['crop_id'],
+                                                        category_id = category_id)
+                        block_progress.save_to_db()
                 return crops
         else:
+            for item in crops:
+                if item['crop_area']:
+                    block_progress = BlockProgress(bt_id=item['bt_id'],
+                                                    is_approved=item['is_approved'],
+                                                    value=item['crop_area'],
+                                                    table_id=item['crop_id'],
+                                                    category_id = category_id)
+                    block_progress.save_to_db()
             return crops
     
     def update_crops(json_data, user_id):
@@ -167,10 +234,22 @@ class BlockData:
     def get_industries(block_id, district_id, bt_id, user_id):
         industries = BlockIndustry.get_by_bt_id(bt_id=bt_id)
         # results =[{'id': item.id, 'category':item.industry_sector } for item in industries]
+        category_id = BlockData.get_category_id('industry')
+
+        for item in industries:
+            if item['table_id']:
+                block_progress = BlockProgress(bt_id=item['bt_id'],
+                                                is_approved=item['is_approved'],
+                                                value=item['allocation'],
+                                                table_id=item['industry_id'],
+                                                category_id = category_id)
+                block_progress.save_to_db()
+            
         return industries
     
     def update_industries(json_data, user_id):
             bt_id = 0 
+            category_id = BlockData.get_category_id('industry')
             for item in json_data: 
                 bt_id = item['bt_id']
                 block_industries = BlockIndustry(
@@ -203,29 +282,14 @@ class BlockData:
                         is_approved=True, 
                         created_by=1)
                 block_industries.save_to_db()
+                block_progress = BlockProgress(bt_id=bt_id,
+                                                is_approved=True,
+                                                value=0,
+                                                table_id=1,
+                                                category_id = category_id)
+                block_progress.save_to_db()
             return True
-
-    # def update_industries(json_data, user_id):
-    #     for item in json_data: 
-    #         block_industries = BlockIndustry(
-    #                 industry_id=item['industry_id'],
-    #                 allocation=item['allocation'],
-    #                 unit = item['unit'],
-    #                 count = item['count'],
-    #                 bt_id=item['bt_id'],
-    #                 is_approved=True, 
-    #                 created_by=user_id)
-    #         if item['allocation']>0:
-    #             block_industries.save_to_db()
-    #         else:
-    #             if item['allocation']==0:
-    #                 if item['table_id']:
-    #                     block_industries = None
-    #                     block_industries = BlockIndustry.get_by_id(item['table_id']) 
-    #                     if block_industries:
-    #                         block_industries.delete_from_db()  
-    #     return True
-
+        
     @classmethod
     def get_surface_supply(cls, block_id, district_id, state_id, user_id):
         bt_id = cls.get_bt_id(block_id=block_id, district_id=district_id, state_id=state_id)
@@ -233,6 +297,7 @@ class BlockData:
     
     def get_or_insert_surface_supply(block_id, district_id, bt_id, user_id):
         waterbodies = BlockWaterbody.get_by_bt_id(bt_id)
+        category_id = BlockCategory.get_category_id('surface')
         if all(row['table_id'] is None for row in waterbodies):            
             surface_supply = BudgetData.get_surface_supply(block_id=block_id, district_id=district_id)
             if surface_supply:
@@ -246,9 +311,25 @@ class BlockData:
                         created_by=user_id
                     )
                     block_surface.save_to_db()
-                waterbodies = BlockWaterbody.get_by_bt_id(bt_id)     
+                waterbodies = BlockWaterbody.get_by_bt_id(bt_id)  
+                for item in waterbodies:
+                    if item['count']:
+                        block_progress = BlockProgress(bt_id=item['bt_id'],
+                                                        is_approved=item['is_approved'],
+                                                        value=item['storage'],
+                                                        table_id=item['wb_type_id'],
+                                                        category_id = category_id)
+                        block_progress.save_to_db()
                 return waterbodies
         else:
+            for item in waterbodies:
+                if item['count']:
+                    block_progress = BlockProgress(bt_id=item['bt_id'],
+                                                    is_approved=item['is_approved'],
+                                                    value=item['storage'],
+                                                    table_id=item['wb_type_id'],
+                                                    category_id = category_id)
+                    block_progress.save_to_db()
             return waterbodies
     
     def update_surface(json_data, user_id):
@@ -278,7 +359,16 @@ class BlockData:
     
     def get_or_insert_groundwater_supply(block_id, district_id, bt_id, user_id):
         groundwater_supply = BlockGround.get_by_bt_id(bt_id)
+        category_id = BlockCategory.get_category_id('groundwater')
         if groundwater_supply:
+            for item in groundwater_supply:
+                if item['extraction']:
+                    block_progress = BlockProgress(bt_id=item['bt_id'],
+                                                    is_approved=item['is_approved'],
+                                                    value=item['extraction'],
+                                                    table_id=0,
+                                                    category_id = category_id)
+                    block_progress.save_to_db()
             return groundwater_supply
         else: 
             groundwater_data = BudgetData.get_ground_supply(block_id, district_id)
@@ -291,6 +381,14 @@ class BlockData:
                                             created_by=user_id)
                     block_ground.save_to_db()
             groundwater_supply = BlockGround.get_by_bt_id(bt_id)
+            for item in groundwater_supply:
+                if item['extraction']:
+                    block_progress = BlockProgress(bt_id=item['bt_id'],
+                                                    is_approved=item['is_approved'],
+                                                    value=item['extraction'],
+                                                    table_id=0,
+                                                    category_id = category_id)
+                    block_progress.save_to_db()
             return groundwater_supply
         
     def update_ground(json_data, user_id):
@@ -311,6 +409,7 @@ class BlockData:
     
     def get_or_insert_rainfall_data(block_id, district_id, bt_id, user_id):
         rainfall = BlockRainfall.get_by_bt_id(bt_id)
+        category_id = BlockCategory.get_category_id('rainfall')
         if not rainfall:            
             rainfall_supply = BudgetData.get_rainfall(block_id, district_id)
             if rainfall_supply:
@@ -324,10 +423,26 @@ class BlockData:
                     block_rainfall.save_to_db()
                 rainfall = BlockRainfall.get_by_bt_id(bt_id) 
                 if rainfall:
+                    for idx,item in enumerate(rainfall):
+                        if item['normal']:
+                            block_progress = BlockProgress(bt_id=item['bt_id'],
+                                                            is_approved=item['is_approved'],
+                                                            value=item['normal'],
+                                                            table_id=idx+1,
+                                                            category_id = category_id)
+                            block_progress.save_to_db()
                     return rainfall
                 else:
                     return None
         else:
+            for idx,item in enumerate(rainfall):
+                if item['normal']:
+                    block_progress = BlockProgress(bt_id=item['bt_id'],
+                                                    is_approved=item['is_approved'],
+                                                    value=item['normal'],
+                                                    table_id=idx+1,
+                                                    category_id = category_id)
+                    block_progress.save_to_db()
             return rainfall
                 
     def update_rainfall(json_data, user_id):
@@ -349,6 +464,7 @@ class BlockData:
 
     def get_or_insert_lulc(block_id, district_id, bt_id, user_id):
         lulc = BlockLULC.get_by_bt_id(bt_id)
+        category_id = BlockCategory.get_category_id('lulc')
         if all(row['table_id'] is None for row in lulc):
             lulc_supply = LULCCensus.get_lulc(block_id=block_id, district_id=district_id)
             if lulc_supply:
@@ -362,8 +478,24 @@ class BlockData:
                             created_by=user_id)
                         block_lulc.save_to_db()
                 lulc = BlockLULC.get_by_bt_id(bt_id)     
+                for item in lulc:
+                    if item['area']:
+                        block_progress = BlockProgress(bt_id=item['bt_id'],
+                                                        is_approved=item['is_approved'],
+                                                        value=item['area'],
+                                                        table_id=item['lulc_id'],
+                                                        category_id = category_id)
+                        block_progress.save_to_db()
                 return lulc
         else:
+            for item in lulc:
+                if item['area']:
+                    block_progress = BlockProgress(bt_id=item['bt_id'],
+                                                    is_approved=item['is_approved'],
+                                                    value=item['area'],
+                                                    table_id=item['lulc_id'],
+                                                    category_id = category_id)
+                    block_progress.save_to_db()
             return lulc
             
     def update_lulc(json_data, user_id):
@@ -392,9 +524,20 @@ class BlockData:
     
     def get_or_insert_water_transfer(block_id, district_id, bt_id, user_id):
         water_transfer = BlockWaterTransfer.get_by_bt_id(bt_id)
+        category_id = BlockData.get_category_id('transfer')
+
+        for item in water_transfer:
+            if item['table_id']:
+                block_progress = BlockProgress(bt_id=item['bt_id'],
+                                                is_approved=item['is_approved'],
+                                                value=item['quantity'],
+                                                table_id=item['type_id'],
+                                                category_id = category_id)
+                block_progress.save_to_db()
         return water_transfer
     
     def update_water_transfer(json_data, user_id):
+        category_id = BlockCategory.get_category_id('transfer')
         for item in json_data: 
             block_water_transfer = BlockWaterTransfer(
                         transfer_quantity=item['quantity'],
@@ -411,7 +554,23 @@ class BlockData:
                         block_water_transfer = None
                         block_water_transfer = BlockWaterTransfer.get_by_id(item['table_id'])
                         if block_water_transfer:
-                            block_water_transfer.delete_from_db()      
+                            block_water_transfer.delete_from_db()     
+        filtered_json_data = [item for item in json_data if item['count'] > 0]
+        if len(filtered_json_data) == 0:
+            block_water_transfer = BlockWaterTransfer(
+                        transfer_quantity=0,
+                        transfer_type_id=item['type_id'],
+                        transfer_sector_id=item['sector_id'],
+                        bt_id=item['bt_id'],
+                        is_approved=True,
+                        created_by=user_id)
+            block_water_transfer.save_to_db()
+            block_progress = BlockProgress(bt_id=item['bt_id'],
+                                                is_approved=True,
+                                                value=0,
+                                                table_id=item['type_id'],
+                                                category_id = category_id)
+            block_progress.save_to_db()
         return True
     
     @classmethod

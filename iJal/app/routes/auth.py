@@ -4,6 +4,7 @@ from iJal.app.classes.helper import HelperClass
 from iJal.app.models.states import State
 from iJal.app.models.territory import TerritoryJoin
 from iJal.app.models.users import User
+from iJal.app.classes.block_or_census import BlockOrCensus
 
 blp = Blueprint("auth","auth")
 
@@ -161,8 +162,12 @@ def approve():
 @blp.route('/dashboard',methods=['POST','GET'])
 @login_required
 def dashboard():
-    chart_data = HelperClass.get_dashboard_menu()
-    card_data = HelperClass.get_card_data(chart_data)
+    dashboard_data = HelperClass.get_dashboard_menu()
+    card_data = HelperClass.get_card_data(dashboard_data)
+    chart_data =[]
+    for data in dashboard_data:
+        if data['completed']:
+            chart_data.append(data)
             
     return render_template('auth/dashboard.html',
                            card_data = card_data,
@@ -174,16 +179,16 @@ def dashboard():
 @login_required
 def progress():
     if current_user.isAdmin:
-        progress = State.get_all_states_status()
-        status_dummy = [{'category':'Human','id':'population'},
+        progress = HelperClass.get_dashboard_menu()
+        status_dummy = [{'category':'Human','id':'human'},
                         {'category':'Livestocks','id':'livestock'},
                         {'category':'Crops','id':'crop'},
                         {'category':'Industry','id':'industry'},
                         {'category':'Surface','id':'surface'},
-                        {'category':'Groundwater','id':'ground'},
+                        {'category':'Groundwater','id':'groundwater'},
                         {'category':'LULC','id':'lulc'},
                         {'category':'Rainfall','id':'rainfall'},
-                        {'category':'Water Transfer','id':'water_transfer'}]
+                        {'category':'Water Transfer','id':'transfer'}]
         return render_template('auth/progress.html',
                             progress=sorted(progress, key=lambda x: x["completed"], reverse=True),
                             status = status_dummy,
@@ -192,6 +197,24 @@ def progress():
     else: 
         flash('You must be admin to view this page!')
         return redirect(url_for('auth.login'))
+@blp.route('/budget',methods=['POST','GET'])
+def budget():
+    filtered_blocks = HelperClass.get_dashboard_menu()
+    budget_array = []
+    for idx,block in enumerate(filtered_blocks):
+        if block['completed'] == 100:
+            demand_side = BlockOrCensus.get_demand_side_data(block['block_id'],block['district_id'],block['state_id'])
+            total_demand = int(sum([item['water_value'] for item in demand_side]))
+            supply_side = BlockOrCensus.get_supply_side_data(block['block_id'],block['district_id'],block['state_id'])
+            total_supply = int(sum([item['water_value'] for item in supply_side]))
+            budget = int(total_supply - total_demand)
+            
+            budget_array.append({'id':idx+1,'state_id':block['state_id'],'block_id':block['block_id'],'district_id':block['district_id'],
+                            'state_short_name':block['state_short_name'],'state_name':block['state_name'],'district_name':block['district_name'],
+                            'block_name':block['block_name'],'total_demand':total_demand,
+                            'total_supply':total_supply,'budget':budget})
+        
+    return render_template('auth/budget.html',budget = budget_array,menu= HelperClass.get_admin_menu()) 
 
 def get_message():
     messages = get_flashed_messages()

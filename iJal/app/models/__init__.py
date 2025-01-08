@@ -39,7 +39,8 @@ from iJal.app.models.block_rainfall import BlockRainfall
 from iJal.app.models.block_transfer_type import BlockTransferType
 from iJal.app.models.block_transfer_sector import BlockTransferSector
 from iJal.app.models.block_transfer import BlockWaterTransfer
-
+from iJal.app.models.block_progress import BlockProgress
+from iJal.app.models.block_category import BlockCategory
 
 
 # Auth Tables

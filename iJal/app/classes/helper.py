@@ -6,6 +6,7 @@ from iJal.app.models.villages import Village
 from iJal.app.classes.block_or_census import BlockOrCensus
 from iJal.app.classes.budget_data import BudgetData
 from iJal.app.models.users import User
+from iJal.app.models.block_progress import BlockProgress
 
 
 class HelperClass():
@@ -13,17 +14,8 @@ class HelperClass():
 
     @classmethod
     def get_dashboard_menu(cls):
-        progress_data = State.get_all_states_status()
-        chart_data = []
-        
-        color_cycle = cycle(cls.COLORS)
-        for item in progress_data:
-            if item['completed']:
-                color = next(color_cycle)
-                chart_data.append({'state_name':item['state_name'], 'completed':item['completed'],'block_name':item['block_name'],
-                                'color':color,'district_name':item['district_name'],'percentage':str(item['completed'])+'%',
-                                'state_short_name':item['state_short_name']})
-        return chart_data
+        progress_data = BlockProgress.get_all_states_status()
+        return progress_data
     
     @classmethod
     def get_card_data(cls,chart_data):
@@ -137,9 +129,10 @@ class HelperClass():
     
     def get_admin_menu():
         return [
-            { "route" : url_for('.dashboard'), "label":"dashboard", "icon":"fa-solid fa-gauge"},
             { "route" : url_for('.approve'), "label":"approve", "icon":"fa-solid fa-list-check"},
-            { "route" : url_for('.progress'), "label":"progress", "icon":"fa-solid fa-bars-progress"}
+            { "route" : url_for('.dashboard'), "label":"dashboard", "icon":"fa-solid fa-gauge"},
+            { "route" : url_for('.progress'), "label":"progress", "icon":"fa-solid fa-bars-progress"},
+            { "route" : url_for('.budget'), "label":"budget", "icon":"fa-solid fa-scale-balanced"}
         ]
     
     def get_breadcrumbs(payload):

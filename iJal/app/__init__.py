@@ -25,7 +25,7 @@ def create_app():
     # register db
     db.init_app(app)
     current_directory = os.getcwd()
-    migrations_directory = current_directory + '/iJal/migrations'
+    migrations_directory = current_directory + '/migrations'
     migrate = Migrate(app, db, directory=migrations_directory)
 
     login_manager = LoginManager()

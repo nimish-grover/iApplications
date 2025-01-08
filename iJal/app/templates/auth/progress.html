@@ -93,7 +93,7 @@ input_hidden, submit_button, progress_bar, tooltip, search_input, validation_inp
                     {{row['category']}}
                 </td>
                 <td class="text-center" id="{{row['id']}}">
-                    <span class="text-danger"><i class="fa-solid fa-xmark"></i></span>s
+                    <span class="text-danger"><i class="fa-solid fa-xmark"></i></span>
                 </td>
             </tr>
             {% endfor %}
@@ -113,15 +113,15 @@ input_hidden, submit_button, progress_bar, tooltip, search_input, validation_inp
     const sectionProgress = document.querySelector("section:first-of-type");
     const sectionInput = document.querySelector("section:last-of-type");
     const btnBack = document.getElementById("btnBack");
-    const populationInput = document.getElementById("population");
+    const populationInput = document.getElementById("human");
     const livestockInput = document.getElementById("livestock");
     const cropInput = document.getElementById("crop");
     const industryInput = document.getElementById("industry");
     const surfaceInput = document.getElementById("surface");
-    const groundwaterInput = document.getElementById("ground");
+    const groundwaterInput = document.getElementById("groundwater");
     const lulcInput = document.getElementById("lulc");
     const rainfallInput = document.getElementById("rainfall");
-    const transferInput = document.getElementById("water_transfer");
+    const transferInput = document.getElementById("transfer");
     const state_name = document.getElementById("state_name");
     const district_name = document.getElementById("district_name");
     const block_name = document.getElementById("block_name");
@@ -159,15 +159,15 @@ input_hidden, submit_button, progress_bar, tooltip, search_input, validation_inp
                 };
 
                 // Set values
-                if (populationInput) setValue(populationInput, progressRow.population);
+                if (populationInput) setValue(populationInput, progressRow.human);
                 if (livestockInput) setValue(livestockInput, progressRow.livestock);
                 if (cropInput) setValue(cropInput, progressRow.crop);
                 if (industryInput) setValue(industryInput, progressRow.industry);
                 if (surfaceInput) setValue(surfaceInput, progressRow.surface);
-                if (groundwaterInput) setValue(groundwaterInput, progressRow.ground);
+                if (groundwaterInput) setValue(groundwaterInput, progressRow.groundwater);
                 if (lulcInput) setValue(lulcInput, progressRow.lulc);
                 if (rainfallInput) setValue(rainfallInput, progressRow.rainfall);
-                if (transferInput) setValue(transferInput, progressRow.water_transfer);
+                if (transferInput) setValue(transferInput, progressRow.transfer);
                 if (state_name) state_name.innerText = progressRow.state_name;
                 if (district_name) district_name.innerText = progressRow.district_name;
                 if (block_name) block_name.innerText = progressRow.block_name;
