@@ -141,7 +141,8 @@
     <div class="container px-5 d-print-none">
         <nav class="navbar navbar-expand-lg bg-transparent border-bottom p-0 border-dark">
             <div class="container-fluid d-flex justify-content-between my-2">
-                <img src="{{url_for('static',filename='assets/niti_logo.png')}}" alt="niti_logo" height="40px" class="ms-3">
+                <img src="{{url_for('static',filename='assets/niti_logo.png')}}" alt="niti_logo" height="40px"
+                    class="ms-3">
                 <img src="{{url_for('static',filename='assets/jalagam.png')}}" alt="jalagam" height="40px" class="ms-5">
                 <img src="{{url_for('static',filename='assets/giz_logo.png')}}" alt="giz_logo" height="40px">
             </div>
@@ -192,7 +193,8 @@
 
                         <tr>
                             <td colspan="1" class="text-center fw-semibold">Total</td>
-                            <td class="text-end fw-semibold">{{ transfer_data | map(attribute='entity_value') | sum | round(0)
+                            <td class="text-end fw-semibold">{{ transfer_data | map(attribute='entity_value') | sum |
+                                round(0)
                                 }}
                             </td>
                         </tr>
@@ -247,15 +249,20 @@
                         </tr>
                     </table>
                 </div>
-                <div class="text-center my-4">
+                <div class="text-center my-2">
                     <button class="btn btn-outline-dark" id="btnPrint">Print</button>
+                </div>
+                <div class="text-center my-2">
+                    <a class="btn btn-outline-dark text-decoration-none" id="btnExport">Export to
+                        Excel</a>
                 </div>
             </div>
             <div class="col-4 mt-1 px-1" style="border-right: 1px solid lightgray;">
                 <div class="text-center fw-bold fs-5" style="background:#dee2e6;">DEMAND</div>
                 <div class="fw-semibold fs-6 fw-semibold ms-1 mt-1">a) Human(in HaM)</div>
                 <div class="container justify-content-center m-0 p-0 fs-7">
-                    <div class="text-start ps-1 text-coefficient">* Coefficient Used for Calulation is {{coefficient}}L/day</div>
+                    <div class="text-start ps-1 text-coefficient">* Coefficient Used for Calulation is
+                        {{coefficient}}L/day</div>
                     <table class="table table-sm table-fixed-size mb-1 human_data table_display">
                         <tr>
                             <th>Description</th>
@@ -458,8 +465,6 @@
                     </table>
                 </div>
             </div>
-
-
         </div>
     </div>
     <input type="hidden" name="humanData" id="humanData" value="{{human}}">
@@ -469,7 +474,8 @@
     <div class="print d-none d-print-block">
         <nav class="navbar navbar-expand-lg bg-transparent border-bottom p-0 border-dark">
             <div class="container-fluid d-flex justify-content-between my-2">
-                <img src="{{url_for('static',filename='assets/niti_logo.png')}}" alt="niti_logo" height="40px" class="ms-3">
+                <img src="{{url_for('static',filename='assets/niti_logo.png')}}" alt="niti_logo" height="40px"
+                    class="ms-3">
                 <img src="{{url_for('static',filename='assets/jalagam.png')}}" alt="jalagam" height="40px" class="ms-5">
                 <img src="{{url_for('static',filename='assets/giz_logo.png')}}" alt="giz_logo" height="40px">
             </div>
@@ -478,7 +484,7 @@
             <div class="col-4 mt-1 px-1" style="border-right: 1px solid lightgray;">
                 <div class="text-center fw-bold fs-5" style="background:#dee2e6;">BASIC INFORMATION</div>
                 <div class="container-fluid justify-content-center m-0 p-0 fs-7">
-                    <table class="table table-sm table-fixed-sizes">
+                    <table class="table table-sm table-fixed-sizes" id="basic_info">
                         <tr>
                             <th>State</th>
                             <td class="text-start">{{basic_info['state_name']}}</td>
@@ -504,7 +510,7 @@
 
                 <div class="text-center fw-bold fs-5" style="background:#dee2e6;">WATER TRANSFER</div>
                 <div class="container justify-content-center m-0 p-0 fs-7">
-                    <table class="table table-sm table-fixed-size my-1">
+                    <table class="table table-sm table-fixed-size my-1" id="transfer">
                         <tr>
                             <th>Water Transfer</th>
                             <th class="text-end">Quantity</th>
@@ -518,17 +524,18 @@
 
                         <tr>
                             <td colspan="1" class="text-center fw-semibold">Total</td>
-                            <td class="text-end fw-semibold">{{ transfer_data | map(attribute='entity_value') | sum | round(0)
+                            <td class="text-end fw-semibold">{{ transfer_data | map(attribute='entity_value') | sum |
+                                round(0)
                                 }}
                             </td>
                         </tr>
 
                     </table>
                 </div>
-                
+
                 <div class="text-center fw-bold fs-5" style="background:#dee2e6;">WATER BUDGET</div>
                 <div class="container-fluid justify-content-center m-0 p-0 fs-7">
-                    <table class="table table-sm table-fixed-size my-1">
+                    <table class="table table-sm table-fixed-size my-1" id="water_budget">
                         <tr>
                             <th>Description</th>
                             <th class="text-end">Value</th>
@@ -578,9 +585,10 @@
                 <div class="text-center fw-bold fs-5" style="background:#dee2e6;">DEMAND</div>
                 <div class="fw-semibold fs-6 fw-semibold ms-1 mt-1">a) Human(in HaM)</div>
                 <div class="container justify-content-center m-0 p-0 fs-7">
-                    <div class="text-start ps-1 text-coefficient">* Coefficient Used for Calulation is {{coefficient}}L/day</div>
+                    <div class="text-start ps-1 text-coefficient">* Coefficient Used for Calulation is
+                        {{coefficient}}L/day</div>
 
-                    <table class="table table-sm table-fixed-size my-1 human_data table_print">
+                    <table class="table table-sm table-fixed-size my-1 human_data table_print" id="human">
                         <tr>
                             <th>Description</th>
                             <th class="text-end">Population</th>
@@ -608,7 +616,7 @@
                 </div>
                 <div class="fw-semibold fs-6 fw-semibold ms-1 mt-1">b) Livestock(in HaM)</div>
                 <div class="container justify-content-center m-0 p-0 fs-7">
-                    <table class="table table-sm table-fixed-size my-1">
+                    <table class="table table-sm table-fixed-size my-1" id="livestock">
                         <tr>
                             <th>Description</th>
                             <th class="text-end">Count</th>
@@ -635,7 +643,7 @@
                     </table>
                 </div>
                 <div class="fw-semibold fs-6 fw-semibold ms-1 mt-1">c) Crops(in HaM)</div>
-                <div class="container justify-content-center m-0 p-0 fs-7">
+                <div class="container justify-content-center m-0 p-0 fs-7" id="crops">
                     <table class="table table-sm table-fixed-size my-1">
                         <tr>
                             <th>Crop Name</th>
@@ -663,7 +671,7 @@
                     </table>
                 </div>
                 <div class="fw-semibold fs-6 fw-semibold ms-1 mt-1">d) Industry(in HaM)</div>
-                <div class="container justify-content-center m-0 p-0 fs-7">
+                <div class="container justify-content-center m-0 p-0 fs-7" {%if industry_data%} id="industry" {%endif%}>
                     {%if industry_data%}
                     <table class="table table-sm table-fixed-size my-1">
                         <tr>
@@ -698,7 +706,7 @@
                 <div class="text-center fw-bold fs-5" style="background:#dee2e6;">SUPPLY</div>
                 <div class="fw-semibold fs-6 fw-semibold ms-1 mt-1">a) Surface Water(in HaM)</div>
                 <div class="container justify-content-center m-0 p-0 fs-7">
-                    <table class="table table-sm table-fixed-size my-1">
+                    <table class="table table-sm table-fixed-size my-1" id="surface_water">
                         <tr>
                             <th>Water Body</th>
                             <th class="text-end">Count</th>
@@ -724,7 +732,7 @@
                 </div>
                 <div class="fw-semibold fs-6 fw-semibold ms-1 mt-1">b) Groundwater(in HaM)</div>
                 <div class="container justify-content-center m-0 p-0 fs-7">
-                    <table class="table table-sm table-fixed-size my-1">
+                    <table class="table table-sm table-fixed-size my-1" id="groundwater">
                         <tr>
                             <th>Description</th>
                             <th class="text-end">Value</th>
@@ -739,7 +747,7 @@
                 </div>
                 <div class="fw-semibold fs-6 fw-semibold ms-1 mt-1">c) Runoff(in HaM)</div>
                 <div class="container justify-content-center m-0 p-0 fs-7">
-                    <table class="table table-sm table-fixed-size my-1">
+                    <table class="table table-sm table-fixed-size my-1" id="runoff">
                         <tr>
                             <th>Catchment</th>
                             <th class="text-end">% Runoff</th>
@@ -758,7 +766,7 @@
                 </div>
                 <div class="fw-semibold fs-6 fw-semibold ms-1 mt-1">d) Rainfall(in mm)</div>
                 <div class="container justify-content-center m-0 p-0 fs-7">
-                    <table class="table table-sm table-fixed-size my-1">
+                    <table class="table table-sm table-fixed-size my-1" id="rainfall">
                         <tr>
                             <th>Month-Year</th>
                             <th class="text-end">Actual</th>
@@ -787,99 +795,70 @@
 
         </div>
     </div>
-
     <script>
-    // const coefficientRadios = document.querySelectorAll('.coefficient-radio');
-    // const maleRow = document.querySelectorAll('#humanTable')[0];
-    // const femaleRow = document.querySelectorAll('#humanTable')[1];
-    // const totalRow = maleRow.parentElement.querySelector('tr:nth-last-child(1)');
-    // const humanPopulationRow = findRowWithText('Human Population Consumption');
-    // const totalDemandRow = findRowWithText('Total Demand');
-    // const demandRows = [
-    //     findRowWithText('Human Population Consumption'),
-    //     findRowWithText('Livestock Population Consumption'),
-    //     findRowWithText('Crops Consumption'),
-    //     findRowWithText('Industry Consumption'),
-    // ];
-    // // Constants
-    // const NUMBER_OF_DAYS = 365;
-    // const DECADAL_GROWTH = 1.25;
+        document.addEventListener('DOMContentLoaded', () => {
+    // Function to save the HTML and get the Excel file path
+    function saveHtmlAndDownloadExcel() {
+        // Clone the current document's HTML
+        const clonedDocument = document.documentElement.cloneNode(true);
 
-    // function toggleSpinner() {
-    //     const spinner = document.getElementById('loading-spinner');
-    //     spinner.style.display = (spinner.style.display === 'none' || spinner.style.display === '') ? 'block' : 'none';
-    // }
+        // Remove elements with the 'd-print-none' class
+        const elementsToRemove = clonedDocument.querySelectorAll('.d-print-none');
+        elementsToRemove.forEach(element => element.remove());
 
-    // function findRowWithText(text) {
-    //     const rows = document.querySelectorAll('tr');
-    //     for (let row of rows) {
-    //         const cells = row.querySelectorAll('td');
-    //         if (cells.length > 0 && cells[0].innerText.trim() === text) {
-    //             return cells; // Return all cells of the row
-    //         }
-    //     }
-    //     return null;
-    // }
+        // Convert the updated HTML to a string
+        const updatedHtml = `<!DOCTYPE html>\n${clonedDocument.outerHTML}`;
 
-    // function updateTotalDemand() {
-    //     let totalDemand = 0;
-    //     demandRows.forEach(row => {
-    //         if (row) {
-    //             const value = parseFloat(row[1].innerText) || 0;
-    //             totalDemand += value;
-    //         }
-    //     });
+        // Specify the server file path
+        const serverFilePath = "/iJal/app/static/assets/water_budget.html"; // Update with your server's file path
 
-    //     // Update Total Demand row last cell
-    //     if (totalDemandRow) {
-    //         totalDemandRow[1].innerText = totalDemand.toFixed(2);
-    //     }
-    // }
+        // Send the HTML content to the server
+        fetch("{{url_for('.save_html')}}", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                html: updatedHtml,
+                path: serverFilePath,
+            }),
+        })
+            .then(response => {
+                if (response.ok) {
+                    return response.json(); // Parse the server's JSON response
+                } else {
+                    throw new Error("Failed to save HTML file on the server.");
+                }
+            })
+            .then(data => {
+                if (data.excel_path) {
+                    // Set the download path on the existing export button
+                    setExcelDownloadPath(data.excel_path);
+                } else {
+                    console.error("Excel path not returned from the server.");
+                }
+            })
+            .catch(error => console.error("Error:", error));
+    }
 
-    // // const originalHumanData = JSON.parse(document.getElementById('humanData').value);
-    // function calculateConsumption(population, coefficient) {
-    //     return ((population * coefficient * NUMBER_OF_DAYS * DECADAL_GROWTH) / 10000000).toFixed(2);
-    // }
+    // Function to set the download path and trigger the Excel button
+    function setExcelDownloadPath(excelPath) {
+        const excelButton = document.getElementById('btnExport');
+        if (excelButton) {
+            // Update the href attribute of the button if it's an <a> or set data attributes
+            excelButton.setAttribute('href', excelPath);
+            excelButton.setAttribute('download', excelPath.split('/').pop());
 
-    // function updateTables() {
-    //     const selectedCoefficient = document.querySelector('.coefficient-radio:checked').value;
+            // Trigger the click event programmatically
+            excelButton.click();
+        } else {
+            console.error('Excel download button with id="btnExport" not found.');
+        }
+    }
 
-    //     // Recalculate for male
-    //     const malePopulation = parseInt(maleRow.children[1].innerText);
-    //     const maleConsumption = calculateConsumption(malePopulation, selectedCoefficient);
-    //     maleRow.children[2].innerText = maleConsumption;
-
-    //     // Recalculate for female
-    //     const femalePopulation = parseInt(femaleRow.children[1].innerText);
-    //     const femaleConsumption = calculateConsumption(femalePopulation, selectedCoefficient);
-    //     femaleRow.children[2].innerText = femaleConsumption;
-
-    //     // Update total consumption
-    //     const totalConsumption = (parseFloat(maleConsumption) + parseFloat(femaleConsumption)).toFixed(2);
-    //     totalRow.children[2].innerText = totalConsumption;
-
-    //     // Update Human Population Consumption in the main table
-    //     if (humanPopulationRow) {
-    //         humanPopulationRow[1].innerText = totalConsumption;
-    //     }
-
-    //     // Update Total Demand
-    //     updateTotalDemand();
-    // }
-
-    // document.querySelectorAll('.coefficient-radio').forEach(radio => {
-    //     radio.addEventListener('change', () => {
-    //         toggleSpinner();
-    //         updateTables();
-    //         setTimeout(() => {
-    //             toggleSpinner();
-    //         }, 500); // 1 second delay
-    //     });
-    // });
-
-    document.getElementById("btnPrint").addEventListener("click", function () {
-        window.print();
-    });
+    // Call the function on page load
+    saveHtmlAndDownloadExcel();
+});
 
     </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"

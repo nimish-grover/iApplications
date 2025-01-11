@@ -1,3 +1,4 @@
+import os
 from flask import Blueprint, json, jsonify, make_response, redirect, render_template, request, session, url_for
 from flask_login import current_user
 
@@ -7,7 +8,7 @@ from iJal.app.models import TerritoryJoin
 from iJal.app.models.states import State
 from iJal.app.models.villages import Village
 from iJal.app.classes.helper import HelperClass
-
+from iJal.app.classes.excel_helper import ExcelHelper
 
 blp = Blueprint("mobile","mobile")
 
@@ -385,6 +386,36 @@ def print():
                            surface_water_data=surface_water,industry_data=industries,
                            groundwater_data=groundwater, transfer_data=water_transfer, runoff_data=runoff,rainfall_data=rainfall,
                            water_budget=water_budget,demand_side=demand_side,supply_side=supply_side)
+
+@blp.route('/print_to_excel',methods=['POST','GET'])
+def print_to_excel():
+    html_path = url_for('static',filename='assets/printable.html')
+    excel_path = url_for('static',filename='assets/water_budget.xlsx')
+    excel_file = ExcelHelper.convert_html_to_excel(html_path,excel_path)
+    
+    return excel_file
+    
+
+@blp.route('/save_html', methods=['POST'])
+def save_html():
+    data = request.json
+    html_content = data.get('html')
+    file_path = data.get('path')
+
+    if not html_content or not file_path:
+        return jsonify({"error": "Invalid data"}), 400
+
+        # Ensure the directory exists
+        
+    os.makedirs(os.path.dirname(file_path), exist_ok=True)
+        # Save the HTML content to the specified file path
+    with open(file_path, 'w', encoding='utf-8') as file:
+        file.write(html_content)
+        
+    excel_path = '/iJal/app/static/assets/water_budget.xlsx'
+    excel_file = ExcelHelper.convert_html_to_excel(file_path,excel_path)
+    return jsonify({"excel_path": excel_file}), 200
+
 
 def get_breadcrumbs(payload):
     """
