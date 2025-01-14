@@ -1,5 +1,5 @@
 import os
-from flask import Blueprint, json, jsonify, make_response, redirect, render_template, request, session, url_for
+from flask import Blueprint, current_app, json, jsonify, make_response, redirect, render_template, request, session, url_for
 from flask_login import current_user
 
 from iJal.app.classes.block_or_census import BlockOrCensus
@@ -379,42 +379,37 @@ def print():
     else:
         payload = json.loads(session_data)
     
-    basic_info,human,livestock,crops,industries,surface_water,groundwater,water_transfer,runoff,rainfall,demand_side,supply_side,water_budget = HelperClass.get_print_data(payload)
+    basic_info,human,livestock,crops,industries,surface_water,groundwater,water_transfer,runoff,lulc,rainfall,demand_side,supply_side,water_budget = HelperClass.get_print_data(payload)
     
     return render_template('mobile/print.html',basic_info=basic_info,human_data=human,human=json.dumps(human),
                            livestock_data=livestock,crop_data=crops,coefficient=payload['coefficient'],
-                           surface_water_data=surface_water,industry_data=industries,
+                           surface_water_data=surface_water,industry_data=industries,lulc_data=lulc,
                            groundwater_data=groundwater, transfer_data=water_transfer, runoff_data=runoff,rainfall_data=rainfall,
                            water_budget=water_budget,demand_side=demand_side,supply_side=supply_side)
 
-@blp.route('/print_to_excel',methods=['POST','GET'])
-def print_to_excel():
-    html_path = url_for('static',filename='assets/printable.html')
-    excel_path = url_for('static',filename='assets/water_budget.xlsx')
-    excel_file = ExcelHelper.convert_html_to_excel(html_path,excel_path)
-    
-    return excel_file
     
 
-@blp.route('/save_html', methods=['POST'])
-def save_html():
-    data = request.json
-    html_content = data.get('html')
-    file_path = data.get('path')
+# @blp.route('/create_excel', methods=['POST'])
+# def create_excel():
+#     data = request.json
+#     html_content = data.get('html')
+#     root_path = current_app.root_path
+#     static_path = "static/assets"
+#     html_path = os.path.join(root_path, static_path,'water_budget.html')
 
-    if not html_content or not file_path:
-        return jsonify({"error": "Invalid data"}), 400
+#     if not html_content or not html_path:
+#         return jsonify({"error": "Invalid data"}), 400
 
-        # Ensure the directory exists
+#         # Ensure the directory exists
         
-    os.makedirs(os.path.dirname(file_path), exist_ok=True)
-        # Save the HTML content to the specified file path
-    with open(file_path, 'w', encoding='utf-8') as file:
-        file.write(html_content)
-        
-    excel_path = '/iJal/app/static/assets/water_budget.xlsx'
-    excel_file = ExcelHelper.convert_html_to_excel(file_path,excel_path)
-    return jsonify({"excel_path": excel_file}), 200
+#     os.makedirs(os.path.dirname(html_path), exist_ok=True)
+#         # Save the HTML content to the specified file path
+#     with open(html_path, 'w', encoding='utf-8') as file:
+#         file.write(html_content)
+    
+#     excel_path = os.path.join(root_path, static_path,'water_budget.xlsx')
+#     excel_file = ExcelHelper.convert_html_to_excel(html_path,excel_path)
+#     return jsonify({"excel_path": excel_file}), 200
 
 
 def get_breadcrumbs(payload):

@@ -77,7 +77,29 @@ class BlockLULC(db.Model):
             return json_data
 
         return None
-    
+    @classmethod
+    def get_block_lulc_area(cls,bt_id):
+        query = (
+            db.session.query(
+                LULC.display_name.label('lulc_name'),
+                (cls.area).label('lulc_area'),
+                cls.is_approved
+            )
+            .join(LULC, LULC.id == cls.lulc_id)
+            .filter(cls.bt_id == bt_id).order_by(LULC.id)
+        )
+
+        # Execute the query
+        results = query.all()
+        if results:
+            json_data = [{
+                'lulc_name': row.lulc_name,
+                'lulc_area': row.lulc_area,
+                'is_approved': row.is_approved
+            } for row in results]
+            return json_data
+        return None
+
     @classmethod
     def get_block_lulc_data(cls,bt_id):
         query = (

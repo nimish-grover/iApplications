@@ -1,5 +1,6 @@
 from itertools import cycle
-from flask import url_for
+import os
+from flask import current_app, url_for
 
 from iJal.app.models.states import State
 from iJal.app.models.villages import Village
@@ -7,6 +8,7 @@ from iJal.app.classes.block_or_census import BlockOrCensus
 from iJal.app.classes.budget_data import BudgetData
 from iJal.app.models.users import User
 from iJal.app.models.block_progress import BlockProgress
+from iJal.app.classes.new_excel import ExcelGenerator
 
 
 class HelperClass():
@@ -32,7 +34,7 @@ class HelperClass():
         
         village_count = Village.get_villages_number_by_block(payload['block_id'],payload['district_id'])
         tga = BlockOrCensus.get_tga(payload['block_id'],payload['district_id'],payload['state_id'])
-        basic_info = {"block_name":payload['block_name'],"district_name":payload['district_name'],"state_name":payload['state_name'],"tga":tga,"village_count":village_count}
+        basic_info = {"State Name":payload['state_name'],"District Name":payload['district_name'],"Block Name":payload['block_name'],"Village Count":village_count,"TGA":tga}
         
         human,is_approved = BlockOrCensus.get_human_data(payload['block_id'],payload['district_id'],payload['state_id'],payload['coefficient'])
         
@@ -60,6 +62,9 @@ class HelperClass():
         runoff,is_approved = BlockOrCensus.get_runoff_data(payload['block_id'],payload['district_id'],payload['state_id'])
         run_off_rename = {'good':'Good Catchment','bad':'Bad Catchment','average':'Average Catchment'}
         runoff = [{**item, 'catchment':run_off_rename[item['catchment']]} for item in runoff]
+
+        lulc,is_approved = BlockOrCensus.get_lulc_data(payload['block_id'],payload['district_id'],payload['state_id'])
+
         
         rainfall,is_approved = BlockOrCensus.get_rainfall_data(payload['block_id'],payload['district_id'],payload['state_id'])
         rainfall_rename = {'Jan':'January','Feb':'February','Mar':'March','Apr':'April','May':'May','Jun':'June','Jul':'July',
@@ -92,8 +97,31 @@ class HelperClass():
         water_budget = BlockOrCensus.get_water_budget_data(payload['block_id'],payload['district_id'],payload['state_id'])
         water_budget_rename = {'demand':'Total Demand','supply':'Total Supply'}
         water_budget = [{**item, 'category':water_budget_rename[item['category']]} for item in water_budget]
+
+        excel_data = {
+        'basic_info': basic_info,
+        'human_data': human,
+        'livestock_data': filtered_livestock,
+        'crop_data': filtered_crops,
+        'industry_data': filtered_industries,
+        'surface_water_data': filtered_surface_water,
+        'groundwater_data': groundwater,        
+        'transfer_data': water_transfer,
+        'runoff_data': runoff,
+        'lulc_data': lulc,
+        'rainfall_data': rainfall,
+        'demand_side': demand_side,
+        'supply_side': supply_side,
+        'water_budget': water_budget,
+        'coefficient': payload.get('coefficient')
+        }
+        root_path = current_app.root_path
+        static_path = "static/assets"
+        excel_path = os.path.join(root_path, static_path,'water_budget.xlsx')
+        class_obj = ExcelGenerator()
+        excel_file = class_obj.create_water_budget_excel(excel_data,excel_path)
         
-        return basic_info,human,filtered_livestock,filtered_crops,filtered_industries,filtered_surface_water,groundwater,water_transfer,runoff,rainfall,demand_side,supply_side,water_budget
+        return basic_info,human,filtered_livestock,filtered_crops,filtered_industries,filtered_surface_water,groundwater,water_transfer,runoff,lulc,rainfall,demand_side,supply_side,water_budget
         
     def format_value(value):
         if value < 10:

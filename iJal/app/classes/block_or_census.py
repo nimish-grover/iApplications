@@ -168,6 +168,21 @@ class BlockOrCensus:
         return runoff, False
     
     @classmethod
+    def get_lulc_data(cls,block_id,district_id,state_id):
+        bt_id = BlockData.get_bt_id(block_id=block_id, district_id=district_id, state_id=state_id)
+        if bt_id:
+            lulc_data = BlockLULC.get_block_lulc_area(bt_id)
+            if lulc_data:
+                is_approved = (
+                    all(row['is_approved'] for row in lulc_data if row['is_approved'] is not None) 
+                    and any(row['is_approved'] is not None for row in lulc_data)
+                )
+                if is_approved:
+                    return lulc_data, is_approved
+        lulc_data = LULCCensus.get_census_lulc_area(block_id, district_id)
+        return lulc_data, False
+    
+    @classmethod
     def get_rainfall_data(cls, block_id, district_id, state_id):
         bt_id = BlockData.get_bt_id(block_id=block_id, district_id=district_id, state_id=state_id)
         if bt_id:

@@ -36,6 +36,30 @@ class LULCCensus(db.Model):
         }
     
     @classmethod
+    def get_census_lulc_area(cls, block_id, district_id):
+        query = db.session.query(
+                (cls.lulc_area).label('lulc_area'),
+                LULC.display_name.label('lulc_name'),
+                ).join(TerritoryJoin, TerritoryJoin.id==cls.tj_id
+                ).join(LULC, LULC.id==cls.lulc_id
+                ).join(Block, Block.id == TerritoryJoin.block_id
+                ).join(District, District.id==TerritoryJoin.district_id
+                ).filter(
+                    Block.id == block_id, 
+                    District.id == district_id
+                ).order_by(LULC.id)
+        
+        results = query.all()
+
+        if results:
+            json_data = [{
+                'lulc_name': row.lulc_name,
+                'lulc_area': row.lulc_area
+            } for row in results]
+            return json_data
+        return None
+
+    @classmethod
     def get_census_data_lulc(cls, block_id, district_id):
         query = db.session.query(
                 func.sum(cls.lulc_area).label('catchment_area'),

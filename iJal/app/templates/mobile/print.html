@@ -156,23 +156,23 @@
                     <table class="table table-sm table-fixed-sizes">
                         <tr>
                             <th>State</th>
-                            <td class="text-start">{{basic_info['state_name']}}</td>
+                            <td class="text-start">{{basic_info['State Name']}}</td>
                         </tr>
                         <tr>
                             <th>District</th>
-                            <td class="text-start">{{basic_info['district_name']}}</td>
+                            <td class="text-start">{{basic_info['District Name']}}</td>
                         </tr>
                         <tr>
                             <th>Block</th>
-                            <td class="text-start">{{basic_info['block_name']}}</td>
+                            <td class="text-start">{{basic_info['Block Name']}}</td>
                         </tr>
                         <tr>
                             <th>No. of Villages</th>
-                            <td class="text-start">{{basic_info['village_count']}}</td>
+                            <td class="text-start">{{basic_info['Village Count']}}</td>
                         </tr>
                         <tr>
                             <th>TGA</th>
-                            <td class="text-start">{{basic_info['tga']}}</td>
+                            <td class="text-start">{{basic_info['TGA']}}</td>
                         </tr>
                     </table>
                 </div>
@@ -263,7 +263,7 @@
                 <div class="container justify-content-center m-0 p-0 fs-7">
                     <div class="text-start ps-1 text-coefficient">* Coefficient Used for Calulation is
                         {{coefficient}}L/day</div>
-                    <table class="table table-sm table-fixed-size mb-1 human_data table_display">
+                    <table class="table table-sm table-fixed-size mb-1">
                         <tr>
                             <th>Description</th>
                             <th class="text-end">Population</th>
@@ -372,7 +372,7 @@
                         </tr>
                     </table>
                     {%else%}
-                    There are no industry in this block
+                    *There are no industries in this block
                     {%endif%}
                 </div>
 
@@ -389,7 +389,7 @@
                         </tr>
                         {%for item in surface_water_data%}
                         <tr>
-                            <td>{{item['category'] | title}}</td>
+                            <td>{{item['category']}}</td>
                             <td class="text-end">{{item['count']}}</td>
                             <td class="text-end">{{item['value']}}</td>
                         </tr>
@@ -439,7 +439,22 @@
                         {%endfor%}
                     </table>
                 </div>
-                <div class="fw-semibold fs-6 fw-semibold ms-1 mt-1">d) Rainfall(in mm)</div>
+                <div class="fw-semibold fs-6 fw-semibold ms-1 mt-1">d) LULC(in HaM)</div>
+                <div class="container justify-content-center m-0 p-0 fs-7">
+                    <table class="table table-sm table-fixed-size my-1" id="lulc">
+                        <tr>
+                            <th>LULC Name</th>
+                            <th class="text-end">Area</th>
+                        </tr>
+                        {%for item in lulc_data%}
+                        <tr>
+                            <td>{{item['lulc_name'] | title}}</td>
+                            <td class="text-end">{{item['lulc_area']}}</td>
+                        </tr>
+                        {%endfor%}
+                    </table>
+                </div>
+                <div class="fw-semibold fs-6 fw-semibold ms-1 mt-1">e) Rainfall(in mm)</div>
                 <div class="container justify-content-center m-0 p-0 fs-7">
                     <table class="table table-sm table-fixed-size my-1">
                         <tr>
@@ -487,23 +502,23 @@
                     <table class="table table-sm table-fixed-sizes" id="basic_info">
                         <tr>
                             <th>State</th>
-                            <td class="text-start">{{basic_info['state_name']}}</td>
+                            <td class="text-start">{{basic_info['State Name']}}</td>
                         </tr>
                         <tr>
                             <th>District</th>
-                            <td class="text-start">{{basic_info['district_name']}}</td>
+                            <td class="text-start">{{basic_info['District Name']}}</td>
                         </tr>
                         <tr>
                             <th>Block</th>
-                            <td class="text-start">{{basic_info['block_name']}}</td>
+                            <td class="text-start">{{basic_info['Block Name']}}</td>
                         </tr>
                         <tr>
                             <th>No. of Villages</th>
-                            <td class="text-start">{{basic_info['village_count']}}</td>
+                            <td class="text-start">{{basic_info['Village Count']}}</td>
                         </tr>
                         <tr>
                             <th>TGA</th>
-                            <td class="text-start">{{basic_info['tga']}}</td>
+                            <td class="text-start">{{basic_info['TGA']}}</td>
                         </tr>
                     </table>
                 </div>
@@ -585,10 +600,10 @@
                 <div class="text-center fw-bold fs-5" style="background:#dee2e6;">DEMAND</div>
                 <div class="fw-semibold fs-6 fw-semibold ms-1 mt-1">a) Human(in HaM)</div>
                 <div class="container justify-content-center m-0 p-0 fs-7">
-                    <div class="text-start ps-1 text-coefficient">* Coefficient Used for Calulation is
+                    <div class="text-start ps-1 text-coefficient" id="coefficient">* Coefficient Used for Calulation is
                         {{coefficient}}L/day</div>
 
-                    <table class="table table-sm table-fixed-size my-1 human_data table_print" id="human">
+                    <table class="table table-sm table-fixed-size my-1 human_data " id="human">
                         <tr>
                             <th>Description</th>
                             <th class="text-end">Population</th>
@@ -643,8 +658,8 @@
                     </table>
                 </div>
                 <div class="fw-semibold fs-6 fw-semibold ms-1 mt-1">c) Crops(in HaM)</div>
-                <div class="container justify-content-center m-0 p-0 fs-7" id="crops">
-                    <table class="table table-sm table-fixed-size my-1">
+                <div class="container justify-content-center m-0 p-0 fs-7">
+                    <table class="table table-sm table-fixed-size my-1" id="crops">
                         <tr>
                             <th>Crop Name</th>
                             <th class="text-end">Area</th>
@@ -670,10 +685,11 @@
 
                     </table>
                 </div>
+
                 <div class="fw-semibold fs-6 fw-semibold ms-1 mt-1">d) Industry(in HaM)</div>
-                <div class="container justify-content-center m-0 p-0 fs-7" {%if industry_data%} id="industry" {%endif%}>
+                <div class="container justify-content-center m-0 p-0 fs-7">
                     {%if industry_data%}
-                    <table class="table table-sm table-fixed-size my-1">
+                    <table class="table table-sm table-fixed-size my-1" {%if industry_data%} id="industry" {%endif%}>
                         <tr>
                             <th>Industry Sector</th>
                             <th class="text-end">Count</th>
@@ -697,8 +713,9 @@
                         </tr>
                     </table>
                     {%else%}
-                    There are no industry in this block
+                    *There are no industries in this block
                     {%endif%}
+
                 </div>
 
             </div>
@@ -714,7 +731,7 @@
                         </tr>
                         {%for item in surface_water_data%}
                         <tr>
-                            <td>{{item['category'] | title}}</td>
+                            <td>{{item['category']}}</td>
                             <td class="text-end">{{item['count']}}</td>
                             <td class="text-end">{{item['value']}}</td>
                         </tr>
@@ -764,7 +781,22 @@
                         {%endfor%}
                     </table>
                 </div>
-                <div class="fw-semibold fs-6 fw-semibold ms-1 mt-1">d) Rainfall(in mm)</div>
+                <div class="fw-semibold fs-6 fw-semibold ms-1 mt-1">d) LULC(in HaM)</div>
+                <div class="container justify-content-center m-0 p-0 fs-7">
+                    <table class="table table-sm table-fixed-size my-1" id="lulc">
+                        <tr>
+                            <th>LULC Name</th>
+                            <th class="text-end">Area</th>
+                        </tr>
+                        {%for item in lulc_data%}
+                        <tr>
+                            <td>{{item['lulc_name'] | title}}</td>
+                            <td class="text-end">{{item['lulc_area']}}</td>
+                        </tr>
+                        {%endfor%}
+                    </table>
+                </div>
+                <div class="fw-semibold fs-6 fw-semibold ms-1 mt-1">e) Rainfall(in mm)</div>
                 <div class="container justify-content-center m-0 p-0 fs-7">
                     <table class="table table-sm table-fixed-size my-1" id="rainfall">
                         <tr>
@@ -796,71 +828,46 @@
         </div>
     </div>
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-    // Function to save the HTML and get the Excel file path
-    function saveHtmlAndDownloadExcel() {
-        // Clone the current document's HTML
-        const clonedDocument = document.documentElement.cloneNode(true);
+        document.addEventListener('DOMContentLoaded', function () {
+            // Function to set the download path and trigger the Excel button
+            function setExcelDownloadPath() {
+                const excelPath = "{{ url_for('static', filename='assets/water_budget.xlsx') }}";
+                const excelButton = document.getElementById('btnExport');
+                if (excelButton) {
+                    // Update the href attribute of the button if it's an <a> or set data attributes
+                    excelButton.setAttribute('href', excelPath);
+                    excelButton.setAttribute('download', excelPath.split('/').pop());
 
-        // Remove elements with the 'd-print-none' class
-        const elementsToRemove = clonedDocument.querySelectorAll('.d-print-none');
-        elementsToRemove.forEach(element => element.remove());
-
-        // Convert the updated HTML to a string
-        const updatedHtml = `<!DOCTYPE html>\n${clonedDocument.outerHTML}`;
-
-        // Specify the server file path
-        const serverFilePath = "/iJal/app/static/assets/water_budget.html"; // Update with your server's file path
-
-        // Send the HTML content to the server
-        fetch("{{url_for('.save_html')}}", {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                html: updatedHtml,
-                path: serverFilePath,
-            }),
-        })
-            .then(response => {
-                if (response.ok) {
-                    return response.json(); // Parse the server's JSON response
+                    // Trigger the click event programmatically
+                    // excelButton.click();
                 } else {
-                    throw new Error("Failed to save HTML file on the server.");
+                    console.error('Excel download button with id="btnExport" not found.');
                 }
-            })
-            .then(data => {
-                if (data.excel_path) {
-                    // Set the download path on the existing export button
-                    setExcelDownloadPath(data.excel_path);
-                } else {
-                    console.error("Excel path not returned from the server.");
-                }
-            })
-            .catch(error => console.error("Error:", error));
-    }
+            }
+            const excelButton = document.getElementById('btnExport');
+            if (excelButton) {
+                excelButton.addEventListener('click', function () {
+                    setExcelDownloadPath();
+                });
+            } else {
+                console.error('Print button with id="btnExport" not found.');
+            }
+            // Call the function on page load
+            
 
-    // Function to set the download path and trigger the Excel button
-    function setExcelDownloadPath(excelPath) {
-        const excelButton = document.getElementById('btnExport');
-        if (excelButton) {
-            // Update the href attribute of the button if it's an <a> or set data attributes
-            excelButton.setAttribute('href', excelPath);
-            excelButton.setAttribute('download', excelPath.split('/').pop());
-
-            // Trigger the click event programmatically
-            excelButton.click();
-        } else {
-            console.error('Excel download button with id="btnExport" not found.');
-        }
-    }
-
-    // Call the function on page load
-    saveHtmlAndDownloadExcel();
-});
-
+            // Function to handle print button click
+            const printButton = document.getElementById('btnPrint');
+            if (printButton) {
+                printButton.addEventListener('click', function () {
+                    window.print();
+                });
+            } else {
+                console.error('Print button with id="btnPrint" not found.');
+            }
+        });
+    
     </script>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
         crossorigin="anonymous"></script>
