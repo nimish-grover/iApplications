@@ -31,7 +31,9 @@ class HelperClass():
     
     @classmethod
     def get_print_data(cls,payload):
-        
+        if payload.get('coefficient') is None:
+            payload['coefficient'] = 55
+
         village_count = Village.get_villages_number_by_block(payload['block_id'],payload['district_id'])
         tga = BlockOrCensus.get_tga(payload['block_id'],payload['district_id'],payload['state_id'])
         basic_info = {"State Name":payload['state_name'],"District Name":payload['district_name'],"Block Name":payload['block_name'],"Village Count":village_count,"TGA":round(tga,2)}
@@ -117,9 +119,10 @@ class HelperClass():
         }
         root_path = current_app.root_path
         static_path = "static/assets"
-        excel_path = os.path.join(root_path, static_path,'water_budget.xlsx')
+        filename = f"Water_Budget_{payload['district_name']}_{payload['block_name']}.xlsx"
+        excel_path = os.path.join(root_path, static_path,filename)
         class_obj = ExcelGenerator()
-        excel_file = class_obj.create_water_budget_excel(excel_data,excel_path)
+        class_obj.create_water_budget_excel(excel_data,excel_path)
         
         return basic_info,human,filtered_livestock,filtered_crops,filtered_industries,filtered_surface_water,groundwater,water_transfer,runoff,lulc,rainfall,demand_side,supply_side,water_budget
         

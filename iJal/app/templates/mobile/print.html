@@ -194,7 +194,7 @@
                         <tr>
                             <td colspan="1" class="text-center fw-semibold">Total</td>
                             <td class="text-end fw-semibold">{{ transfer_data | map(attribute='entity_value') | sum |
-                                round(0)
+                                round(2)
                                 }}
                             </td>
                         </tr>
@@ -365,7 +365,7 @@
                                 round(0)
                                 }}</td>
                             <td class="text-end fw-semibold">{{ industry_data | map(attribute='value') | sum |
-                                round(0)
+                                round(2)
                                 }}</td>
                         </tr>
                     </table>
@@ -423,20 +423,22 @@
                     <table class="table table-sm table-fixed-size my-1">
                         <tr>
                             <th>Catchment</th>
-                            <th class="text-end">% Runoff</th>
+                            <th class="text-end">Area</th>
                             <th class="text-end">Yield</th>
                             <th class="text-end">Available</th>
                         </tr>
                         {%for item in runoff_data%}
                         <tr>
                             <td>{{item['catchment'] | title }}</td>
-                            <td class="text-end">{{item['runoff']}}</td>
+                            <td class="text-end">{{item['runoff'] | round(2)}}</td>
                             <td class="text-end">{{item['runoff_yield']}}</td>
                             <td class="text-end">{{item['supply']}}</td>
                         </tr>
                         {%endfor%}
                         <tr>
-                            <td colspan="2" class="text-center fw-semibold">Total</td>
+                            <td colspan="1" class="text-center fw-semibold">Total</td>
+                            <td class="text-end fw-semibold">{{ runoff_data | map(attribute='runoff') | sum |
+                                round(0) }}</td>
                             <td class="text-end fw-semibold">{{ runoff_data | map(attribute='runoff_yield') | sum |
                                 round(0) }}</td>
                             <td class="text-end fw-semibold">{{ runoff_data | map(attribute='supply') | sum |
@@ -552,7 +554,7 @@
                         <tr>
                             <td colspan="1" class="text-center fw-semibold">Total</td>
                             <td class="text-end fw-semibold">{{ transfer_data | map(attribute='entity_value') | sum |
-                                round(0)
+                                round(2)
                                 }}
                             </td>
                         </tr>
@@ -718,7 +720,7 @@
                                 round(0)
                                 }}</td>
                             <td class="text-end fw-semibold">{{ industry_data | map(attribute='value') | sum |
-                                round(0)
+                                round(2)
                                 }}</td>
                         </tr>
                     </table>
@@ -777,20 +779,22 @@
                     <table class="table table-sm table-fixed-size my-1" id="runoff">
                         <tr>
                             <th>Catchment</th>
-                            <th class="text-end">% Runoff</th>
+                            <th class="text-end">Area</th>
                             <th class="text-end">Yield</th>
                             <th class="text-end">Available</th>
                         </tr>
                         {%for item in runoff_data%}
                         <tr>
                             <td>{{item['catchment'] | title }}</td>
-                            <td class="text-end">{{item['runoff']}}</td>
+                            <td class="text-end">{{item['runoff'] | round(2)}}</td>
                             <td class="text-end">{{item['runoff_yield']}}</td>
                             <td class="text-end">{{item['supply']}}</td>
                         </tr>
                         {%endfor%}
                         <tr>
-                            <td colspan="2" class="text-center fw-semibold">Total</td>
+                            <td colspan="1" class="text-center fw-semibold">Total</td>
+                            <td class="text-end fw-semibold">{{ runoff_data | map(attribute='runoff') | sum |
+                                round(0) }}</td>
                             <td class="text-end fw-semibold">{{ runoff_data | map(attribute='runoff_yield') | sum |
                                 round(0) }}</td>
                             <td class="text-end fw-semibold">{{ runoff_data | map(attribute='supply') | sum |
@@ -855,12 +859,16 @@
         document.addEventListener('DOMContentLoaded', function () {
             // Function to set the download path and trigger the Excel button
             function setExcelDownloadPath() {
-                const excelPath = "{{ url_for('static', filename='assets/water_budget.xlsx') }}";
+                const blockName = "{{basic_info['Block Name']}}";
+                const districtName = "{{basic_info['District Name']}}";
+                const stateBlock = blockName + '_' + districtName;
+                const excelPath = "{{ url_for('static', filename='assets/Water_Budget_') }}" + districtName + '_' + blockName + '.xlsx';
                 const excelButton = document.getElementById('btnExport');
                 if (excelButton) {
                     // Update the href attribute of the button if it's an <a> or set data attributes
-                    excelButton.setAttribute('href', excelPath);
-                    excelButton.setAttribute('download', excelPath.split('/').pop());
+                    fileName = 'Water_Budget_{{basic_info["District Name"]}}_{{basic_info["Block Name"]}}.xlsx';
+                    excelButton.setAttribute('href', String(excelPath));
+                    excelButton.setAttribute('download', fileName);
 
                     // Trigger the click event programmatically
                     // excelButton.click();

@@ -177,7 +177,7 @@ class BlockOrCensus:
                             runoff_yield = round((value/10) * rainfall_in_mm, 2)
                             catchment_yield = round(catchment_area * runoff_yield, 2)
                             item = {'catchment': key, 
-                                    'runoff': value, 
+                                    'runoff': catchment_area, 
                                     'runoff_yield': runoff_yield, 
                                     'supply': round(cls.cubic_meter_to_hectare_meters(catchment_yield),2)}
                             runoff_array.append(item)

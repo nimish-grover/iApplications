@@ -279,11 +279,12 @@ class ExcelGenerator:
 
     def _format_runoff_data(self, data):
         """Format water transfer data from array of dictionaries"""
-        headers = ['Catchment', "% Runoff", 'Yield','Available']
+        headers = ['Catchment', "Area", 'Yield','Available']
         rows = [[item.get('catchment', ''), item.get('runoff', ''), item.get('runoff_yield', ''), item.get('supply', '')] for item in data]
         total_count = sum([item.get('runoff_yield', 0) for item in data])
+        total_area = sum([item.get('runoff', 0) for item in data])
         total_value = sum([item.get('supply', 0) for item in data])
-        rows.append(['Total','', total_count, total_value])
+        rows.append(['Total',total_area, total_count, total_value])
         return [headers] + rows
     
     def _format_lulc_data(self, data):
