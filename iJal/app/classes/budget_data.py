@@ -19,7 +19,13 @@ class BudgetData:
     RURAL_CONSUMPTION = 55 # Human consumption of water in rural areas in Litres
     URBAN_CONSUMPTION = 70 # Human consumption of water in urban areas in Litres
     LITRE_TO_HECTARE = 10000000 # Constant for converting hectare to litres
+    CUM_TO_HAM = 10000 #Constant for converting hectare meter to cubic meter
+
     COLORS = ['#5470c6','#91cc75','#fac858','#ee6666','#73c0de','#3ba272','#fc8452','#9a60b4']
+
+    @classmethod
+    def cubic_meter_to_hectare_meters(cls, value):
+        return value/cls.CUM_TO_HAM
 
     @classmethod
     def get_randomized_colors(cls):
@@ -117,11 +123,11 @@ class BudgetData:
             if not key=='rainfall_in_mm':
                 catchment_area = [item['catchment_area'] for item in lulc_data if item['catchment'] == key.lower()][0]
                 runoff_yield = round((value/10) * rainfall_in_mm, 2)
-                catchment_yield = round(catchment_area * runoff_yield/1000,2)
+                catchment_yield = round(catchment_area * runoff_yield, 2)
                 item = {'catchment': key, 
                         'runoff': value, 
                         'runoff_yield': runoff_yield, 
-                        'supply': catchment_yield}
+                        'supply': round(cls.cubic_meter_to_hectare_meters(catchment_yield),2)}
                 runoff_array.append(item)
         bg_colors = cls.COLORS
         runoff = [{**item, 'background': bg} for item, bg in zip(runoff_array, bg_colors)]

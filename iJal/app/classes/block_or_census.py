@@ -19,8 +19,13 @@ class BlockOrCensus:
     RURAL_CONSUMPTION = 55 # Human consumption of water in rural areas in Litres
     URBAN_CONSUMPTION = 70 # Human consumption of water in urban areas in Litres
     LITRE_TO_HECTARE = 10000000 # Constant for converting hectare to litres
+    CUM_TO_HAM = 10000 #Constant for converting hectare meter to cubic meter
+
     COLORS = ['#5470c6','#91cc75','#fac858','#ee6666','#73c0de','#3ba272','#fc8452','#9a60b4']
-    
+    @classmethod
+    def cubic_meter_to_hectare_meters(cls, value):
+        return value/cls.CUM_TO_HAM
+
     @classmethod
     def litre_to_hectare_meters(cls, value):
         return value/cls.LITRE_TO_HECTARE
@@ -128,12 +133,28 @@ class BlockOrCensus:
             if ground_water:
                 for item in ground_water_supply:
                     if item['name'] == 'extraction':
-                        item['value'] = ground_water['extraction']
-
+                        extraction = ground_water['extraction']
+                        item['value'] = extraction
+                    elif item['name'].lower()=='extractable':
+                        extractable = item['value']
+                    elif item['name'].lower()=='stage_of_extraction':
+                        if extractable:
+                            stage_of_extraction = round((ground_water['extraction']/extractable) * 100, 2)
+                            item['value'] = stage_of_extraction
+                    elif item['name'].lower() == 'category':
+                        category = 'safe'
+                        if stage_of_extraction > 70 and stage_of_extraction <= 90:
+                            category = 'semi-critical'
+                        elif stage_of_extraction > 90 and stage_of_extraction <= 100:
+                            category = 'critical'
+                        elif stage_of_extraction > 100:
+                            category = 'over-exploited'
+                        item['value'] = category
+                        
                 is_approved = ground_water['is_approved']
                 if is_approved:
                     return ground_water_supply, is_approved
-        ground_water_supply = BudgetData.get_ground_supply(block_id, district_id)
+        # ground_water_supply = BudgetData.get_ground_supply(block_id, district_id)
         return ground_water_supply, False
     
     @classmethod
@@ -154,11 +175,11 @@ class BlockOrCensus:
                         if not key=='rainfall_in_mm':
                             catchment_area = [item['catchment_area'] for item in lulc_data if item['catchment'] == key.lower()][0]
                             runoff_yield = round((value/10) * rainfall_in_mm, 2)
-                            catchment_yield = round(catchment_area * runoff_yield/1000,2)
+                            catchment_yield = round(catchment_area * runoff_yield, 2)
                             item = {'catchment': key, 
                                     'runoff': value, 
                                     'runoff_yield': runoff_yield, 
-                                    'supply': catchment_yield}
+                                    'supply': round(cls.cubic_meter_to_hectare_meters(catchment_yield),2)}
                             runoff_array.append(item)
                     bg_colors = cls.COLORS
                     runoff = [{**item, 'background': bg} for item, bg in zip(runoff_array, bg_colors)]
@@ -249,6 +270,15 @@ class BlockOrCensus:
         total_supply = sum([item['water_value'] for item in supply_side])
         water_budget.append({'category':'demand', 'value': round((total_demand*100)/(total_demand + total_supply),0),'water_value':total_demand})
         water_budget.append({'category':'supply', 'value': round((total_supply*100)/(total_demand + total_supply),0),'water_value':total_supply})
+        runoff,is_approved = cls.get_runoff_data(block_id, district_id,state_id)
+        total_runoff = sum([item['supply'] for item in runoff])
+        water_budget.append({'category':'available_runoff', 'value': round((total_runoff*100)/(total_demand + total_supply),0),'water_value':total_runoff})
+        surface,is_approved = cls.get_surface_data(block_id, district_id,state_id)
+        total_surface = sum([item['value'] for item in surface])
+        water_budget.append({'category':'harvested_runoff', 'value': round((total_supply*100)/(total_demand + total_supply),0),'water_value':total_surface})
+
+        potential_runoff = total_runoff-total_surface
+        water_budget.append({'category':'potential_runoff', 'value': round((potential_runoff*100)/(total_demand + total_supply),0),'water_value':potential_runoff})
         bg_colors = cls.COLORS
         budget_with_colors = [{**item, 'background': bg} for item, bg in zip(water_budget, bg_colors)] 
         return budget_with_colors

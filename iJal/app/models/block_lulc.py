@@ -83,7 +83,8 @@ class BlockLULC(db.Model):
             db.session.query(
                 LULC.display_name.label('lulc_name'),
                 (cls.area).label('lulc_area'),
-                cls.is_approved
+                cls.is_approved,
+                LULC.catchment
             )
             .join(LULC, LULC.id == cls.lulc_id)
             .filter(cls.bt_id == bt_id).order_by(LULC.id)
@@ -95,7 +96,8 @@ class BlockLULC(db.Model):
             json_data = [{
                 'lulc_name': row.lulc_name,
                 'lulc_area': row.lulc_area,
-                'is_approved': row.is_approved
+                'is_approved': row.is_approved,
+                'catchment': row.catchment
             } for row in results]
             return json_data
         return None

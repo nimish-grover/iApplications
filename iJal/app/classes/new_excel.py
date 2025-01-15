@@ -201,6 +201,12 @@ class ExcelGenerator:
                     target_cell.font = Font(bold=True)
                 if isinstance(value, (int, float)):
                     target_cell.alignment = Alignment(horizontal='right')
+                if isinstance(value, (str)):
+                    if value == 'Total':
+                        target_cell.font = Font(bold=True)
+                        target_cell.alignment = Alignment(horizontal='center')
+                if row_data[0] == 'Total':
+                    target_cell.font = Font(bold=True)
 
     def _write_data_with_headers(self, data, headers, start_row):
         """Helper method to write data with headers"""
@@ -222,18 +228,27 @@ class ExcelGenerator:
         """Format human data from array of dictionaries"""
         headers = ['Category', 'Population', 'Consumption']
         rows = [[str(item['category']).capitalize(), item.get('count', ''), item.get('value', '')] for item in data]
-        return [headers] + rows
+        total_count = sum([item.get('count', 0) for item in data])
+        total_value = sum([item.get('value', 0) for item in data])
+        rows.append(['Total', total_count, total_value])
+        return [headers] + rows 
 
     def _format_livestock_data(self, data):
         """Format livestock data from array of dictionaries"""
         headers = ['Type', 'Count', 'Consumption']
         rows = [[str(item['category']).capitalize(), item.get('count', ''), item.get('value', '')] for item in data]
+        total_count = sum([item.get('count', 0) for item in data])
+        total_value = sum([item.get('value', 0) for item in data])
+        rows.append(['Total', total_count, total_value])
         return [headers] + rows
 
     def _format_crop_data(self, data):
         """Format crop data from array of dictionaries"""
         headers = ['Crop', 'Area', 'Consumption']
         rows = [[str(item['category']).capitalize(), item.get('count', ''), item.get('value', '')] for item in data]
+        total_count = sum([item.get('count', 0) for item in data])
+        total_value = sum([item.get('value', 0) for item in data])
+        rows.append(['Total', total_count, total_value])
         return [headers] + rows
 
     def _format_industry_data(self, data):
@@ -242,12 +257,18 @@ class ExcelGenerator:
             return [['*No industries in this block']]
         headers = ['Industry', 'Type', 'Water Allocation']
         rows = [[str(item['category']).capitalize(), item.get('count', ''), item.get('value', '')] for item in data]
+        total_count = sum([item.get('count', 0) for item in data])
+        total_value = sum([item.get('value', 0) for item in data])
+        rows.append(['Total', total_count, total_value])
         return [headers] + rows
 
     def _format_surface_water_data(self, data):
         """Format surface water data from array of dictionaries"""
         headers = ['Water Body', 'Count','Storage Capacity']
         rows = [[item.get('category', ''), item.get('count', ''), item.get('value', '')] for item in data]
+        total_count = sum([item.get('count', 0) for item in data])
+        total_value = sum([item.get('value', 0) for item in data])
+        rows.append(['Total', total_count, total_value])
         return [headers] + rows
 
     def _format_groundwater_data(self, data):
@@ -260,18 +281,25 @@ class ExcelGenerator:
         """Format water transfer data from array of dictionaries"""
         headers = ['Catchment', "% Runoff", 'Yield','Available']
         rows = [[item.get('catchment', ''), item.get('runoff', ''), item.get('runoff_yield', ''), item.get('supply', '')] for item in data]
+        total_count = sum([item.get('runoff_yield', 0) for item in data])
+        total_value = sum([item.get('supply', 0) for item in data])
+        rows.append(['Total','', total_count, total_value])
         return [headers] + rows
     
     def _format_lulc_data(self, data):
         """Format lulc data from array of dictionaries"""
-        headers = ['Name', 'Area']
-        rows = [[item.get('lulc_name', ''), item.get('lulc_area', '')] for item in data]
+        headers = ['Catchment','Name', 'Area']
+        rows = [[str(item.get('catchment','')).capitalize(), item.get('lulc_name', ''), round(float(item.get('lulc_area', 0)), 2)] for item in data]
+        total_value = sum([item.get('lulc_area', 0) for item in data])
+        rows.append(['Total', ' ', total_value])
         return [headers] + rows
     
     def _format_transfer_data(self, data):
         """Format water transfer data from array of dictionaries"""
         headers = ['Water Transfer', 'Quantity']
         rows = [[item.get('entity_name', ''), item.get('entity_value', '')] for item in data]
+        total_value = sum([item.get('entity_value', 0) for item in data])
+        rows.append(['Total', total_value])
         return [headers] + rows
     
 
@@ -279,6 +307,9 @@ class ExcelGenerator:
         """Format rainfall data from array of dictionaries"""
         headers = ['Month-Year', 'Actual','Normal']
         rows = [[item.get('month', ''), item.get('actual', ''), item.get('normal', '')] for item in data]
+        total_actual = sum([item.get('actual', 0) for item in data])
+        total_normal = sum([item.get('normal', 0) for item in data])
+        rows.append(['Total', total_actual, total_normal])
         return [headers] + rows
 
     def _format_budget_data(self, data_dict):
@@ -321,9 +352,9 @@ class ExcelGenerator:
         total_demand = float(data_dict['water_budget'][0]['water_value'])
         water_budget_value = total_supply - total_demand
         
-        message = ("Water is Deficient in Block, Please take necessary actions." 
+        message = ("Water is Deficient in Block." 
                 if water_budget_value < 0 
-                else "Water is Surplus in Block, No action is required.")
+                else "Water is Surplus in Block.")
         
         rows.append([message, water_budget_value])
         

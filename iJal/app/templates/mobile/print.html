@@ -241,9 +241,7 @@
                             {% set total_demand = water_budget[0]['water_value'] %}
                             {% set water_budget_value = total_supply - total_demand %}
                             <td class="text-start fw-bold">
-                                {% if water_budget_value < 0 %} Water is Deficient in Block, Please take necessary
-                                    actions. {% else %} Water is Surplus in Block, No action is required. {% endif
-                                    %}</td>
+                                {% if water_budget_value < 0 %} Water is Deficient in Block. {% else %} Water is Surplus in Block. {%endif%}</td>
                             <td class="text-end fw-bold">
                                 {{'%0.2f'|format(water_budget_value|float)}}</td>
                         </tr>
@@ -437,21 +435,35 @@
                             <td class="text-end">{{item['supply']}}</td>
                         </tr>
                         {%endfor%}
+                        <tr>
+                            <td colspan="2" class="text-center fw-semibold">Total</td>
+                            <td class="text-end fw-semibold">{{ runoff_data | map(attribute='runoff_yield') | sum |
+                                round(0) }}</td>
+                            <td class="text-end fw-semibold">{{ runoff_data | map(attribute='supply') | sum |
+                                    round(0) }}</td>
+                        </tr>
                     </table>
                 </div>
                 <div class="fw-semibold fs-6 fw-semibold ms-1 mt-1">d) LULC(in HaM)</div>
                 <div class="container justify-content-center m-0 p-0 fs-7">
                     <table class="table table-sm table-fixed-size my-1" id="lulc">
                         <tr>
+                            <th>Catchment</th>
                             <th>LULC Name</th>
                             <th class="text-end">Area</th>
                         </tr>
                         {%for item in lulc_data%}
                         <tr>
+                            <td>{{item['catchment'] | title}}</td>
                             <td>{{item['lulc_name'] | title}}</td>
-                            <td class="text-end">{{item['lulc_area']}}</td>
+                            <td class="text-end">{{item['lulc_area'] | round(2)}}</td>
                         </tr>
                         {%endfor%}
+                        <tr>
+                            <td colspan="2" class="text-center fw-semibold">Total</td>
+                            <td class="text-end fw-semibold">{{ lulc_data | map(attribute='lulc_area') | sum |
+                                round(0) }}</td>
+                        </tr>
                     </table>
                 </div>
                 <div class="fw-semibold fs-6 fw-semibold ms-1 mt-1">e) Rainfall(in mm)</div>
@@ -587,9 +599,7 @@
                             {% set total_demand = water_budget[0]['water_value'] %}
                             {% set water_budget_value = total_supply - total_demand %}
                             <td class="text-start fw-bold">
-                                {% if water_budget_value < 0 %} Water is Deficient in Block, Please take necessary
-                                    actions. {% else %} Water is Surplus in Block, No action is required. {% endif
-                                    %}</td>
+                                {% if water_budget_value < 0 %} Water is Deficient in Block. {% else %} Water is Surplus in Block. {%endif%}</td>
                             <td class="text-end fw-bold">
                                 {{'%0.2f'|format(water_budget_value|float)}}</td>
                         </tr>
@@ -779,21 +789,35 @@
                             <td class="text-end">{{item['supply']}}</td>
                         </tr>
                         {%endfor%}
+                        <tr>
+                            <td colspan="2" class="text-center fw-semibold">Total</td>
+                            <td class="text-end fw-semibold">{{ runoff_data | map(attribute='runoff_yield') | sum |
+                                round(0) }}</td>
+                            <td class="text-end fw-semibold">{{ runoff_data | map(attribute='supply') | sum |
+                                    round(0) }}</td>
+                        </tr>
                     </table>
                 </div>
                 <div class="fw-semibold fs-6 fw-semibold ms-1 mt-1">d) LULC(in HaM)</div>
                 <div class="container justify-content-center m-0 p-0 fs-7">
                     <table class="table table-sm table-fixed-size my-1" id="lulc">
                         <tr>
+                            <th>Catchment</th>
                             <th>LULC Name</th>
                             <th class="text-end">Area</th>
                         </tr>
                         {%for item in lulc_data%}
                         <tr>
+                            <td>{{item['catchment'] |title}}</td>
                             <td>{{item['lulc_name'] | title}}</td>
-                            <td class="text-end">{{item['lulc_area']}}</td>
+                            <td class="text-end">{{item['lulc_area'] | round(2)}}</td>
                         </tr>
                         {%endfor%}
+                        <tr>
+                            <td colspan="2" class="text-center fw-semibold">Total</td>
+                            <td class="text-end fw-semibold">{{ lulc_data | map(attribute='lulc_area') | sum |
+                                round(0) }}</td>
+                        </tr>
                     </table>
                 </div>
                 <div class="fw-semibold fs-6 fw-semibold ms-1 mt-1">e) Rainfall(in mm)</div>

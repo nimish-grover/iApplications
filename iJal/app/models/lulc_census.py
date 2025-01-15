@@ -40,6 +40,7 @@ class LULCCensus(db.Model):
         query = db.session.query(
                 (cls.lulc_area).label('lulc_area'),
                 LULC.display_name.label('lulc_name'),
+                LULC.catchment
                 ).join(TerritoryJoin, TerritoryJoin.id==cls.tj_id
                 ).join(LULC, LULC.id==cls.lulc_id
                 ).join(Block, Block.id == TerritoryJoin.block_id
@@ -54,7 +55,8 @@ class LULCCensus(db.Model):
         if results:
             json_data = [{
                 'lulc_name': row.lulc_name,
-                'lulc_area': row.lulc_area
+                'lulc_area': row.lulc_area,
+                'catchment': row.catchment
             } for row in results]
             return json_data
         return None
