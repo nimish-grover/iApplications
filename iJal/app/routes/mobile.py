@@ -1,4 +1,4 @@
-from flask import Blueprint, json, jsonify, make_response, redirect, render_template, request, session, url_for
+from flask import Blueprint, json, make_response, redirect, render_template, request, session, url_for
 from flask_login import current_user
 
 from iJal.app.classes.block_or_census import BlockOrCensus
@@ -6,7 +6,6 @@ from iJal.app.classes.budget_data import BudgetData
 from iJal.app.models import TerritoryJoin
 from iJal.app.models.states import State
 from iJal.app.models.villages import Village
-from iJal.app.classes.helper import HelperClass
 
 
 blp = Blueprint("mobile","mobile")
@@ -82,8 +81,6 @@ def home():
                            supply_side = budget_data[1],
                            water_budget = budget_data[2],
                            menu = get_main_menu(),
-                           demand_data = json.dumps(budget_data[0]),
-                           supply_data = json.dumps(budget_data[1]),
                            chart_data = json.dumps(budget_data),
                            toggle_labels=['chart', 'table'])
 
@@ -120,6 +117,7 @@ def human():
     human, is_approved = BlockOrCensus.get_human_data(payload['block_id'],payload['district_id'],payload['state_id'])
     return render_template('mobile/demand/human.html',
         is_approved = is_approved, 
+        source='Census 2011',
         human = human,
         chart_data= json.dumps(human),
         toggle_labels= ['chart', 'table'],
@@ -146,6 +144,7 @@ def livestocks():
     livestock, is_approved = BlockOrCensus.get_livestock_data(payload['block_id'],payload['district_id'],payload['state_id'])  
     return render_template('mobile/demand/livestocks.html',
         is_approved = is_approved, 
+        source = 'Livestock Census 2019',
         livestocks = livestock,
         chart_data= json.dumps(livestock),
         toggle_labels= ['chart', 'table'],
@@ -169,6 +168,7 @@ def crops():
     crops, is_approved = BlockOrCensus.get_crop_data(payload['block_id'],payload['district_id'],payload['state_id']) 
     return render_template('mobile/demand/crops.html',
         is_approved = is_approved, 
+        source = 'Crop Census 2019 (DES)', #https://data.desagri.gov.in/website/crops-apy-report-web
         crops = crops,
         chart_data= json.dumps(crops),
         toggle_labels= ['chart', 'table'],
@@ -191,10 +191,15 @@ def industry():
     else:
         payload = json.loads(payload)
     industry_demand, is_approved = BlockOrCensus.get_industry_data(payload['block_id'], payload['district_id'], payload['state_id'])
-    # has_value = sum(item['count'] for item in industry_demand)
+    has_value = sum(item['count'] for item in industry_demand)
+    if is_approved:
+            source = 'The Industrial Water demand is reported nil by the block' 
+    else:
+        source = 'The Industrial Water demand is reported nil by the block' if has_value else 'Industry demand input is awaited.'
     return render_template("mobile/demand/industry.html",
                         subtitle = '(in Ha M)' if is_approved else 'There are no industry in this block',
-                        industries = industry_demand, 
+                        industries = industry_demand if has_value else None, 
+                        source = source,
                         is_approved = is_approved,
                         chart_data = json.dumps(industry_demand),
                         breadcrumbs= get_breadcrumbs(payload), 
@@ -228,7 +233,8 @@ def surface():
         payload = json.loads(payload)
     surface_water_supply, is_approved = BlockOrCensus.get_surface_data(payload['block_id'], payload['district_id'], payload['state_id'])
     return render_template('mobile/supply/surface.html',
-                        is_approved = is_approved,   
+                        is_approved = is_approved, 
+                        source = 'India’s First waterbodies census 2019',  
                         waterbodies= sorted(surface_water_supply, key = lambda x: x['value'], reverse=True),
                         chart_data= json.dumps(surface_water_supply),
                         toggle_labels= ['chart', 'table'],
@@ -257,7 +263,8 @@ def ground():
                                                 payload['state_id'])
     
     return render_template('mobile/supply/ground.html',
-                        is_approved = is_approved,   
+                        is_approved = is_approved,  
+                        source = 'INDIA-Groundwater Resource Estimation System (IN-GRES)', 
                         groundwater= ground_water_supply,
                         chart_data= json.dumps(ground_water_supply),
                         toggle_labels= ['chart', 'table'],
@@ -281,6 +288,7 @@ def rainfall():
         payload = json.loads(payload)
     rainfall_data, is_approved = BlockOrCensus.get_rainfall_data(payload['block_id'], payload['district_id'], payload['state_id'])
     return render_template("mobile/supply/rainfall.html", 
+                           source='India- Water Resource Information System (WRIS)',
                            is_approved = is_approved,
                            monthwise_rainfall = rainfall_data,
                            chart_data = json.dumps(rainfall_data),
@@ -298,6 +306,7 @@ def runoff():
     runoff_data, is_approved = BlockOrCensus.get_runoff_data(payload['block_id'], payload['district_id'], payload['state_id'])
     return render_template("mobile/supply/runoff.html", 
                            is_approved = is_approved,
+                           source="Strange's Table",
                            catchments=runoff_data,
                            chart_data = json.dumps(runoff_data),
                            breadcrumbs = get_breadcrumbs(payload),
@@ -360,31 +369,81 @@ def render_demand_template(template, demand_function, template_data_key):
 
     return render_template(template, **context)
 
-@blp.route('/print',methods=['POST','GET'])
+@blp.route('/print')
 def print():
-    if request.method == 'POST':
-        session_data = session.get('payload')
-        payload = json.loads(session_data)
-        json_data = request.json
-        coefficient = json_data['coefficient']
-        payload['coefficient'] = coefficient
-        session['payload'] = json.dumps(payload)
-        
-        return jsonify({'redirect_url': url_for('.print')})
-    
     session_data = session.get('payload')
     if not session_data:
         return redirect(url_for('mobile.index'))
     else:
         payload = json.loads(session_data)
+        
+    village_count = Village.get_villages_number_by_block(payload['block_id'],payload['district_id'])
+    tga = BlockOrCensus.get_tga(payload['block_id'],payload['district_id'],payload['state_id'])
     
-    basic_info,human,livestock,crops,industries,surface_water,groundwater,water_transfer,runoff,rainfall,demand_side,supply_side,water_budget = HelperClass.get_print_data(payload)
+    human,is_approved = BlockOrCensus.get_human_data(payload['block_id'],payload['district_id'],payload['state_id'])
     
-    return render_template('mobile/print.html',basic_info=basic_info,human_data=human,human=json.dumps(human),
-                           livestock_data=livestock,crop_data=crops,coefficient=payload['coefficient'],
-                           surface_water_data=surface_water,industry_data=industries,
-                           groundwater_data=groundwater, transfer_data=water_transfer, runoff_data=runoff,rainfall_data=rainfall,
-                           water_budget=water_budget,demand_side=demand_side,supply_side=supply_side)
+    livestocks,is_approved = BlockOrCensus.get_livestock_data(payload['block_id'],payload['district_id'],payload['state_id'])
+    filtered_livestock = [livestock for livestock in livestocks if livestock['count'] > 0]
+    
+    crops,is_approved = BlockOrCensus.get_crop_data(payload['block_id'],payload['district_id'],payload['state_id'])
+    filtered_crops = [crop for crop in crops if crop['count'] > 0]
+    
+    industries = BudgetData.get_industry_demand(payload['block_id'],payload['district_id'],payload['state_id'])
+    filtered_industries = [industries for industries in industries if industries['count'] > 0]
+    
+    surface_water,is_approved = BlockOrCensus.get_surface_data(payload['block_id'],payload['district_id'],payload['state_id'])
+    filtered_surface_water = [waterbody for waterbody in surface_water if waterbody['count'] > 0]
+    surface_rename = {'whs':'WHS','lakes':'Lakes','ponds':'Ponds','tanks':'Tanks','reservoirs':'Resevoirs','others':'Others'}
+    filtered_surface_water = [{**item, 'category':surface_rename[item['category']]} for item in filtered_surface_water]
+
+    
+    groundwater,is_approved = BlockOrCensus.get_ground_data(payload['block_id'],payload['district_id'],payload['state_id']) 
+    # groundwater_rename = {'extraction':'Extracted Groundwater','extractable':'Extractable Groundwater','stage_of_extraction':'Stage of Extraction','category':'Category'}
+    # groundwater = [{**item, 'name':groundwater_rename[item['name']]} for item in groundwater]
+    
+    water_transfer = BudgetData.get_water_transfer(payload['block_id'],payload['district_id'],payload['state_id'])
+
+    runoff,is_approved = BlockOrCensus.get_runoff_data(payload['block_id'],payload['district_id'],payload['state_id'])
+    # run_off_rename = {'good':'Good Catchment','bad':'Bad Catchment','average':'Average Catchment'}
+    # runoff = [{**item, 'catchment':run_off_rename[item['catchment']]} for item in runoff]
+    
+    rainfall,is_approved = BlockOrCensus.get_rainfall_data(payload['block_id'],payload['district_id'],payload['state_id'])
+    # rainfall_rename = {'Jan':'January','Feb':'February','Mar':'March','Apr':'April','May':'May','Jun':'June','Jul':'July',
+    #                     'Aug':'August','Sep':'September','Oct':'October','Nov':'November','Dec':'December'}
+    # for item in rainfall:
+    #     month_abbr = item['month'].split('-')[0]
+    #     year = item['month'].split('-')[1]
+    #     full_month_name = rainfall_rename.get(month_abbr, month_abbr)
+    #     item['month'] = f"{full_month_name}-{year}"
+
+    
+    demand_side = BlockOrCensus.get_demand_side_data(payload['block_id'],payload['district_id'],payload['state_id'])
+    # demand_rename = {'human':'Human Population Consumption','livestock':'Livestock Population Consumption'
+    #                     ,'crop':'Crops Consumption','industry':'Industry Consumption'}
+    # demand_side = [{**item, 'category':demand_rename[item['category']]} for item in demand_side]
+    
+    supply_side = BlockOrCensus.get_supply_side_data(payload['block_id'],payload['district_id'],payload['state_id'])
+    # supply_rename = {'Surface':'Available Surface Water','Ground':'Ground Water'}
+    for item in supply_side:
+        if item['category'] == 'Transfer':
+            if item['value'] >0:
+                item['category'] = 'Water Transfer Inward'
+                transfer_indicator = 'inward'
+            else:
+                transfer_indicator = 'outward'
+                item['category'] = 'Water Transfer Outward'
+        # else:
+        #     item['category'] = supply_side[item['category']]
+    
+    water_budget = BlockOrCensus.get_water_budget_data(payload['block_id'],payload['district_id'],payload['state_id'])
+    # water_budget_rename = {'demand':'Total Demand','supply':'Total Supply'}
+    # water_budget = [{**item, 'category':water_budget_rename[item['category']]} for item in water_budget]
+    
+    return render_template('mobile/print.html',village_count=village_count,tga=round(tga,2),human_data=human,human=json.dumps(human),
+                           livestock_data=filtered_livestock,crop_data=filtered_crops,
+                           surface_water_data=filtered_surface_water,industry_data=filtered_industries,
+                           groundwater_data=groundwater, transfer_data=water_transfer, runoff_data=runoff,rainfall_data=rainfall,transfer_indicator=transfer_indicator,
+                           water_budget=water_budget,demand_side=demand_side,supply_side=supply_side,payload=payload)
 
 def get_breadcrumbs(payload):
     """

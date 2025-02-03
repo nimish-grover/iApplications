@@ -1,11 +1,15 @@
 {% extends 'mobile/base.html' %}
 {% block title %} Industry {% endblock %}
-{% from 'mobile/components.html' import table_title, chart, badge %}
+{% from 'mobile/components.html' import table_title, chart, badge, table_head %}
 {% block content %}
 <div class="row">
     <div class="col"></div>
     <div class="col-8 text-center">
+        {% if industries %}
         {{table_title(title='Industry Demand', subtitle=subtitle)}}
+        {% else %}
+        {{table_title(title='Industry Demand', subtitle="")}}
+        {% endif %}
     </div>
     <div class="col">
         {% if is_approved %}
@@ -15,24 +19,26 @@
 </div>
 <div id="cardCarousel" class="carousel slide">
     <div class="carousel-inner">
-      <div class="carousel-item active">        
+      <div class="carousel-item active"> 
+        {% if industries %}       
         {{chart()}}
+        {% else %}
+        <span class="fs-7 fw-lighter d-flex justify-content-center align-items-center" style="height: 100px;">
+            NIL Industry demand reported by the block
+        </span>
+        {% endif %}
       </div>
       <div class="carousel-item">
         <div class="overflow-y-scroll" style="height:30vh !important;">
-            <table class="table table-bordered table-sm fs-7 mb-0">
-                <thead>
-                    <tr>
-                        <th>S.No.</th>
-                        <th>Industry Sector</th>
-                        <th>Count</th>
-                        <th>Consumption</th>
-                    </tr>
-                </thead>
+            {% if industries %}
+            <table class="table table-bordered border-light  border-light table-sm fs-7 mb-0">
+                    {{table_head(headings=[{'heading':'Industry Sector','subheading':'(group)'},
+                    {'heading':'Count','subheading':'(in numbers)'},
+                    {'heading':'Consumption','subheading':'(in Ha M)'}
+                ])}}
                 <tbody>
                     {% for industry in industries %}
                     <tr>
-                        <td class="text-center">{{loop.index}}</td>
                         <td class="text-start">{{industry.category | title}}</td>
                         <td class="text-center">{{industry.count}}</td>
                         <td class="text-end">{{'%0.2f'|format(industry.value|float)}}</td>
@@ -40,13 +46,18 @@
                     {% endfor %}
                 </tbody>
                 <tfoot>
-                    <tr>
-                        <td colspan="2">Total</td>
+                    <tr class="fw-semibold">
+                        <td >Total</td>
                         <td class="text-end">{{ crops | map(attribute='count') | sum | round(0) }}</td>
                         <td class="text-end">{{ crops | map(attribute='value') | sum | round(0) }}</td>
                     </tr>
                 </tfoot>
             </table>
+            {% else %}
+            <span class="fs-7 fw-lighter d-flex justify-content-center align-items-center" style="height: 100px;">
+            NIL Industry demand reported by the block
+            </span>
+            {% endif %}            
         </div>
       </div>
     </div>
@@ -58,13 +69,18 @@
     // echart
     let chart_data = JSON.parse(document.getElementById('chartData').value);
     var chartDom = document.getElementById('main');
-    var myChart = echarts.init(chartDom);
+    // var chartDom = document.getElementById('main');
+    if (chartDom){
+        myChart = echarts.init(chartDom);
+    }
     var option;
 
     option = {
-    // title: {
-    //    text: 'Human Population'
-    // },
+    title: {
+    //    text: 'Industry Demand',
+    //    top: 'bottom',
+    //    left:'center'
+    },
     tooltip: {
         trigger: 'axis',
         axisPointer: {
@@ -113,6 +129,8 @@
         return output_array;
         }
 
-    option && myChart.setOption(option);
+    if (chartDom){
+        option && myChart.setOption(option);
+    }
 </script>
 {% endblock %}

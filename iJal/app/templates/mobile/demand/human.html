@@ -1,11 +1,11 @@
 {% extends 'mobile/base.html' %}
 {% block title %} Human {% endblock %}
-{% from 'mobile/components.html' import select, block_button, chart, table_title, badge %}
+{% from 'mobile/components.html' import select, block_button, chart, table_title, badge, table_head %}
 {% block content %}
 <div class="row">
     <div class="col"></div>
     <div class="col-8 text-center">
-        {{table_title(title='Human Consumption', subtitle='(in Ha M)')}}
+        {{table_title(title='Human Water Consumption', subtitle='')}}
     </div>
     <div class="col">
         {% if is_approved %}
@@ -19,30 +19,26 @@
         {{chart()}}
       </div>      
       <div class="carousel-item">        
-        <table class="table table-bordered table-sm fs-7 mb-0">
-            <thead class="text-center">
-                <tr>
-                    <th>S.No.</th>
-                    <th>Description</th>
-                    <th>Population</th>
-                    <th>Consumption</th>
-                </tr>
-            </thead>
-            <tbody>
+        <table class="table table-bordered border-light table-sm fs-7 mb-0">
+            {{table_head(headings=[
+                {'heading':'Description','subheading':'(Total)'},
+                {'heading':'Population','subheading':'(in numbers)'},
+                {'heading':'Consumption','subheading':'(in Ha M)'}
+                ])}}
+            <!-- {#<tbody>
                 {% for row in human %}
                 <tr>
-                    <td class="text-center">{{loop.index}}</td>
                     <td class="text-start">{{row['category'] | title}}</td>
-                    <td class="text-end">{{row['count']}}</td>
-                    <td class="text-end">{{row['value']}}</td>
+                    <td class="text-end">{{row['count']| indian_format}}</td>
+                    <td class="text-end">{{row['value']|indian_format}}</td>
                 </tr>
                 {% endfor %}
-            </tbody>
+            </tbody> #}-->
             <tfoot>
                 <tr>
-                    <td colspan="2">Total</td>
-                    <td class="text-end">{{ human | map(attribute='count') | sum | round(0) }}</td>
-                    <td class="text-end">{{ human | map(attribute='value') | sum | round(0) }}</td>
+                    <td>Human</td>
+                    <td class="text-end">{{ human | map(attribute='count') | sum | indian_format }}</td>
+                    <td class="text-end">{{ human | map(attribute='value') | sum | indian_format }}</td>
                 </tr>
             </tfoot>
         </table>
@@ -57,6 +53,7 @@
     let chart_data = JSON.parse(document.getElementById('chartData').value);
     var chartDom = document.getElementById('main');
     var myChart = echarts.init(chartDom);
+    const total_population = chart_data[0]['value'] + chart_data[1]['value']
     var option;
 
     option = {
@@ -90,9 +87,9 @@
     },
     series: [
         {
-        name: chart_data[0]['category'],
+        name: 'Human',
         type: 'bar',
-        data: [chart_data[0]['value']],
+        data: [total_population.toFixed(2)],
         label:{
             show: true,
             // position: 'center',
@@ -102,19 +99,19 @@
         },
         color:[chart_data[0]['background']]
         },
-        {
-        name: chart_data[1]['category'],
-        type: 'bar',
-        data: [chart_data[1]['value']],
-        label:{
-            show: true,
-            // position: [50, 10],
-            // align: 'center',
-            verticalAlign:'middle',
-            formatter:'{c} Ha M'
-        },
-        color:[chart_data[1]['background']]
-        }
+        // {
+        // name: chart_data[1]['category'],
+        // type: 'bar',
+        // data: [chart_data[1]['value']],
+        // label:{
+        //     show: true,
+        //     // position: [50, 10],
+        //     // align: 'center',
+        //     verticalAlign:'middle',
+        //     formatter:'{c} Ha M'
+        // },
+        // color:[chart_data[1]['background']]
+        // }
     ]
     };
 

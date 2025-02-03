@@ -1,11 +1,11 @@
 {% extends 'mobile/base.html' %}
 {% block title %} Livestock {% endblock %}
-{% from 'mobile/components.html' import chart, table_title, badge %}
+{% from 'mobile/components.html' import chart, table_title, badge, table_head %}
 {% block content %}
 <div class="row">
     <div class="col"></div>
     <div class="col-8 text-center">
-        {{table_title(title='Livestocks Consumption', subtitle='(in Ha M)')}}
+        {{table_title(title='Livestocks Water Consumption', subtitle='')}}
     </div>
     <div class="col">
         {% if is_approved %}
@@ -19,30 +19,26 @@
         {{chart()}}
       </div>
       <div class="carousel-item">
-        <table class="table table-bordered table-sm fs-7 mb-0">
-            <thead>
-                <tr>
-                    <th>S.No.</th>
-                    <th>Livestock</th>
-                    <th>Count</th>
-                    <th>Consumption</th>
-                </tr>
-            </thead>
+        <table class="table table-bordered  border-light table-sm fs-7 mb-0">
+            {{table_head(headings=[
+                {'heading':'Livestock','subheading':'(name)'},
+                {'heading':'Count','subheading':'(in numbers)'},
+                {'heading':'Consumption','subheading':'(in Ha M)'},
+                ])}}
             <tbody>
                 {% for item in livestocks %}
                 <tr>
-                    <td class="text-center">{{loop.index}}</td>
                     <td class="text-start">{{item.category | title}}</td>
-                    <td class="text-end">{{item.count}}</td>
-                    <td class="text-end">{{item.value}}</td>
+                    <td class="text-end">{{item.count | indian_format }}</td>
+                    <td class="text-end">{{item.value | indian_format}}</td>
                 </tr>
                 {% endfor %}
             </tbody>
             <tfoot>
-                <tr>
-                    <td colspan="2">Total</td>
-                    <td class="text-end">{{ livestocks | map(attribute='count') | sum | round(0) }}</td>
-                    <td class="text-end">{{ livestocks | map(attribute='value') | sum | round(0) }}</td>
+                <tr class="fw-semibold">
+                    <td>Total</td>
+                    <td class="text-end">{{ livestocks | map(attribute='count') | sum | round(0)| indian_format }}</td>
+                    <td class="text-end">{{ livestocks | map(attribute='value') | sum | round(0)| indian_format }}</td>
                 </tr>
             </tfoot>
         </table>
@@ -60,17 +56,19 @@
 
     // This example requires ECharts v5.5.0 or later
     option = {
+        color:['#973EFA','#FA3ECE','#D540FA','#5A3EFA','#FA3E5E','#E592FA','#EB78C7','#B492FF'],
         title: {
-            text: 'Livestock Population',
-            show: false,
+            text: 'Consumption (in Ha M)',
+            top: 'bottom',
+            left: 'center'
         },
         tooltip: {
             trigger: 'item'
         },
         legend: {
             orient: 'horizontal',
-            bottom: '5%',
-            left: 'center',
+            top: '5%',
+            left: 'right',
             show: true
         },
         textStyle: {
@@ -99,7 +97,13 @@
         return data.map(item => {
             // Use object destructuring to rename the key
             const { category, ...rest } = item; // Extract 'category' and the remaining keys
-            return { name: category, ...rest }; // Return a new object with 'name' instead of 'category'
+            // Convert 'category' to title case
+            const titleCase = category
+                .toLowerCase()
+                .split(' ')
+                .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                .join(' ');
+            return { name: titleCase, ...rest }; // Return a new object with 'name' instead of 'category'
         });
     }
 </script>

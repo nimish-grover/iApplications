@@ -3,13 +3,13 @@
 @import "../bootstrap/scss/functions";
 
 $primary: #9e29fb;
-$secondary:#f564ff;
-$success:#53b011;
-$danger:#f54a4a;
-$warning:#feaf3b;
-$info:#b3e7f8;
-$light:#e0e0e0;
-$dark:#142527;
+$secondary:#9968e4;
+$success:#28d9c6;
+$danger:#d9283a;
+$warning:#d96e28;
+$info:#93d928;
+$light:#e2d4f7;
+$dark:#37008d;
 // $theme-colors: (
 //     "light":      #c7e6d0,
 //     "dark":       #181513,
@@ -34,6 +34,7 @@ $dark:#142527;
 // $primary: #8200d9;
 // $danger: #ff4136;
 
+
 // Required
 // @import "../bootstrap/scss/variables";
 // @import "../bootstrap/scss/variables-dark";
@@ -49,7 +50,9 @@ $dark:#142527;
 // @import "../bootstrap/scss/reboot";
 // @import "../bootstrap/scss/type";
 // etc
-
+.breadcrumb-item + .breadcrumb-item::before {
+  color:white;
+}
 .mt-n5{
     margin-top: -0.5em;
 }
@@ -109,6 +112,21 @@ body {
 }
 
 /* END CSS Animated Background */
+/* Center Card*/
+
+.center-card {
+  position: absolute;
+  top: 40%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 400px;
+  min-height: 320px;
+  max-width: 90%;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  overflow: hidden; // Prevent overflow
+}
+
+/* End card center */
 /* Chart Table Toggle Button */
 :root {
   --primary-color: #fff;
@@ -147,22 +165,25 @@ body {
   @media (max-width: 700px) {
       transform: scale(0.6);
   }
-}
-
-input[type="radio"] {
-  display: none;
-
-  &:checked {
-      & + label {
-          color: var(--primary-color);
-
-          .notification {
-              background-color: var(--primary-color);
-              color: #fff;
-          }
-      }
+  
+  input[type="radio"] {
+    display: none;
+  
+    &:checked {
+        & + label {
+            color: var(--primary-color);
+  
+            .notification {
+                background-color: var(--primary-color);
+                color: #fff;
+            }
+        }
+    }
   }
+
 }
+
+
 
 .tab {
   display: flex;
@@ -223,6 +244,7 @@ input[id="radio-2"]:checked ~ .glider {
 }
 
 /* End Toggle Button */
+
 /* Variables */
 $overlay-bg: rgba(0, 0, 0, 0.5);
 $spinner-border-color: #4D658D;
@@ -472,3 +494,38 @@ input[type="number"] {
 }
 
 /* Remove spinners*/
+
+// // Required
+// @import "../bootstrap/scss/functions";
+
+// $primary: #9e29fb;
+// $secondary:#f564ff;
+// $success:#53b011;
+// $danger:#f54a4a;
+// $warning:#feaf3b;
+// $info:#b3e7f8;
+// $light:#e0e0e0;
+// $dark:#142527;
+// // $theme-colors: (
+// //     "light":      #c7e6d0,
+// //     "dark":       #181513,
+// //     "primary":    #5e3373,
+// //     "secondary":  #af5665,
+// //     "info":       #ecafcb,
+// //     "success":    #36a871,
+// //     "warning":    #decf34,
+// //     "danger":     #e9361d,
+// // );
+// // $theme-colors: (
+// //   "primary":    $primary,
+// //   "secondary":  $secondary,
+// //   "success":    $success,
+// //   "info":       $info,
+// //   "warning":    $warning,
+// //   "danger":     $danger,
+// //   "light":      $light,
+// //   "dark":       $dark
+// // );
+// // // Default variable overrides
+// // $primary: #8200d9;
+// // $danger: #ff4136;

@@ -1,6 +1,6 @@
 {% extends 'mobile/base.html' %}
 {% block title %} Rainfall {% endblock %}
-{% from 'mobile/components.html' import chart, badge, table_title %}
+{% from 'mobile/components.html' import chart, badge, table_title, table_head %}
 {% block content %}
 <div class="row">
   <div class="col"></div>
@@ -20,14 +20,19 @@
       </div>
       <div class="carousel-item">
         <div class="overflow-y-scroll" style="height:30vh !important;">
-          <table class="table table-bordered table-sm fs-7 mb-0">
-              <thead class="text-center">
+          <table class="table table-bordered  border-light table-sm fs-7 mb-0">
+            {{table_head(headings=[
+              {'heading':'Observation Month', 'subheading':'(in Mon-YY)'},
+              {'heading':'Normal', 'subheading':'(30 Yrs Average)'},
+              {'heading':'Actual', 'subheading':'(Current Year)'}
+              ])}}
+              <!-- <thead class="text-center bg-secondary text-primary">
                   <tr>
                       <th>Observation Month</th>
                       <th>Normal</th>
                       <th>Actual</th>
                   </tr>
-              </thead>
+              </thead> -->
               <tbody>
                   {% for rainfall in monthwise_rainfall %}
                   <tr>
@@ -38,10 +43,10 @@
                   {% endfor %}
               </tbody>
               <tfoot>
-                <tr>
+                <tr class="fw-bold">
                     <td>Total Rainfall</td>
-                    <td class="text-end">{{ monthwise_rainfall | map(attribute='normal') | sum | round(0) }}</td>
-                    <td class="text-end">{{ monthwise_rainfall | map(attribute='actual') | sum | round(0) }}</td>
+                    <td class="text-end">{{ monthwise_rainfall | map(attribute='normal') | sum | indian_format }}</td>
+                    <td class="text-end">{{ monthwise_rainfall | map(attribute='actual') | sum | indian_format }}</td>
                 </tr>
             </tfoot>
           </table>
@@ -111,14 +116,14 @@
       yAxis: [
         {
           type: 'value',
-          color: 'red',
+          color: '#f00',
           name: 'Actual (in mm)',
-          show: false,
+          show: true,
           min: 0,
           max: y_axis_max,
-          interval: 25,
+          interval: 50,
           itemStyle: {
-            color: 'red'
+            color: '#f00'
           },
           axisLabel: {
             formatter: '{value}'
@@ -142,7 +147,7 @@
           type: 'line',
           lineStyle: {
             normal: {
-              color: 'blue',
+              color: '#7f00ff',
               width: 2,
               type: 'solid'
             }
@@ -160,14 +165,14 @@
           type: 'line',
           lineStyle: {
             normal: {
-              color: 'red',
+              color: '#f00',
               width: 2,
               type: 'solid'
             }
           },
           itemStyle: {
             normal: {
-              color: 'red',
+              color: '#f00',
               width: 2,
               type: 'solid'
             }

@@ -19,7 +19,10 @@ class BudgetData:
     RURAL_CONSUMPTION = 55 # Human consumption of water in rural areas in Litres
     URBAN_CONSUMPTION = 70 # Human consumption of water in urban areas in Litres
     LITRE_TO_HECTARE = 10000000 # Constant for converting hectare to litres
-    COLORS = ['#5470c6','#91cc75','#fac858','#ee6666','#73c0de','#3ba272','#fc8452','#9a60b4']
+    WATER_LOSS = 1.15 # add 15% transmission loss to consumption 
+    CUM_TO_HAM = 10000 #Constant for converting hectare meter to cubic meter
+    # COLORS = ['#5470c6','#91cc75','#fac858','#ee6666','#73c0de','#3ba272','#fc8452','#9a60b4']
+    COLORS=['#973EFA','#FA3ECE','#D540FA','#5A3EFA','#FA3E5E','#E592FA','#EB78C7','#B492FF']
 
     @classmethod
     def get_randomized_colors(cls):
@@ -32,11 +35,15 @@ class BudgetData:
         return value/cls.LITRE_TO_HECTARE
     
     @classmethod
+    def cubic_meter_to_hectare_meters(cls, value):
+        return value/cls.CUM_TO_HAM
+    
+    @classmethod
     def get_human_consumption(cls, block_id, district_id):
         entity = PopulationCensus.get_population_by_block(block_id, district_id)
         bg_colors=cls.COLORS
         for item in entity:
-            item['entity_consumption'] = round(cls.litre_to_hectare_meters((int(item['entity_value']) * cls.RURAL_CONSUMPTION * cls.DECADAL_GROWTH * cls.NUMBER_OF_DAYS)),2)
+            item['entity_consumption'] = round(cls.litre_to_hectare_meters((int(item['entity_value']) * cls.RURAL_CONSUMPTION * cls.DECADAL_GROWTH * cls.NUMBER_OF_DAYS * cls.WATER_LOSS)),2)
         human_consumption = cls.get_entity_consumption(entity, bg_colors)
         return human_consumption
     
@@ -117,11 +124,11 @@ class BudgetData:
             if not key=='rainfall_in_mm':
                 catchment_area = [item['catchment_area'] for item in lulc_data if item['catchment'] == key.lower()][0]
                 runoff_yield = round((value/10) * rainfall_in_mm, 2)
-                catchment_yield = round(catchment_area * runoff_yield/1000,2)
+                catchment_yield = round(catchment_area * runoff_yield, 2)
                 item = {'catchment': key, 
                         'runoff': value, 
                         'runoff_yield': runoff_yield, 
-                        'supply': catchment_yield}
+                        'supply': round(cls.cubic_meter_to_hectare_meters(catchment_yield),2)}
                 runoff_array.append(item)
         bg_colors = cls.COLORS
         runoff = [{**item, 'background': bg} for item, bg in zip(runoff_array, bg_colors)]
