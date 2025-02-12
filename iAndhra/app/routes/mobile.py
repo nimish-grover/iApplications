@@ -81,9 +81,9 @@ def home():
         return redirect(url_for('.index'))
     else:
         payload = json.loads(payload)
-    demand_side = BlockOrCensus.get_demand_side_data(payload['block_id'], payload['district_id'],payload['state_id'])
-    supply_side = BlockOrCensus.get_supply_side_data(payload['block_id'], payload['district_id'], payload['state_id'])
-    budget = BlockOrCensus.get_water_budget_data(payload['block_id'], payload['district_id'], payload['state_id'])
+    demand_side = BlockOrCensus.get_demand_side_data(payload['village_id'],payload['panchayat_id'],payload['block_id'], payload['district_id'])
+    supply_side = BlockOrCensus.get_supply_side_data(payload['village_id'],payload['panchayat_id'],payload['block_id'], payload['district_id'])
+    budget = BlockOrCensus.get_water_budget_data(payload['village_id'],payload['panchayat_id'],payload['block_id'], payload['district_id'])
     budget_data = []
     budget_data.append(demand_side)
     budget_data.append(supply_side)
@@ -127,7 +127,7 @@ def human():
         return redirect(url_for('.index'))
     else:
         payload = json.loads(payload)
-    human, is_approved = BlockOrCensus.get_human_data(payload['block_id'],payload['district_id'],payload['state_id'])
+    human, is_approved = BlockOrCensus.get_human_data(payload['village_id'],payload['panchayat_id'],payload['block_id'],payload['district_id'])
     return render_template('mobile/demand/human.html',
         is_approved = is_approved, 
         source='Census 2011',
@@ -154,7 +154,7 @@ def livestocks():
         return redirect(url_for('.index'))
     else:
         payload = json.loads(payload)
-    livestock, is_approved = BlockOrCensus.get_livestock_data(payload['block_id'],payload['district_id'],payload['state_id'])  
+    livestock, is_approved = BlockOrCensus.get_livestock_data(payload['village_id'],payload['panchayat_id'],payload['block_id'],payload['district_id'])  
     return render_template('mobile/demand/livestocks.html',
         is_approved = is_approved, 
         source = 'Livestock Census 2019',
@@ -178,7 +178,7 @@ def crops():
         return redirect(url_for('.index'))
     else:
         payload = json.loads(payload)
-    crops, is_approved = BlockOrCensus.get_crop_data(payload['block_id'],payload['district_id'],payload['state_id']) 
+    crops, is_approved = BlockOrCensus.get_crop_data(payload['village_id'],payload['panchayat_id'],payload['block_id'],payload['district_id']) 
     return render_template('mobile/demand/crops.html',
         is_approved = is_approved, 
         source = 'Crop Census 2019 (DES)', #https://data.desagri.gov.in/website/crops-apy-report-web
@@ -203,7 +203,7 @@ def industry():
         return redirect(url_for('.index'))
     else:
         payload = json.loads(payload)
-    industry_demand, is_approved = BlockOrCensus.get_industry_data(payload['block_id'], payload['district_id'], payload['state_id'])
+    industry_demand, is_approved = BlockOrCensus.get_industry_data(payload['village_id'],payload['panchayat_id'],payload['block_id'], payload['district_id'])
     has_value = sum(item['count'] for item in industry_demand)
     if is_approved:
             source = 'The Industrial Water demand is reported nil by the block' 
@@ -244,16 +244,19 @@ def surface():
         return redirect(url_for('.index'))
     else:
         payload = json.loads(payload)
-    surface_water_supply, is_approved = BlockOrCensus.get_surface_data(payload['block_id'], payload['district_id'], payload['state_id'])
+    surface_water_supply, is_approved = BlockOrCensus.get_surface_data(payload['village_id'],payload['panchayat_id'],payload['block_id'], payload['district_id'])
+    waterbodies=[]
+    if surface_water_supply:
+        waterbodies = sorted(surface_water_supply, key = lambda x: x['value'], reverse=True)
     return render_template('mobile/supply/surface.html',
                         is_approved = is_approved, 
                         source = 'India’s First waterbodies census 2019',  
-                        waterbodies= sorted(surface_water_supply, key = lambda x: x['value'], reverse=True),
+                        waterbodies= waterbodies,
                         chart_data= json.dumps(surface_water_supply),
                         toggle_labels= ['chart', 'table'],
                         breadcrumbs=get_breadcrumbs(payload), 
                         menu=get_supply_menu()
-                           )
+                        )
 
 # @blp.route('/surface')
 # def surface():
@@ -270,10 +273,9 @@ def ground():
         return redirect(url_for('.index'))
     else:
         payload = json.loads(payload)
-    ground_water_supply, is_approved = BlockOrCensus.get_ground_data(
+    ground_water_supply, is_approved = BlockOrCensus.get_ground_data(payload['village_id'],payload['panchayat_id'],
                                                 payload['block_id'],
-                                                payload['district_id'], 
-                                                payload['state_id'])
+                                                payload['district_id'])
     
     return render_template('mobile/supply/ground.html',
                         is_approved = is_approved,  
@@ -299,7 +301,9 @@ def rainfall():
         return redirect(url_for('.index'))
     else:
         payload = json.loads(payload)
-    rainfall_data, is_approved = BlockOrCensus.get_rainfall_data(payload['block_id'], payload['district_id'], payload['state_id'])
+    rainfall_data, is_approved = BlockOrCensus.get_rainfall_data(payload['village_id'],payload['panchayat_id'],payload['block_id'], payload['district_id'])
+    if len(rainfall_data)!=12:
+        rainfall_data=None
     return render_template("mobile/supply/rainfall.html", 
                            source='India- Water Resource Information System (WRIS)',
                            is_approved = is_approved,
@@ -316,7 +320,7 @@ def runoff():
         return redirect(url_for('.index'))
     else:
         payload = json.loads(payload)
-    runoff_data, is_approved = BlockOrCensus.get_runoff_data(payload['block_id'], payload['district_id'], payload['state_id'])
+    runoff_data, is_approved = BlockOrCensus.get_runoff_data(payload['village_id'],payload['panchayat_id'],payload['block_id'], payload['district_id'])
     return render_template("mobile/supply/runoff.html", 
                            is_approved = is_approved,
                            source="Strange's Table",
@@ -466,9 +470,11 @@ def get_breadcrumbs(payload):
         list: Breadcrumbs for the current context.
     """
     return [
-        {'name': payload['state_name'], 'href': '#'},
         {'name': payload['district_name'], 'href': '#'},
-        {'name': payload['block_name'], 'href': '#'}
+        {'name': payload['block_name'], 'href': '#'},
+        {'name': payload['panchayat_name'], 'href': '#'},
+        {'name': payload['village_name'], 'href': '#'}
+
     ]
 
 def get_supply_menu():

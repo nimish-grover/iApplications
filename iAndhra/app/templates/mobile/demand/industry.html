@@ -23,9 +23,11 @@
         {% if industries %}       
         {{chart()}}
         {% else %}
-        <span class="fs-7 fw-lighter d-flex justify-content-center align-items-center" style="height: 100px;">
+        <div class="alert alert-warning mt-2" role="alert">
             NIL Industry demand reported by the block
-        </span>
+        </div>
+        <!-- <span class="fs-7 fw-lighter d-flex justify-content-center align-items-center" style="height: 100px;">
+        </span> -->
         {% endif %}
       </div>
       <div class="carousel-item">
@@ -54,9 +56,9 @@
                 </tfoot>
             </table>
             {% else %}
-            <span class="fs-7 fw-lighter d-flex justify-content-center align-items-center" style="height: 100px;">
-            NIL Industry demand reported by the block
-            </span>
+            <div class="alert alert-warning mt-2" role="alert">
+                NIL Industry demand reported by the block
+            </div>
             {% endif %}            
         </div>
       </div>

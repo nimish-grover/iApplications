@@ -1,8 +1,8 @@
 from sqlalchemy import func
 from iAndhra.app.db import db
 from iAndhra.app.models import Population, TerritoryJoin
-# from iAndhra.app.models.block_pop import BlockPop
-# from iAndhra.app.models.block_territory import BlockTerritory
+from iAndhra.app.models.block_pop import BlockPop
+from iAndhra.app.models.block_territory import BlockTerritory
 from iAndhra.app.models.blocks import Block
 from iAndhra.app.models.districts import District
 
@@ -44,7 +44,7 @@ class PopulationCensus(db.Model):
             "territory_id": self.territory_id
         }
     @classmethod
-    def get_census_data_population(cls, block_id, district_id):
+    def get_census_data_population(cls, village_id,panchayat_id,block_id, district_id):
         query = db.session.query(
             func.sum(PopulationCensus.population_count).label("population_count"),
             Population.id,
@@ -54,6 +54,8 @@ class PopulationCensus(db.Model):
             ).filter(
                 TerritoryJoin.block_id == block_id,
                 TerritoryJoin.district_id == district_id,
+                TerritoryJoin.panchayat_id == panchayat_id,
+                TerritoryJoin.village_id == village_id,
                 Population.id.in_([2, 3]) # 2 = 'male', 3 = 'female'
             ).group_by(
                 TerritoryJoin.block_id,

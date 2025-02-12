@@ -1,7 +1,7 @@
 from sqlalchemy import func
 from iAndhra.app.db import db
-# from iAndhra.app.models.block_livestocks import BlockLivestock
-# from iAndhra.app.models.block_territory import BlockTerritory
+from iAndhra.app.models.block_livestocks import BlockLivestock
+from iAndhra.app.models.block_territory import BlockTerritory
 from iAndhra.app.models.blocks import Block
 from iAndhra.app.models.livestocks import Livestock
 from iAndhra.app.models.territory import TerritoryJoin
@@ -51,7 +51,7 @@ class LivestockCensus(db.Model):
         }
     
     @classmethod
-    def get_census_data_livestock(cls, block_id, district_id):
+    def get_census_data_livestock(cls,village_id,panchayat_id, block_id, district_id):
         query = db.session.query(
             func.sum(cls.livestock_count).label('livestock_count'),
             Livestock.livestock_name,
@@ -61,7 +61,9 @@ class LivestockCensus(db.Model):
         ).join(TerritoryJoin, TerritoryJoin.id == cls.tj_id
         ).filter(
             TerritoryJoin.block_id == block_id,
-            TerritoryJoin.district_id == district_id
+            TerritoryJoin.district_id == district_id,
+            TerritoryJoin.panchayat_id == panchayat_id,
+            TerritoryJoin.village_id == village_id
         ).group_by(
             TerritoryJoin.block_id,
             TerritoryJoin.district_id,

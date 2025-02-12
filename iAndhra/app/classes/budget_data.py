@@ -39,8 +39,8 @@ class BudgetData:
         return value/cls.CUM_TO_HAM
     
     @classmethod
-    def get_human_consumption(cls, block_id, district_id):
-        entity = PopulationCensus.get_population_by_block(block_id, district_id)
+    def get_human_consumption(cls,village_id,panchayat_id, block_id, district_id):
+        entity = PopulationCensus.get_census_data_population(village_id,panchayat_id,block_id, district_id)
         bg_colors=cls.COLORS
         for item in entity:
             item['entity_consumption'] = round(cls.litre_to_hectare_meters((int(item['entity_value']) * cls.RURAL_CONSUMPTION * cls.DECADAL_GROWTH * cls.NUMBER_OF_DAYS * cls.WATER_LOSS)),2)
@@ -48,17 +48,19 @@ class BudgetData:
         return human_consumption
     
     @classmethod
-    def get_livestock_consumption(cls, block_id, district_id):
-        entity = LivestockCensus.get_livestock_by_block(block_id, district_id)
+    def get_livestock_consumption(cls, village_id,panchayat_id,block_id, district_id):
+        entity = LivestockCensus.get_census_data_livestock(village_id,panchayat_id,block_id, district_id)
         bg_colors = cls.COLORS
+        if not entity:
+            return None
         for item in entity:
             item['entity_consumption'] = round(cls.litre_to_hectare_meters(float(item['entity_value']) * float(item['coefficient']) * cls.NUMBER_OF_DAYS),2) 
         livestock_consumption = cls.get_entity_consumption(entity, bg_colors)
         return livestock_consumption
     
     @classmethod
-    def get_crops_consumption(cls, block_id, district_id):
-        entity = CropCensus.get_crops_by_block(block_id, district_id)
+    def get_crops_consumption(cls,village_id,panchayat_id, block_id, district_id):
+        entity = CropCensus.get_census_data_crops(village_id,panchayat_id,block_id, district_id)
         for item in entity:
             item['entity_consumption'] = round(float(item['entity_value']) * float(item['coefficient']),2)         
         bg_colors = cls.COLORS
@@ -67,9 +69,9 @@ class BudgetData:
         return crops_consumption
     
     @classmethod
-    def get_industry_demand(cls, block_id, district_id, state_id):
+    def get_industry_demand(cls,village_id,panchayat_id, block_id, district_id, state_id=2):
         from iAndhra.app.classes.block_data import BlockData
-        bt_id = BlockData.get_bt_id(block_id=block_id, district_id=district_id, state_id=state_id)
+        bt_id = BlockData.get_bt_id(village_id=village_id,panchayat_id=panchayat_id,block_id=block_id, district_id=district_id, state_id=state_id)
         entity = BlockIndustry.get_industry_by_block(bt_id)
         # for item in entity:
         #     item['entity_consumption'] = item['entity_count']        
@@ -79,16 +81,18 @@ class BudgetData:
         return industry_demand
     
     @classmethod
-    def get_surface_supply(cls, block_id, district_id):
-        entity = WaterbodyCensus.get_waterbody_by_block(block_id, district_id)
+    def get_surface_supply(cls,village_id,panchayat_id, block_id, district_id):
+        entity = WaterbodyCensus.get_census_data_waterbody(village_id,panchayat_id,block_id, district_id)
         bg_colors = cls.COLORS
+        if not entity:
+            return entity
         sorted_data = sorted(entity, key=lambda x: x['entity_value'], reverse=False)
         surface_supply = cls.get_entity_supply(sorted_data, bg_colors)
         return surface_supply
     
     @classmethod
-    def get_ground_supply(cls, block_id, district_id):
-        entity = GroundwaterExtraction.get_groudwater_by_block(block_id, district_id)
+    def get_ground_supply(cls,village_id,panchayat_id, block_id, district_id):
+        entity = GroundwaterExtraction.get_census_data_groundwater(village_id,panchayat_id,block_id, district_id)
         gw_array=[]
         if entity:
             for key,value in entity[0].items():
@@ -104,21 +108,21 @@ class BudgetData:
             return None
     
     @classmethod
-    def get_water_transfer(cls, block_id, district_id, state_id):
+    def get_water_transfer(cls, village_id,panchayat_id,block_id, district_id, state_id=2):
         from iAndhra.app.classes.block_data import BlockData
-        bt_id = BlockData.get_bt_id(block_id=block_id, district_id=district_id, state_id=state_id)
+        bt_id = BlockData.get_bt_id(village_id,panchayat_id,block_id=block_id, district_id=district_id, state_id=state_id)
         entity = BlockWaterTransfer.get_water_transfer_by_block(bt_id)
         block_water_transfer = entity
         return block_water_transfer
     
     @classmethod
-    def get_runoff(cls, block_id, district_id):
+    def get_runoff(cls,village_id,panchayat_id, block_id, district_id):
         rainfall_data = Rainfall.get_census_data_rainfall(district_id)
         rainfall_in_mm = float(sum(item['actual'] for item in rainfall_data))
         if rainfall_in_mm > 1500:
             rainfall_in_mm = 1500
         runoff_data = StrangeTable.get_runoff_by_rainfall(rainfall_in_mm)
-        lulc_data = LULCCensus.get_lulc_by_block(block_id, district_id)
+        lulc_data = LULCCensus.get_census_data_lulc(village_id,panchayat_id,block_id, district_id)
         runoff_array = []
         for key,value in runoff_data[0].items():
             if not key=='rainfall_in_mm':
@@ -135,20 +139,20 @@ class BudgetData:
         return runoff
     
     @classmethod
-    def get_rainfall(cls, block_id, district_id):
-        rainfall_data = Rainfall.get_monthwise_rainfall(block_id, district_id)
+    def get_rainfall(cls, village_id,panchayat_id,block_id, district_id):
+        rainfall_data = Rainfall.get_census_data_rainfall(district_id)
         return rainfall_data
     
     @classmethod
-    def get_supply_side(cls, block_id, district_id, state_id):
+    def get_supply_side(cls,village_id,panchayat_id, block_id, district_id, state_id=2):
         supply_side = []
-        surface = cls.get_surface_supply(block_id, district_id)
+        surface = cls.get_surface_supply(village_id,panchayat_id,block_id, district_id)
         total_surface = sum([item['value'] for item in surface])
-        ground = cls.get_ground_supply(block_id, district_id)
+        ground = cls.get_ground_supply(village_id,panchayat_id,block_id, district_id)
         total_ground=0
         if ground:
             total_ground = [item['value'] for item in ground if item['name'] == 'extraction'][0]
-        transfer = cls.get_water_transfer(block_id, district_id, state_id)
+        transfer = cls.get_water_transfer(village_id,panchayat_id,block_id, district_id, state_id)
         total_transfer = sum([item['entity_value'] for item in transfer])
         positive_transfer = 0
         if total_transfer > 0: 
@@ -162,13 +166,13 @@ class BudgetData:
         return supply_with_colors
     
     @classmethod
-    def get_demand_side(cls, block_id, district_id):
+    def get_demand_side(cls,village_id,panchayat_id, block_id, district_id):
         demand_side = []
-        human = cls.get_human_consumption(block_id, district_id)
+        human = cls.get_human_consumption(village_id,panchayat_id,block_id, district_id)
         total_human = round(sum([float(item['value']) for item in human]), 2)
-        livestocks = cls.get_livestock_consumption(block_id, district_id)
+        livestocks = cls.get_livestock_consumption(village_id,panchayat_id,block_id, district_id)
         total_livestock = round(sum([item['value']for item in livestocks]),2)
-        crops = cls.get_crops_consumption(block_id, district_id)
+        crops = cls.get_crops_consumption(village_id,panchayat_id,block_id, district_id)
         total_crop = round(sum([item['value'] for item in crops]),2)
         total_demand = total_human + total_livestock + total_crop
         demand_side.append({'category': 'human','value':round((total_human*100)/(total_demand),0),'water_value':total_human})
@@ -180,11 +184,11 @@ class BudgetData:
         return demand_with_colors
     
     @classmethod
-    def get_water_budget(cls, block_id, district_id, state_id):
+    def get_water_budget(cls,village_id,panchayat_id, block_id, district_id, state_id=2):
         water_budget = []
-        demand_side = cls.get_demand_side(block_id, district_id)
+        demand_side = cls.get_demand_side(village_id,panchayat_id,block_id, district_id)
         total_demand = sum([item['water_value'] for item in demand_side])
-        supply_side = cls.get_supply_side(block_id, district_id, state_id)
+        supply_side = cls.get_supply_side(village_id,panchayat_id,block_id, district_id)
         total_supply = sum([item['water_value'] for item in supply_side])
         water_budget.append({'category':'demand', 'value': round((total_demand*100)/(total_demand + total_supply),0),'water_value':total_demand})
         water_budget.append({'category':'supply', 'value': round((total_supply*100)/(total_demand + total_supply),0),'water_value':total_supply})

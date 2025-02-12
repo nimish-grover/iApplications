@@ -1,7 +1,7 @@
 from sqlalchemy import func
 from iAndhra.app.db import db
-# from iAndhra.app.models.block_crops import BlockCrop
-# from iAndhra.app.models.block_territory import BlockTerritory
+from iAndhra.app.models.block_crops import BlockCrop
+from iAndhra.app.models.block_territory import BlockTerritory
 from iAndhra.app.models.blocks import Block
 from iAndhra.app.models.crops import Crop
 from iAndhra.app.models.territory import TerritoryJoin
@@ -53,7 +53,7 @@ class CropCensus(db.Model):
         }
     
     @classmethod
-    def get_census_data_crops(cls, block_id, district_id):
+    def get_census_data_crops(cls,village_id,panchayat_id, block_id, district_id):
         query = db.session.query(
             func.sum(cls.crop_area).label('crop_area'),
             Crop.id.label('crop_id'),
@@ -63,7 +63,9 @@ class CropCensus(db.Model):
         ).join(TerritoryJoin, TerritoryJoin.id == cls.territory_id
         ).filter(
             TerritoryJoin.block_id==block_id,
-            TerritoryJoin.district_id==district_id
+            TerritoryJoin.district_id==district_id,
+            TerritoryJoin.panchayat_id==panchayat_id,
+            TerritoryJoin.village_id==village_id
         ).group_by(
             Crop.id,Crop.coefficient,Crop.crop_name
         )

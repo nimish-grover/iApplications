@@ -21,14 +21,14 @@ from iAndhra.app.models.block_category import BlockCategory
 
 class BlockData:
     @classmethod
-    def get_bt_id(cls, block_id, district_id, state_id):
-        bt_id = BlockTerritory.get_bt_id(block_id=int(block_id), district_id=int(district_id), state_id=int(state_id))
+    def get_bt_id(cls,village_id,panchayat_id, block_id, district_id, state_id):
+        bt_id = BlockTerritory.get_bt_id(village_id = int(village_id),panchayat_id=int(panchayat_id),block_id=int(block_id), district_id=int(district_id), state_id=int(state_id))
         if bt_id:
             return bt_id
         else:
-            block_territory = BlockTerritory(state_id=state_id, district_id=district_id, block_id=block_id)
+            block_territory = BlockTerritory(state_id=state_id, district_id=district_id, block_id=block_id,village_id=village_id,panchayat_id=panchayat_id)
             block_territory.save_to_db()
-            bt_id = BlockTerritory.get_bt_id(block_id, district_id, state_id)
+            bt_id = BlockTerritory.get_bt_id(village_id,panchayat_id,block_id, district_id, state_id)
             return bt_id
         
         

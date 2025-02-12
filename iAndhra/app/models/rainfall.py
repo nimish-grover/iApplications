@@ -1,23 +1,23 @@
 # from datetime import datetime
 from sqlalchemy import Numeric, alias, and_, cast, func
 from iAndhra.app.db import db
-# from iAndhra.app.models.block_rainfall import BlockRainfall
-# from iAndhra.app.models.block_territory import BlockTerritory
+from iAndhra.app.models.block_rainfall import BlockRainfall
+from iAndhra.app.models.block_territory import BlockTerritory
 from iAndhra.app.models.blocks import Block
 
 class Rainfall(db.Model):
     __tablename__ = 'rainfall_data'
 
     id = db.Column(db.Integer, primary_key=True)
-    observation_date = db.Column(db.DateTime)
+    month_year = db.Column(db.String(),nullable=False)
     normal = db.Column(db.Float(53), nullable=False)
     actual = db.Column(db.Float(53), nullable=False)
     district_id = db.Column(db.ForeignKey('districts.id'), nullable=False)
     
     district = db.relationship('District', backref=db.backref("rainfall_data", lazy="dynamic"))
 
-    def __init__(self, observation_date, normal, actual, district_id):
-        self.observation_date = observation_date
+    def __init__(self, month_year, normal, actual, district_id):
+        self.month_year = month_year
         self.normal = normal
         self.actual = actual
         self.district_id = district_id
@@ -25,7 +25,7 @@ class Rainfall(db.Model):
     def json(self):
         return {
             'id': self.id,
-            'observation_date': self.observation_date,
+            'month_year': self.month_year,
             'normal': self.normal,
             'actual': self.actual,
             'district_id': self.district_id 
@@ -35,12 +35,10 @@ class Rainfall(db.Model):
     def get_census_data_rainfall(cls, district_id):
         query = (
             db.session.query(
-                func.to_char(cls.observation_date, 'FMMon-YY').label('month_year'),     # TO_CHAR
-                func.round(cast(func.sum(cls.actual), Numeric), 2).label('actual'),      # SUM and ROUND
-                func.round(cast(func.sum(cls.normal), Numeric), 2).label('normal')       # SUM and ROUND
-            ).filter(cls.district_id==district_id)                                       # WHERE 
-            .group_by(func.to_char(cls.observation_date, 'FMMon-YY'))                   # GROUP BY
-            .order_by(func.min(cls.observation_date))                                    # ORDER BY
+                cls.month_year,     # TO_CHAR
+                func.round(cls.actual).label('actual'),      # SUM and ROUND
+                func.round(cls.normal).label('normal')       # SUM and ROUND
+            ).filter(cls.district_id==district_id)                                       # WHERE # GROUP BY
         )
         results = query.all()
         if results:

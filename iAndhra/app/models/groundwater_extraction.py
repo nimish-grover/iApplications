@@ -1,8 +1,8 @@
 from sqlalchemy import func
 from iAndhra.app.db import db
-from iAndhra.app.models import Block, District
-# from iAndhra.app.models.block_ground import BlockGround
-# from iAndhra.app.models.block_territory import BlockTerritory	
+from iAndhra.app.models import Block, District,Village
+from iAndhra.app.models.block_ground import BlockGround
+from iAndhra.app.models.block_territory import BlockTerritory	
 
 class GroundwaterExtraction(db.Model):
     __tablename__ = "groundwater_extractions"
@@ -55,7 +55,7 @@ class GroundwaterExtraction(db.Model):
             
         }
     @classmethod
-    def get_census_data_groundwater(cls, block_id, district_id):
+    def get_census_data_groundwater(cls, village_id,panchayat_id,block_id, district_id):
         query = db.session.query(
                 cls.extractable,
                 cls.extraction,
@@ -64,7 +64,7 @@ class GroundwaterExtraction(db.Model):
                 cls.block_id.label('block_id')
         ).join(Block, Block.id==cls.block_id
         ).join(District, District.id==cls.district_id
-        ).filter(cls.block_id==block_id, District.id==district_id)
+        ).filter(cls.block_id==block_id, District.id==district_id,Village.id == village_id)
 
         results = query.all()
 
