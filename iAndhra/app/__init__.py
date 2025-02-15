@@ -1,11 +1,10 @@
 import os
 from dotenv import load_dotenv
-from flask import Flask
+from flask import Flask, session, url_for
 from flask_migrate import Migrate
 from flask_login import LoginManager
-
+from iAndhra.app.models.users import User
 from iAndhra.app.db import db
-from iAndhra.app.models import * 
 from iAndhra.app.routes.auth import blp as authBlueprint
 from iAndhra.app.routes.desktop import blp as desktopBlueprint
 from iAndhra.app.routes.mobile import blp as mobileBlueprint
@@ -39,9 +38,36 @@ def create_app():
         return User.query.get(int(user_id))
     #register jinja filters
     app.jinja_env.filters['indian_format'] = HelperClass.indian_number_format
-
+    @app.context_processor
+    def inject_theme_info():
+        THEMES = {
+        'purple': {
+            'name': 'Purple Theme',
+            'stylesheet': url_for('static',filename='scss/purple_theme.css')
+        },
+        'dark': {
+            'name': 'Dark Theme',
+            'stylesheet': url_for('static',filename='scss/dark_theme.css')
+        },
+        'orange': {
+            'name': 'Orange Theme',
+            'stylesheet': url_for('static',filename='scss/orange_theme.css')
+        },
+        'pink': {
+            'name': 'Pink Theme',
+            'stylesheet': url_for('static',filename='scss/styles.css')
+        }
+        }
+        current_theme = session.get('theme', 'purple')
+        return {
+            'current_theme': current_theme,
+            'theme_stylesheet': THEMES[current_theme]['stylesheet'],
+            'available_themes': THEMES
+        }
     # # register blueprints
+
     app.register_blueprint(authBlueprint, url_prefix="/auth")
     app.register_blueprint(desktopBlueprint, url_prefix="/block")
     app.register_blueprint(mobileBlueprint)
+
     return app

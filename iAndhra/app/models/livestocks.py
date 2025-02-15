@@ -26,3 +26,10 @@ class Livestock(db.Model):
             "coefficient": self.coefficient,
             "remarks": self.remarks
         }
+
+    @classmethod
+    def get_all_livestocks(cls):
+        query = db.session.query(cls.id,cls.livestock_name).all()
+        if query:
+            json_data = [{'livestock_id':item.id,'livestock_name':item.livestock_name} for item in query]
+            return json_data

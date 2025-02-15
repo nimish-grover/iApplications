@@ -29,3 +29,10 @@ class WaterbodyType(db.Model):
             "waterbody_name": self.waterbody_name,
             "description": self.description
         }
+
+    @classmethod
+    def get_all_waterbodies(cls):
+        query = db.session.query(cls.id,cls.waterbody_name).all()
+        if query:
+            json_data = [{'wb_type_id':item.id,'waterbody_name':item.waterbody_name} for item in query]
+            return json_data

@@ -9,7 +9,7 @@ class Rainfall(db.Model):
     __tablename__ = 'rainfall_data'
 
     id = db.Column(db.Integer, primary_key=True)
-    month_year = db.Column(db.String(),nullable=False)
+    month_year = db.Column(db.DateTime,nullable=False)
     normal = db.Column(db.Float(53), nullable=False)
     actual = db.Column(db.Float(53), nullable=False)
     district_id = db.Column(db.ForeignKey('districts.id'), nullable=False)
@@ -33,16 +33,17 @@ class Rainfall(db.Model):
     
     @classmethod
     def get_census_data_rainfall(cls, district_id):
-        query = (
-            db.session.query(
-                cls.month_year,     # TO_CHAR
-                func.round(cls.actual).label('actual'),      # SUM and ROUND
-                func.round(cls.normal).label('normal')       # SUM and ROUND
-            ).filter(cls.district_id==district_id)                                       # WHERE # GROUP BY
-        )
-        results = query.all()
+        results = db.session.query(
+                        cls.actual,
+                        cls.normal,
+                        func.to_char(cls.month_year, 'Mon-YY').label("month"),
+                        cls.month_year
+                    ).filter(cls.district_id == district_id
+                    ).order_by(cls.month_year
+                    ).all()
+                
         if results:
-            result = [{'month':result[0],'actual':result[1],'normal':result[2]} for result in results]
+            result = [{'month':result[2],'actual':result[0],'normal':result[1],'date':result[3]} for result in results]
         else: 
             result = [{'month':0,'actual':0,'normal':0}]
         return result

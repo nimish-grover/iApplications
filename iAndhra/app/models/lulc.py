@@ -35,3 +35,10 @@ class LULC(db.Model):
             "display_name": self.display_name,
             "catchment":self.catchment
         }
+        
+    @classmethod
+    def get_all_lulc(cls):
+        query = db.session.query(cls.id,cls.display_name).all()
+        if query:
+            json_data = [{'lulc_id':item.id,'lulc_name':item.display_name} for item in query]
+            return json_data

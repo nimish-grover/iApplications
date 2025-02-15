@@ -1,7 +1,7 @@
 from itertools import cycle
 from flask import url_for
 
-from iAndhra.app.models.states import State
+from iAndhra.app.models.block_progress import BlockProgress
 from iAndhra.app.models.users import User
 
 
@@ -10,16 +10,31 @@ class HelperClass():
 
     @classmethod
     def get_dashboard_menu(cls):
-        progress_data = State.get_all_states_status()
+        progress_data = BlockProgress.get_all_villages_status()
+        chart_data = []
+        
+        color_cycle = cycle(cls.COLORS)
+        for item in progress_data:
+            if item['bt_id']:
+                color = next(color_cycle)
+                chart_data.append({'panchayat_name':item['panchayat_name'], 'completed':item['completed'],
+                                'block_name':item['block_name'],'percentage':str(item['completed'])+'%',
+                                'color':color,'district_name':item['district_name'],'category_id':item['category_id'],
+                                'district_short_name':item['district_short_name'],'bt_id':item['bt_id']})
+        return chart_data
+    
+    @classmethod
+    def get_chart_data(cls):
+        progress_data = BlockProgress.get_all_districts_status()
         chart_data = []
         
         color_cycle = cycle(cls.COLORS)
         for item in progress_data:
             if item['completed']:
                 color = next(color_cycle)
-                chart_data.append({'state_name':item['state_name'], 'completed':item['completed'],'block_name':item['block_name'],
-                                'color':color,'district_name':item['district_name'],'percentage':str(item['completed'])+'%',
-                                'state_short_name':item['state_short_name']})
+                chart_data.append({'completed':item['completed'],'percentage':str(item['completed'])+'%',
+                                'color':color,'district_name':item['district_name'],'category_id':item['category_id'],
+                                'district_short_name':item['district_short_name'],'bt_id':item['bt_id']})
         return chart_data
     
     @classmethod
@@ -29,8 +44,8 @@ class HelperClass():
         return [
             {'title': 'Users Active', 'value': cls.format_value(user_status['active_users']), 'icon': 'fa-user-gear'},
             {'title': 'Users Registered', 'value': cls.format_value(user_status['active_users']+user_status['inactive_users']), 'icon': 'fa-user-check'},
-            {'title': 'Blocks In-Progress', 'value': cls.format_value(len(chart_data)-completed_blocks), 'icon': 'fa-gears'},
-            {'title': 'Blocks Completed', 'value': cls.format_value(completed_blocks), 'icon': 'fa-list-check'}]
+            {'title': 'Panchayats In-Progress', 'value': cls.format_value(len(chart_data)-completed_blocks), 'icon': 'fa-gears'},
+            {'title': 'Panchayats Completed', 'value': cls.format_value(completed_blocks), 'icon': 'fa-list-check'}]
     
     def format_value(value):
         if value < 10:
@@ -120,7 +135,8 @@ class HelperClass():
             list: Breadcrumbs for the current context.
         """
         return [
-            {'name': payload['state_name'], 'href': '#'},
-            {'name': payload['district_name'], 'href': '#'},
-            {'name': payload['block_name'], 'href': '#'}
+            {'name': payload['district_short_name'], 'href': '#'},
+            {'name': payload['block_name'], 'href': '#'},
+            {'name': payload['panchayat_name'], 'href': '#'},
+            {'name': payload['village_name'], 'href': '#'}
         ]

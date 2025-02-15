@@ -1,5 +1,9 @@
 from iAndhra.app.db import db
-from iAndhra.app.models import State, District, Block,Panchayat,Village
+from iAndhra.app.models.states import State
+from iAndhra.app.models.districts import District
+from iAndhra.app.models.blocks import Block
+from iAndhra.app.models.panchayats import Panchayat
+from iAndhra.app.models.villages import Village
 
 class TerritoryJoin(db.Model):
     __tablename__ = 'territory_joins'
@@ -10,7 +14,6 @@ class TerritoryJoin(db.Model):
     block_id = db.Column(db.Integer, db.ForeignKey('blocks.id'), nullable=True)
     panchayat_id = db.Column(db.Integer, db.ForeignKey('panchayats.id'), nullable=True)
     village_id = db.Column(db.Integer, db.ForeignKey('villages.id'), nullable=False)
-    rec_status = db.Column(db.Boolean, nullable=False, default=False) # if True then the record status is 'deleted'
 
     # Relationships
     state = db.relationship("State", backref=db.backref("territory_joins", lazy="dynamic"))

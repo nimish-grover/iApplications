@@ -17,9 +17,11 @@ def status():
         return redirect(url_for('mobile.index'))
     else:
         payload = json.loads(session_data)
-    progress_status = BlockData.get_progress_status(block_id=payload['block_id'], 
-                                            district_id=payload['district_id'], 
-                                            state_id=payload['state_id'])
+    progress_status = BlockData.get_progress_status(village_id=payload['village_id'],
+                                            panchayat_id=payload['panchayat_id'],
+                                            block_id=payload['block_id'], 
+                                            district_id=payload['district_id'])
+    message = get_message()
     return render_template('desktop/home.html',
                            progress = progress_status,
                            flash_message = get_message(),
@@ -40,14 +42,24 @@ def human():
         return redirect(url_for('mobile.index'))
     else:
         payload = json.loads(session_data)
-    human = BlockData.get_human_consumption(block_id=payload['block_id'], 
-                                            district_id=payload['district_id'], 
-                                            state_id=payload['state_id'],
+    human = BlockData.get_human_consumption(village_id=payload['village_id'],
+                                            panchayat_id=payload['panchayat_id'],
+                                            block_id=payload['block_id'], 
+                                            district_id=payload['district_id'],
                                             user_id=current_user.id)
-    is_approved = (
-        all(row['is_approved'] for row in human if row['is_approved'] is not None) 
-        and any(row['is_approved'] is not None for row in human)
-    )
+    if human:
+        
+        is_approved = (
+            all(row['is_approved'] for row in human if row['is_approved'] is not None) 
+            and any(row['is_approved'] is not None for row in human)
+        )
+    else:
+        is_approved = False
+        human = BlockData.get_dummy_crops(village_id=payload['village_id'],
+                                            panchayat_id=payload['panchayat_id'],
+                                            block_id=payload['block_id'], 
+                                            district_id=payload['district_id'])
+        
     return render_template('desktop/demand/human.html', 
                            human=human, 
                            human_data=json.dumps(human), 
@@ -68,14 +80,23 @@ def livestocks():
         return redirect(url_for('mobile.index'))
     else:
         payload = json.loads(session_data)
-    livestocks = BlockData.get_livestock_consumption(block_id=payload['block_id'], 
-                                            district_id=payload['district_id'], 
-                                            state_id=payload['state_id'],
+    livestocks = BlockData.get_livestock_consumption(village_id=payload['village_id'],
+                                            panchayat_id=payload['panchayat_id'],
+                                            block_id=payload['block_id'], 
+                                            district_id=payload['district_id'],
                                             user_id=current_user.id)
-    is_approved = (
-        all(row['is_approved'] for row in livestocks if row['is_approved'] is not None) 
-        and any(row['is_approved'] is not None for row in livestocks)
-    )
+    if livestocks:
+        is_approved = (
+            all(row['is_approved'] for row in livestocks if row['is_approved'] is not None) 
+            and any(row['is_approved'] is not None for row in livestocks)
+        )
+    else:
+        is_approved = False
+        livestocks = BlockData.get_dummy_livestock(village_id=payload['village_id'],
+                                            panchayat_id=payload['panchayat_id'],
+                                            block_id=payload['block_id'], 
+                                            district_id=payload['district_id'])
+
     return render_template('desktop/demand/livestock.html', 
                            livestock=livestocks, 
                            livestock_data=json.dumps(livestocks), 
@@ -96,14 +117,23 @@ def crops():
         return redirect(url_for('mobile.index'))
     else:
         payload = json.loads(session_data)
-    crops = BlockData.get_crops_consumption(block_id=payload['block_id'], 
+    crops = BlockData.get_crops_consumption(village_id=payload['village_id'],
+                                            panchayat_id = payload['panchayat_id'],
+                                            block_id=payload['block_id'], 
                                             district_id=payload['district_id'], 
-                                            state_id=payload['state_id'],
                                             user_id=current_user.id)
-    is_approved = (
-        all(row['is_approved'] for row in crops if row['is_approved'] is not None) 
-        and any(row['is_approved'] is not None for row in crops)
-    )
+    if crops:
+        is_approved = (
+            all(row['is_approved'] for row in crops if row['is_approved'] is not None) 
+            and any(row['is_approved'] is not None for row in crops)
+        )
+    else:
+        is_approved = False
+        crops = BlockData.get_dummy_crops(village_id=payload['village_id'],
+                                            panchayat_id = payload['panchayat_id'],
+                                            block_id=payload['block_id'], 
+                                            district_id=payload['district_id'])
+        
     return render_template('desktop/demand/crops.html', 
                            crops=crops, 
                            crops_data=json.dumps(crops), 
@@ -124,14 +154,23 @@ def industries():
         return redirect(url_for('mobile.index'))
     else:
         payload = json.loads(session_data)
-    industries = BlockData.get_block_industries(block_id=payload['block_id'], 
+    industries = BlockData.get_block_industries(village_id=payload['village_id'],
+                                            panchayat_id = payload['panchayat_id'],
+                                            block_id=payload['block_id'], 
                                             district_id=payload['district_id'], 
-                                            state_id=payload['state_id'],
                                             user_id=current_user.id)
-    is_approved = (
-        all(row['is_approved'] for row in industries if row['is_approved'] is not None) 
-        and any(row['is_approved'] is not None for row in industries)
-    )
+    if industries:
+        is_approved = (
+            all(row['is_approved'] for row in industries if row['is_approved'] is not None) 
+            and any(row['is_approved'] is not None for row in industries)
+        )
+    else:
+        is_approved = False
+        industries = BlockData.get_dummy_industries(village_id=payload['village_id'],
+                                            panchayat_id = payload['panchayat_id'],
+                                            block_id=payload['block_id'], 
+                                            district_id=payload['district_id'])
+        
     return render_template('desktop/demand/industry.html', 
                            industries=industries, 
                            industry_data=json.dumps(industries), 
@@ -151,14 +190,23 @@ def surface():
         BlockData.update_surface(json_data, current_user.id)
         flash('Surface Water Data is Validated/Updated')
         return jsonify({'redirect_url': url_for('.status')})    
-    surface_supply = BlockData.get_surface_supply(block_id=payload['block_id'], 
+    surface_supply = BlockData.get_surface_supply(village_id=payload['village_id'],
+                                            panchayat_id = payload['panchayat_id'],
+                                            block_id=payload['block_id'], 
                                             district_id=payload['district_id'], 
-                                            state_id=payload['state_id'],
                                             user_id=current_user.id)
-    is_approved = (
-        all(row['is_approved'] for row in surface_supply if row['is_approved'] is not None) 
-        and any(row['is_approved'] is not None for row in surface_supply)
-    )
+    if surface_supply:
+        is_approved = (
+            all(row['is_approved'] for row in surface_supply if row['is_approved'] is not None) 
+            and any(row['is_approved'] is not None for row in surface_supply)
+        )
+    else:
+        is_approved = False
+        surface_supply = BlockData.get_dummy_surface(village_id=payload['village_id'],
+                                            panchayat_id = payload['panchayat_id'],
+                                            block_id=payload['block_id'], 
+                                            district_id=payload['district_id'])
+        
     return render_template('desktop/supply/surface.html',
                         waterbodies = surface_supply,
                         waterbody_data = json.dumps(surface_supply),
@@ -178,15 +226,23 @@ def rainfall():
         return redirect(url_for('mobile.index'))
     else:
         payload = json.loads(session_data)
-    rainfall = BlockData.get_rainfall_data(block_id=payload['block_id'], 
+    rainfall = BlockData.get_rainfall_data(village_id=payload['village_id'],
+                                            panchayat_id = payload['panchayat_id'],
+                                            block_id=payload['block_id'], 
                                             district_id=payload['district_id'], 
-                                            state_id=payload['state_id'],
                                             user_id=current_user.id)
-    
-    is_approved = (
-        all(row['is_approved'] for row in rainfall if row['is_approved'] is not None) 
-        and any(row['is_approved'] is not None for row in rainfall)
-    )
+    if len(rainfall) == 12:
+        is_approved = (
+            all(row['is_approved'] for row in rainfall if row['is_approved'] is not None) 
+            and any(row['is_approved'] is not None for row in rainfall)
+        )
+    else:
+        is_approved = False
+        rainfall = BlockData.get_dummy_rainfall(village_id=payload['village_id'],
+                                            panchayat_id = payload['panchayat_id'],
+                                            block_id=payload['block_id'], 
+                                            district_id=payload['district_id'])
+        
     return render_template('desktop/supply/rainfall.html', 
                             rainfall=rainfall, 
                             rainfall_data=json.dumps(rainfall), 
@@ -206,14 +262,23 @@ def lulc():
         return redirect(url_for('mobile.index'))
     else:
         payload = json.loads(session_data)
-    lulc = BlockData.get_lulc_supply(block_id=payload['block_id'], 
+    lulc = BlockData.get_lulc_supply(village_id=payload['village_id'],
+                                            panchayat_id = payload['panchayat_id'],
+                                            block_id=payload['block_id'], 
                                             district_id=payload['district_id'], 
-                                            state_id=payload['state_id'],
                                             user_id=current_user.id)
-    is_approved = (
-        all(row['is_approved'] for row in lulc if row['is_approved'] is not None) 
-        and any(row['is_approved'] is not None for row in lulc)
-    )
+    if lulc:
+        is_approved = (
+            all(row['is_approved'] for row in lulc if row['is_approved'] is not None) 
+            and any(row['is_approved'] is not None for row in lulc)
+        )
+    else:
+        is_approved = False
+        lulc = BlockData.get_dummy_lulc(village_id=payload['village_id'],
+                                            panchayat_id = payload['panchayat_id'],
+                                            block_id=payload['block_id'], 
+                                            district_id=payload['district_id'])
+        
     return render_template('desktop/supply/lulc.html', 
                         lulc=lulc, 
                         lulc_data=json.dumps(lulc), 
@@ -233,14 +298,22 @@ def ground():
         return redirect(url_for('mobile.index'))
     else:
         payload = json.loads(session_data)
-    ground_supply = BlockData.get_groundwater_supply(block_id=payload['block_id'], 
+    ground_supply = BlockData.get_groundwater_supply(village_id=payload['village_id'],
+                                            panchayat_id = payload['panchayat_id'],
+                                            block_id=payload['block_id'], 
                                             district_id=payload['district_id'], 
-                                            state_id=payload['state_id'],
                                             user_id=current_user.id)
-    is_approved = (
-        all(row['is_approved'] for row in ground_supply if row['is_approved'] is not None) 
-        and any(row['is_approved'] is not None for row in ground_supply)
-    )
+    if ground_supply:
+        is_approved = (
+            all(row['is_approved'] for row in ground_supply if row['is_approved'] is not None) 
+            and any(row['is_approved'] is not None for row in ground_supply)
+        )
+    else:
+        is_approved = False
+        ground_supply= BlockData.get_dummy_groundwater(village_id=payload['village_id'],
+                                            panchayat_id = payload['panchayat_id'],
+                                            block_id=payload['block_id'], 
+                                            district_id=payload['district_id'])
 
     return render_template('desktop/supply/ground.html',
                            ground_supply = ground_supply,
@@ -262,9 +335,10 @@ def transfer():
         return redirect(url_for('mobile.index'))
     else:
         payload = json.loads(session_data)
-    transfer_data = BlockData.get_water_transfer(block_id=payload['block_id'], 
+    transfer_data = BlockData.get_water_transfer(village_id=payload['village_id'],
+                                            panchayat_id = payload['panchayat_id'],
+                                            block_id=payload['block_id'], 
                                             district_id=payload['district_id'], 
-                                            state_id=payload['state_id'],
                                             user_id=current_user.id)
     
     is_approved = (

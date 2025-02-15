@@ -3,7 +3,10 @@ from sqlalchemy import case, func
 from iAndhra.app.db import db
 from passlib.hash import pbkdf2_sha256
 
-from iAndhra.app.models.states import State
+from iAndhra.app.models.districts import District
+from iAndhra.app.models.blocks import Block
+from iAndhra.app.models.panchayats import Panchayat
+
 
 class User(UserMixin, db.Model):
     __tablename__ = "users"
@@ -11,22 +14,24 @@ class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(100))
     password = db.Column(db.String(300))
-    block_id = db.Column(db.Integer, db.ForeignKey("blocks.id"), nullable=False)
     district_id = db.Column(db.Integer, db.ForeignKey("districts.id"), nullable=False)
+    block_id = db.Column(db.Integer, db.ForeignKey("blocks.id"), nullable=False)
+    panchayat_id = db.Column(db.Integer, db.ForeignKey("panchayats.id"), nullable=False)
 
     isActive = db.Column(db.Boolean, nullable=False, default=False)
     isAdmin = db.Column(db.Boolean, nullable=False, default=False)
-
-    block = db.relationship("Block", backref=db.backref('blocks', lazy='dynamic'))
     district = db.relationship("District", backref=db.backref('districts', lazy='dynamic'))
+    block = db.relationship("Block", backref=db.backref('blocks', lazy='dynamic'))
+    panchayat = db.relationship("Panchayat", backref=db.backref('panchayats', lazy='dynamic'))
     
-    def __init__(self, username, password, block_id,district_id, isActive, isAdmin):
+    def __init__(self, username, password, district_id,block_id,panchayat_id, isActive, isAdmin):
         self.username = username
         self.password = password
         self.isActive = isActive
         self.isAdmin = isAdmin
-        self.block_id = block_id
         self.district_id = district_id
+        self.block_id = block_id
+        self.panchayat_id = panchayat_id
 
     def json(self):
         return {
@@ -34,8 +39,9 @@ class User(UserMixin, db.Model):
             'username': self.username,
             'isActive': self.isActive,
             'isAdmin': self.isAdmin,
+            'district_id': self.district_id,
             'block_id': self.block_id,
-            'district_id': self.district_id
+            'panchayat_id': self.panchayat_id
         }
     
     def save_to_db(self):
@@ -61,10 +67,17 @@ class User(UserMixin, db.Model):
             cls.id, 
             cls.username,
             cls.isActive,
-            State.short_name
+            Panchayat.panchayat_name,
+            District.district_name,
+            District.short_name,
+            Block.block_name
         ).join(
-            State, State.id==cls.state_id
-        ).order_by(State.short_name)
+            District,District.id==cls.district_id
+        ).join(
+            Block, Block.id==cls.block_id
+        ).join(
+            Panchayat, Panchayat.id==cls.panchayat_id
+        ).order_by(District.district_name,Block.block_name,Panchayat.panchayat_name)
         
         results = query.all()
         
@@ -73,7 +86,10 @@ class User(UserMixin, db.Model):
                 'id': item.id,
                 'username': item.username,
                 'isActive': item.isActive,
-                'state_name': item.short_name
+                'district_short_name':item.short_name,
+                'block_name': item.block_name,
+                'district_name':item.district_name,
+                'panchayat_name':item.panchayat_name
             } for item in results]
             return json_data
         return None

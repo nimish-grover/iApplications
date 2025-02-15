@@ -3,11 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jalagam - {% block title %} {% endblock %}</title>
+    <title>DPR - {% block title %} {% endblock %}</title>
     <link rel="icon" type="image/png" href="{{url_for('static', filename='assets/drop.png')}}">
     <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='css/bootstrap.min.css')}}">
-    <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='scss/styles.css')}}">
+    <!-- <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='scss/styles.css')}}"> -->
+    <link id="theme-stylesheet" rel="stylesheet" type="text/css"  href="{{ theme_stylesheet }}">
     <style>
 
     
@@ -26,7 +27,7 @@
     <nav class="navbar fixed-top bg-primary justify-content-between">        
         <div class="ms-2">
             <a class="navbar-brand text-white" href="{{url_for('mobile.index')}}">
-                <span class="me-2"><i class="fa-solid fa-droplet"></i></span>Jalagam</a>
+                <span class="me-2"><i class="fa-solid fa-droplet"></i></span>DPR</a>
         </div>
         <div>
             <button class="btn text-white" type="button" data-bs-toggle="offcanvas" 
@@ -63,7 +64,7 @@
                     {% endif %}" href="{{breadcrumb.href}}">
                         {{breadcrumb.name}}
                     </a>
-                </li>
+                </li> 
                 {% endfor %}
                 </ol>
             </nav> 
@@ -94,12 +95,28 @@
     </div>
     <div class="offcanvas offcanvas-start" data-bs-scroll="true" tabindex="-1" id="offcanvasMenu" aria-labelledby="offcanvasMenu">
         <div class="offcanvas-header">
-            <h5 class="offcanvas-title" id="offcanvasMenuLabel"><i class="fa-solid fa-droplet"></i>&nbsp;Jalagam</h5>
+            <h5 class="offcanvas-title" id="offcanvasMenuLabel"><i class="fa-solid fa-droplet"></i>&nbsp;DPR</h5>
             <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
         </div>
         <div class="offcanvas-body">
             <p><strong>Menu</strong></p>
             <div class="list-group list-group-flush fs-7">
+                <div class="dropdown">
+                    <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                        Theme: {{ available_themes[current_theme].name }}
+                    </button>
+                    <ul class="dropdown-menu">
+                        {% for theme_id, theme in available_themes.items() %}
+                        <li>
+                            <button class="dropdown-item theme-switcher" 
+                                    data-theme="{{ theme_id }}"
+                                    {% if theme_id == current_theme %}disabled{% endif %}>
+                                {{ theme.name }}
+                            </button>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
                 {% if current_user.is_authenticated %}
                     {% if current_user.isAdmin %}
                     <a class="list-group-item list-group-item-action py-3" href="{{url_for('auth.approve')}}"><i class="fa-solid fa-gauge"></i>&nbsp;Dashboard</a>
@@ -121,7 +138,7 @@
         <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
           <div class="toast-header">
             <span class="me-2"><i class="fa-solid fa-droplet"></i></span>
-            <strong class="me-auto">Jalagam says...</strong>
+            <strong class="me-auto">DPR says...</strong>
             <small></small>
             <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
           </div>
@@ -136,73 +153,116 @@
     <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.1/dist/echarts.min.js"></script>
     <script src="{{url_for('static', filename='js/popper.min.js')}}"></script> 
     <script src="{{url_for('static', filename='js/bootstrap.min.js')}}"></script>
-    <script src="{{url_for('static', filename='js/main.js')}}"></script>     
+    <script src="{{url_for('static', filename='js/main.js')}}"></script> 
     <script>
-    //     // Tooltip
-    //     const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
-    //     const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
+        document.addEventListener('DOMContentLoaded', function() {
+            const themeSwitchers = document.querySelectorAll('.theme-switcher');
+            
+            themeSwitchers.forEach(button => {
+                button.addEventListener('click', function() {
+                    const theme = this.dataset.theme;
+                    
+                    // Disable all buttons temporarily
+                    themeSwitchers.forEach(btn => btn.disabled = true);
+                    
+                    fetch('/iandhra/change-theme', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ theme: theme })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Update stylesheet
+                            const styleSheet = document.getElementById('theme-stylesheet');
+                            styleSheet.setAttribute('href', data.stylesheet);
+                            
+                            // Update button states
+                            themeSwitchers.forEach(btn => {
+                                btn.disabled = btn.dataset.theme === theme;
+                            });
+                            
+                            // Reload Bootstrap components if needed
+                            // Add any additional theme-switch logic here
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        // Re-enable all buttons on error
+                        themeSwitchers.forEach(btn => btn.disabled = false);
+                    });
+                });
+            });
+        });
+    </script>    
+    <!-- <script>
+        // Tooltip
+        const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
+        const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
         
-    //     // Toggle dropdown
-    //     const dropdownElementList = document.querySelectorAll('.dropdown-toggle')
-    //     const dropdownList = [...dropdownElementList].map(dropdownToggleEl => new bootstrap.Dropdown(dropdownToggleEl))
+        // Toggle dropdown
+        const dropdownElementList = document.querySelectorAll('.dropdown-toggle')
+        const dropdownList = [...dropdownElementList].map(dropdownToggleEl => new bootstrap.Dropdown(dropdownToggleEl))
 
-    //     // toggle toast
-    //     const toastDiv = document.getElementById('liveToast');
-    //     const flash_message = document.getElementById('flashMesssageDiv')
-    //     if (flash_message) {
-    //             if (flash_message.innerText.trim() !== 'false' && flash_message.innerText.trim() !== '') {
-    //             const toastBootstrap = bootstrap.Toast.getOrCreateInstance(toastDiv);
-    //             toastBootstrap.show();
-    //         }
-    //     }
-    //     document.addEventListener('DOMContentLoaded', () => {
-    //         const bottomMenu = document.querySelector('.fixed-bottom.bg-dark.bottom-menu.fade-in');
-    //         if (bottomMenu){bottomMenu.classList.add('show')}            
-    //     });
-    //     function toggleSpinner() {
-    //         const spinner = document.getElementById('loading-spinner');
-    //         spinner.style.display = (spinner.style.display === 'none' || spinner.style.display === '') ? 'block' : 'none';
-    //         }
-    //     const carousel = document.querySelector("#cardCarousel");
-    //     const radio1 = document.querySelector("#radio-1");
-    //     const radio2 = document.querySelector("#radio-2");
-    //     if (carousel){
-    //         document.querySelectorAll('.tab').forEach((label, index) => {
-    //         label.addEventListener('click', () => {
-    //             // Update the carousel slide using Bootstrap's API
-    //             const carousel = new bootstrap.Carousel('#cardCarousel');
-    //             carousel.to(index);
-    //             });
-    //         });
-    //         // Add event listener for the carousel slide
-    //         if (radio1){
-    //                 carousel.addEventListener("slid.bs.carousel", function (event) {
-    //                 const activeIndex = [...carousel.querySelectorAll(".carousel-item")].indexOf(
-    //                     carousel.querySelector(".carousel-item.active")
-    //                 );
+        // toggle toast
+        const toastDiv = document.getElementById('liveToast');
+        const flash_message = document.getElementById('flashMesssageDiv')
+        if (flash_message) {
+                if (flash_message.innerText.trim() !== 'false' && flash_message.innerText.trim() !== '') {
+                const toastBootstrap = bootstrap.Toast.getOrCreateInstance(toastDiv);
+                toastBootstrap.show();
+            }
+        }
+        document.addEventListener('DOMContentLoaded', () => {
+            const bottomMenu = document.querySelector('.fixed-bottom.bg-dark.bottom-menu.fade-in');
+            if (bottomMenu){bottomMenu.classList.add('show')}            
+        });
+        function toggleSpinner() {
+            const spinner = document.getElementById('loading-spinner');
+            spinner.style.display = (spinner.style.display === 'none' || spinner.style.display === '') ? 'block' : 'none';
+            }
+        const carousel = document.querySelector("#cardCarousel");
+        const radio1 = document.querySelector("#radio-1");
+        const radio2 = document.querySelector("#radio-2");
+        if (carousel){
+            document.querySelectorAll('.tab').forEach((label, index) => {
+            label.addEventListener('click', () => {
+                // Update the carousel slide using Bootstrap's API
+                const carousel = new bootstrap.Carousel('#cardCarousel');
+                carousel.to(index);
+                });
+            });
+            // Add event listener for the carousel slide
+            if (radio1){
+                    carousel.addEventListener("slid.bs.carousel", function (event) {
+                    const activeIndex = [...carousel.querySelectorAll(".carousel-item")].indexOf(
+                        carousel.querySelector(".carousel-item.active")
+                    );
 
-    //                 if (activeIndex === 0) {
-    //                     radio1.checked = true;
-    //                 } else if (activeIndex === 1) {
-    //                     radio2.checked = true;
-    //                 }
-    //             });
-    //         }            
-    //     }
+                    if (activeIndex === 0) {
+                        radio1.checked = true;
+                    } else if (activeIndex === 1) {
+                        radio2.checked = true;
+                    }
+                });
+            }            
+        }
         
-    //     function adjustCardHeight() {
-    //     const card = document.getElementById('dynamicCard');
-    //     const screenHeight = window.innerHeight;
-    //     const cardHeight = screenHeight * 0.60; // 60% of screen height
-    //     card.style.height = `${cardHeight}px`;
-    // }
+        function adjustCardHeight() {
+        const card = document.getElementById('dynamicCard');
+        const screenHeight = window.innerHeight;
+        const cardHeight = screenHeight * 0.60; // 60% of screen height
+        card.style.height = `${cardHeight}px`;
+    }
 
-    // // Adjust the card height on page load
+    // Adjust the card height on page load
     // adjustCardHeight();
 
     // Adjust the card height on window resize
-    // window.addEventListener('resize', adjustCardHeight);
-    </script>
+    window.addEventListener('resize', adjustCardHeight);
+    </script> -->
     {% block scripts %}
     {% endblock %}
     <!--END SCRIPTS-->

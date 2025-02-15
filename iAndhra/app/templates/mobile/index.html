@@ -1,10 +1,10 @@
 
 {% extends 'mobile/base.html' %}
-{% block title %} Select Block {% endblock %}
+{% block title %} Select Village {% endblock %}
 {% from 'mobile/components.html' import select, submit_button %}
 {% block content %}
 
-<h5 class="card-title">Select your block</h5>
+<h5 class="card-title">Select your Village</h5>
 {{select(id='dd_district', dd_array=districts,label='Select District' )}}
 {{select(id='dd_block', dd_array=[],label='Select Block' )}}  
 {{select(id='dd_panchayat', dd_array=[],label='Select Panchayat' )}}  

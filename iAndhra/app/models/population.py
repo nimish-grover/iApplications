@@ -23,3 +23,10 @@ class Population(db.Model):
             "display_name": self.display_name,
             "short_name": self.short_name
         }
+        
+    @classmethod
+    def get_all_population(cls):
+        query = db.session.query(cls.id,cls.display_name).all()
+        if query:
+            json_data = [{'population_id':item.id,'population_name':item.display_name} for item in query]
+            return json_data

@@ -24,7 +24,7 @@ class BlockRainfall(db.Model):
     users = db.relationship('User', backref=db.backref('block_rainfall', lazy='dynamic'))
     block_territory = db.relationship('BlockTerritory', backref=db.backref('block_rainfall', lazy='dynamic'))
 
-    def __init__(self,normal,actual,month_year,bt_id,is_approved,created_by):
+    def __init__(self,normal,actual,bt_id,is_approved,created_by,month_year):
         self.normal = normal
         self.actual = actual
         self.month_year = month_year
@@ -79,7 +79,7 @@ class BlockRainfall(db.Model):
     def get_by_bt_id(cls, bt_id):
         query = db.session.query(
             cls.id, 
-            cls.month_year,
+            func.to_char(cls.month_year, 'Mon-YY').label("month"),
             func.coalesce(cls.actual,0).label('actual'),
             func.coalesce(cls.normal,0).label('normal'),
             func.coalesce(cls.bt_id,bt_id).label("bt_id"),
@@ -94,8 +94,7 @@ class BlockRainfall(db.Model):
             json_data = [{
                 'id': index + 1,
                 'table_id': row.id,
-                'full_month_year': row.month_year,
-                'month_year': row.month_year.strftime('%b-%y'),
+                'month_year': row.month,
                 'actual': row.actual,
                 'normal': row.normal,
                 'bt_id': row.bt_id,

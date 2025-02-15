@@ -31,7 +31,7 @@
 </div>
 {% endfor %}
 <div class="card shadow rounded-1 mb-1 px-2 mt-2 d-flex align-items-center">
-    <div id="main" style="height: 40vh; width: 100%;"></div>
+    <div id="main" style="height: 38vh; width: 100%;"></div>
 </div>
 <input type="hidden" name="chartData" id="chartData" value="{{chart_data}}">
 
@@ -42,21 +42,17 @@
 var chartDom = document.getElementById('main');
 var myChart = echarts.init(chartDom);
 let chart_data = JSON.parse(document.getElementById('chartData').value)
-    const state_short_name = chart_data.map(item => item.state_short_name);
-    const state_name = chart_data.map(item => item.state_name);
+    const district_short_name = chart_data.map(item => item.district_short_name);
     const district_name = chart_data.map(item => item.district_name);
-    const block_name = chart_data.map(item => item.block_name);
     const values = chart_data.map(item => item.completed);
     const percentage = chart_data.map(item => item.percentage);
     const color = chart_data.map(item => item.color);
 
     chart_data = {
-    state_short_name: [...state_short_name], // Reverse the state_short_name array
+    district_short_name: [...district_short_name], // Reverse the district_short_name array
     values: [...values],         // Reverse the data array
     percentage: [...percentage],
-    state_name: [...state_name],
     district_name: [...district_name],
-    block_name: [...block_name],
     color: [...color]
 };
 var option;
@@ -77,9 +73,7 @@ option = {
       var index = params[0].dataIndex;
       return `
         <div style="text-align: left;">
-          State: ${chart_data.state_name[index]}<br>
           District: ${chart_data.district_name[index]}<br>
-          Block: ${chart_data.block_name[index]}<br>
           Completed: ${chart_data.percentage[index]}
         </div>
       `;
@@ -90,7 +84,7 @@ option = {
   },
   yAxis: {
     type: 'category',
-    data: chart_data['state_short_name']
+    data: chart_data['district_short_name']
   },
   series: [
     {

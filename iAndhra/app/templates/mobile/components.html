@@ -178,7 +178,7 @@ aria-valuemin="0" aria-valuemax="100">
             <a class="d-flex flex-column justify-content-center align-items-center flex-fill p-2 
             {% if (item.label in request.path) %} bg-white text-dark
             {% else %} text-white {% endif %}
-            link-underline link-underline-opacity-0 {% if loop.last %} rounded-end-5{% endif %}" href="{{item.route}}">
+            link-underline link-underline-opacity-0 {% if loop.last %} rounded-end-5{%elif loop.first%}rounded-start-5{% endif %}" href="{{item.route}}">
                 <i class="{{item.icon}}"></i>
                 <span class="fs-8">{{item.label | title}}</span>
             </a>

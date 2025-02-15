@@ -25,7 +25,7 @@
                 {'heading':'Population','subheading':'(in numbers)'},
                 {'heading':'Consumption','subheading':'(in Ha M)'}
                 ])}}
-            <!-- {#<tbody>
+            <tbody>
                 {% for row in human %}
                 <tr>
                     <td class="text-start">{{row['category'] | title}}</td>
@@ -33,10 +33,10 @@
                     <td class="text-end">{{row['value']|indian_format}}</td>
                 </tr>
                 {% endfor %}
-            </tbody> #}-->
+            </tbody> 
             <tfoot>
                 <tr>
-                    <td>Human</td>
+                    <td class="fw-semibold">Total</td>
                     <td class="text-end">{{ human | map(attribute='count') | sum | indian_format }}</td>
                     <td class="text-end">{{ human | map(attribute='value') | sum | indian_format }}</td>
                 </tr>
@@ -53,7 +53,9 @@
     let chart_data = JSON.parse(document.getElementById('chartData').value);
     var chartDom = document.getElementById('main');
     var myChart = echarts.init(chartDom);
-    const total_population = chart_data[0]['value'] + chart_data[1]['value']
+    // const population = [chart_data[0]['value'] ,chart_data[1]['value']]
+    // const category = [chart_data[0]['category'],chart_data[1]['category']]
+    // const background = [chart_data[0]['background'],chart_data[1]['background']]
     var option;
 
     option = {
@@ -86,10 +88,10 @@
         data: ['' ]
     },
     series: [
-        {
-        name: 'Human',
+    {
+        name: chart_data[0]['category'],
         type: 'bar',
-        data: [total_population.toFixed(2)],
+        data: [chart_data[0]['value']],
         label:{
             show: true,
             // position: 'center',
@@ -99,19 +101,19 @@
         },
         color:[chart_data[0]['background']]
         },
-        // {
-        // name: chart_data[1]['category'],
-        // type: 'bar',
-        // data: [chart_data[1]['value']],
-        // label:{
-        //     show: true,
-        //     // position: [50, 10],
-        //     // align: 'center',
-        //     verticalAlign:'middle',
-        //     formatter:'{c} Ha M'
-        // },
-        // color:[chart_data[1]['background']]
-        // }
+        {
+        name: chart_data[1]['category'],
+        type: 'bar',
+        data: [chart_data[1]['value']],
+        label:{
+            show: true,
+            // position: [50, 10],
+            // align: 'center',
+            verticalAlign:'middle',
+            formatter:'{c} Ha M'
+        },
+        color:[chart_data[1]['background']]
+        }
     ]
     };
 

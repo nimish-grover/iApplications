@@ -20,9 +20,9 @@ class BlockTerritory(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     state_id = db.Column(db.ForeignKey('states.id'), nullable=False)
     district_id = db.Column(db.ForeignKey('districts.id'), nullable=False)
-    block_id = db.Column(db.ForeignKey('blocks.id'), unique=True, nullable=False)
+    block_id = db.Column(db.ForeignKey('blocks.id'), nullable=False)
     panchayat_id = db.Column(db.ForeignKey('panchayats.id'), nullable=True)
-    village_id = db.Column(db.ForeignKey('villages.id'), nullable=True)
+    village_id = db.Column(db.ForeignKey('villages.id'),unique=True, nullable=True)
     is_approved = db.Column(db.Boolean, nullable=False, default=False)
     created_on = db.Column(db.DateTime, nullable=False, default=lambda: datetime.now(ZoneInfo('Asia/Kolkata')))
     

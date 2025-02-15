@@ -15,7 +15,9 @@ def register():
         username = request.form.get('username')
         password = request.form.get('password')
         confirm_password = request.form.get('confirmPassword')
-        state_id = request.form.get('dd_states')
+        district_id = request.form.get('dd_districts')
+        block_id = request.form.get('dd_blocks')
+        panchayat_id = request.form.get('dd_panchayats')
         user = User.find_by_username(username.lower())
         if user:
             flash('username already exists!')
@@ -25,16 +27,16 @@ def register():
             flash('Passwords do not match!')
             return redirect(url_for('auth.register'))
 
-        user = User(username.lower(), password,state_id, False, False)
+        user = User(username.lower(),password,district_id,block_id,panchayat_id,False,False)
         user.set_password(password)
         user.save_to_db()
 
         flash('Registered successfully!')
         return redirect(url_for('auth.login'))
-    states = TerritoryJoin.get_aspirational_states()
+    districts = TerritoryJoin.get_districts()
     return render_template("auth/register_user.html", 
                            flash_message=message, 
-                           states = states)
+                           districts = districts)
 
 @blp.route('/login', methods=['POST','GET'])
 def login():
@@ -52,7 +54,7 @@ def login():
             elif not User.check_password(user, password):
                 flash('Password is incorrect')
             elif not user.isActive:
-                flash('User is not authorized. Please contact State Coordinator')
+                flash('User is not authorized. Please contact Block Coordinator')
         except Exception as e:
             flash('There was an error while connecting to database!')
             print(e)
@@ -164,10 +166,10 @@ def approve():
 def dashboard():
     dashboard_data = HelperClass.get_dashboard_menu()
     card_data = HelperClass.get_card_data(dashboard_data)
-    chart_data =[]
-    for data in dashboard_data:
-        if data['completed']:
-            chart_data.append(data)
+    chart_data =HelperClass.get_chart_data()
+    # for data in dashboard_data:
+    #     if data['completed']:
+    #         chart_data.append(data)
             
     return render_template('auth/dashboard.html',
                            card_data = card_data,
@@ -199,19 +201,19 @@ def progress():
         return redirect(url_for('auth.login'))
 @blp.route('/budget',methods=['POST','GET'])
 def budget():
-    filtered_blocks = HelperClass.get_dashboard_menu()
+    filtered_data = HelperClass.get_dashboard_menu()
     budget_array = []
-    for idx,block in enumerate(filtered_blocks):
-        if block['completed'] == 100:
-            demand_side = BlockOrCensus.get_demand_side_data(block['block_id'],block['district_id'],block['state_id'])
+    for idx,data in enumerate(filtered_data):
+        if data['completed'] == 100:
+            demand_side = BlockOrCensus.get_demand_side_data(data['village_id'],data['panchayat_id'],data['block_id'],data['district_id'])
             total_demand = int(sum([item['water_value'] for item in demand_side]))
-            supply_side = BlockOrCensus.get_supply_side_data(block['block_id'],block['district_id'],block['state_id'])
+            supply_side = BlockOrCensus.get_supply_side_data(data['village_id'],data['panchayat_id'],data['block_id'],data['district_id'])
             total_supply = int(sum([item['water_value'] for item in supply_side]))
             budget = int(total_supply - total_demand)
             
-            budget_array.append({'id':idx+1,'state_id':block['state_id'],'block_id':block['block_id'],'district_id':block['district_id'],
-                            'state_short_name':block['state_short_name'],'state_name':block['state_name'],'district_name':block['district_name'],
-                            'block_name':block['block_name'],'total_demand':total_demand,
+            budget_array.append({'id':idx+1,'block_id':data['block_id'],'district_id':data['district_id'],
+                            'district_short_name':data['district_short_name'],'district_name':data['district_name'],
+                            'block_name':data['block_name'],'total_demand':total_demand,
                             'total_supply':total_supply,'budget':budget})
         
     return render_template('auth/budget.html',budget = budget_array,menu= HelperClass.get_admin_menu()) 

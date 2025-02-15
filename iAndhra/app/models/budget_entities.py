@@ -1,4 +1,4 @@
-from iAndhra.app import db
+from iAndhra.app.db import db
 
 class BudgetEntity(db.Model):
     __tablename__ = "budget_entities"

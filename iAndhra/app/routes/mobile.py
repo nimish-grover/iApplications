@@ -1,4 +1,4 @@
-from flask import Blueprint, json, make_response, redirect, render_template, request, session, url_for
+from flask import Blueprint, json, jsonify, make_response, redirect, render_template, request, session, url_for
 from flask_login import current_user
 
 from iAndhra.app.classes.block_or_census import BlockOrCensus
@@ -18,9 +18,10 @@ def splash():
 def index():
     if request.method == 'POST':
         json_data = request.json
-        payload = json.dumps(json_data)
         if 'payload' in session:
             session['payload'] = ''
+        json_data['district_short_name'] = District.get_short_name(int(json_data['district_id']))
+        payload = json.dumps(json_data)
         session['payload'] = payload
         if current_user.is_authenticated:
             return json.dumps(url_for('desktop.status'))
@@ -55,6 +56,10 @@ def panchayats():
     else:
         return make_response('', 400)
     panchayats = TerritoryJoin.get_panchayats(block_id)
+    if current_user.is_authenticated:
+        if not current_user.isAdmin:
+            filtered_panchayats = [panchayat for panchayat in panchayats if panchayat['id'] == current_user.panchayat_id]
+            return filtered_panchayats
     if panchayats:
         return panchayats
     else:
@@ -68,6 +73,10 @@ def blocks():
     else:
         return make_response('', 400)
     blocks = TerritoryJoin.get_blocks(district_id)
+    if current_user.is_authenticated:
+        if not current_user.isAdmin:
+            filtered_blocks = [block for block in blocks if block['id'] == current_user.block_id]
+            return filtered_blocks
     if blocks:
         return blocks
     else:
@@ -386,6 +395,35 @@ def render_demand_template(template, demand_function, template_data_key):
 
     return render_template(template, **context)
 
+@blp.route('/change-theme', methods=['POST'])
+def change_theme():
+    THEMES = {
+        'purple': {
+            'name': 'Purple Theme',
+            'stylesheet': url_for('static',filename='scss/purple_theme.css')
+        },
+        'dark': {
+            'name': 'Dark Theme',
+            'stylesheet': url_for('static',filename='scss/dark_theme.css')
+        },
+        'orange': {
+            'name': 'Orange Theme',
+            'stylesheet': url_for('static',filename='scss/orange_theme.css')
+        },
+        'pink': {
+            'name': 'Pink Theme',
+            'stylesheet': url_for('static',filename='scss/styles.css')
+        }
+        }
+    theme = request.json.get('theme')
+    if theme in THEMES:
+        session['theme'] = theme
+        return jsonify({
+            'success': True,
+            'stylesheet': THEMES[theme]['stylesheet']
+        })
+    return jsonify({'success': False}), 400
+
 @blp.route('/print')
 def print():
     session_data = session.get('payload')
@@ -470,7 +508,7 @@ def get_breadcrumbs(payload):
         list: Breadcrumbs for the current context.
     """
     return [
-        {'name': payload['district_name'], 'href': '#'},
+        {'name': payload['district_short_name'], 'href': '#'},
         {'name': payload['block_name'], 'href': '#'},
         {'name': payload['panchayat_name'], 'href': '#'},
         {'name': payload['village_name'], 'href': '#'}

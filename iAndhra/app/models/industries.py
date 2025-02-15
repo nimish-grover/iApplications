@@ -69,3 +69,10 @@ class Industry(db.Model):
             "Water Management & Plumbing"
         ]
     }
+    
+    @classmethod
+    def get_all_industries(cls):
+        query = db.session.query(cls.id,cls.industry_sector).all()
+        if query:
+            json_data = [{'industry_id':item.id,'industry_name':item.industry_sector} for item in query]
+            return json_data

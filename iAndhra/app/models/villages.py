@@ -11,11 +11,13 @@ class Village(db.Model):
     lgd_code = db.Column(db.Integer, unique=True, nullable=False)
     village_name = db.Column(db.String(255), nullable=True)
     panchayat_lgd_code = db.Column(db.Integer, db.ForeignKey('panchayats.lgd_code'), nullable=True)
+    block_lgd_code = db.Column(db.Integer, db.ForeignKey('blocks.lgd_code'), nullable=False)
 
     # Relationships (if needed)
     state = db.relationship('State', backref=db.backref('villages', lazy='dynamic'))
     district = db.relationship('District', backref=db.backref('villages', lazy='dynamic'))
-    panchayat = db.relationship('Panchayat', backref=db.backref('panchayats', lazy='dynamic'))
+    block = db.relationship('Block',backref=db.backref('villages', lazy='dynamic'))
+    panchayat = db.relationship('Panchayat', backref=db.backref('villages', lazy='dynamic'))
 
     # territory = db.relationship('TerritoryJoin', backref=db.backref('villages', lazy=True), uselist=False, foreign_keys="[TerritoryJoin.village_id]")
 
@@ -54,14 +56,14 @@ class Village(db.Model):
             "census_code": self.census_code
         }
     
-    @classmethod
-    def get_villages_number_by_block(cls,block_id,district_id):
-        query = db.session.query(
-            func.count(Village.id).label("village_count")
-            ).join(TerritoryJoin, TerritoryJoin.village_id == Village.id
-            ).filter(
-                TerritoryJoin.block_id == block_id,
-                TerritoryJoin.district_id == district_id
-            )
-        results = query.first()
-        return results.village_count
+    # @classmethod
+    # def get_villages_number_by_block(cls,block_id,district_id):
+    #     query = db.session.query(
+    #         func.count(Village.id).label("village_count")
+    #         ).join(TerritoryJoin, TerritoryJoin.village_id == Village.id
+    #         ).filter(
+    #             TerritoryJoin.block_id == block_id,
+    #             TerritoryJoin.district_id == district_id
+    #         )
+    #     results = query.first()
+    #     return results.village_count

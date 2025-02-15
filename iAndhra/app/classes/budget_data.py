@@ -61,6 +61,8 @@ class BudgetData:
     @classmethod
     def get_crops_consumption(cls,village_id,panchayat_id, block_id, district_id):
         entity = CropCensus.get_census_data_crops(village_id,panchayat_id,block_id, district_id)
+        if not entity:
+            return entity
         for item in entity:
             item['entity_consumption'] = round(float(item['entity_value']) * float(item['coefficient']),2)         
         bg_colors = cls.COLORS
