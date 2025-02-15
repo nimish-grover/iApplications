@@ -15,3 +15,5 @@ dash==2.16.1
 sib-api-v3-sdk==7.6.0
 redis==5.2.0
 flask-session==0.8.0
+flask-mail
+gunicorn
