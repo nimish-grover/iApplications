@@ -1,11 +1,14 @@
-window.InitUserScripts = function()
+function ExecuteScript(strId)
 {
-var player = GetPlayer();
-var object = player.object;
-var addToTimeline = player.addToTimeline;
-var setVar = player.SetVar;
-var getVar = player.GetVar;
-window.Script2 = function()
+  switch (strId)
+  {
+      case "6YNDNisn4m0":
+        Script1();
+        break;
+  }
+}
+
+function Script1()
 {
   var m_names = new Array("January", "February", "March",
 "April", "May", "June", "July", "August", "September",
@@ -20,4 +23,3 @@ var player = GetPlayer();
 player.SetVar("SystemDate",date);
 }
 
-};

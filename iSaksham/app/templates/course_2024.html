@@ -52,7 +52,7 @@
                                     </div>
                                 </div>
                                 <div class="contianer-fluid ratio ratio-16x9">
-                                    <iframe id="embeddedFrame" class="ratio ratio-16x9" data-src="/esaksham_1/"
+                                    <iframe id="embeddedFrame" class="ratio ratio-16x9" data-src="/esaksham_2/"
                                         frameborder="0"></iframe>
                                 </div>
                             </div>
@@ -90,7 +90,7 @@
                                 </div>
                             </div>
                             <div class="contianer-fluid ratio ratio-16x9">
-                                <iframe id="embeddedFrame" class="ratio ratio-16x9" data-src="/esaksham/"
+                                <iframe id="embeddedFrame" class="ratio ratio-16x9" data-src="/esaksham_1/"
                                     frameborder="0"></iframe>
                             </div>
                         </div>
@@ -114,9 +114,31 @@
                         </button>
                     </h2>
                     <div id="collapseThree" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
-                        <div class="accordion-body text-center p-5 fw-semibold fs-5">
-                            Course content for Module 3 will be added soon.
+                        {%if current_user.is_authenticated %}
+                        <div class="accordion-body">
+                            <div class="row justify-content-end py-2">
+                                <div class="col-auto ml-auto">
+                                    <button onclick="openSourceInNewTab()" class="btn btn-primary no-loader"
+                                        data-bs-target=""><i
+                                            class="fa-solid fa-arrow-up-right-from-square fa-sm"></i></button>
+                                    <button onclick="toggleFullScreenMobile()" class="btn btn-primary no-loader "><i
+                                            class="fa-solid fa-expand"></i></button>
+                                </div>
+                            </div>
+                            <div class="contianer-fluid ratio ratio-16x9">
+                                <iframe id="embeddedFrameMobile" class="ratio ratio-16x9" data-src="/esaksham_3/"
+                                    frameborder="0"></iframe>
+                            </div>
                         </div>
+                        {%else%}
+                        <div class="accordion-body">
+
+                            <div class="container-fluid">
+                                <iframe id="embeddedFrameMobile" class="ratio ratio-16x9"
+                                    src="{{url_for('admin.no_login')}}" frameborder="0"></iframe>
+                            </div>
+                        </div>
+                        {%endif%}
                     </div>
                 </div>
             </div>
@@ -172,7 +194,7 @@
                                 </div>
                             </div>
                             <div class="contianer-fluid ratio ratio-16x9">
-                                <iframe id="embeddedFrameMobile" class="ratio ratio-16x9" data-src="/esaksham_1/"
+                                <iframe id="embeddedFrameMobile" class="ratio ratio-16x9" data-src="/esaksham_2/"
                                     frameborder="0"></iframe>
                             </div>
                         </div>
@@ -210,7 +232,7 @@
                                 </div>
                             </div>
                             <div class="contianer-fluid ratio ratio-16x9">
-                                <iframe id="embeddedFrameMobile" class="ratio ratio-16x9" data-src="/esaksham/"
+                                <iframe id="embeddedFrameMobile" class="ratio ratio-16x9" data-src="/esaksham_1/"
                                     frameborder="0"></iframe>
                             </div>
                         </div>
@@ -234,9 +256,31 @@
                         </button>
                     </h2>
                     <div id="collapseThree" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
-                        <div class="accordion-body text-center p-5 fw-semibold fs-5">
-                            Course content for Module 3 will be added soon.
+                        {%if current_user.is_authenticated %}
+                        <div class="accordion-body">
+                            <div class="row justify-content-end py-2">
+                                <div class="col-auto ml-auto">
+                                    <button onclick="openSourceInNewTab()" class="btn btn-primary no-loader"
+                                        data-bs-target=""><i
+                                            class="fa-solid fa-arrow-up-right-from-square fa-sm"></i></button>
+                                    <button onclick="toggleFullScreenMobile()" class="btn btn-primary no-loader "><i
+                                            class="fa-solid fa-expand"></i></button>
+                                </div>
+                            </div>
+                            <div class="contianer-fluid ratio ratio-16x9">
+                                <iframe id="embeddedFrameMobile" class="ratio ratio-16x9" data-src="/esaksham_3/"
+                                    frameborder="0"></iframe>
+                            </div>
                         </div>
+                        {%else%}
+                        <div class="accordion-body">
+
+                            <div class="container-fluid">
+                                <iframe id="embeddedFrameMobile" class="ratio ratio-16x9"
+                                    src="{{url_for('admin.no_login')}}" frameborder="0"></iframe>
+                            </div>
+                        </div>
+                        {%endif%}
                     </div>
                 </div>
             </div>
@@ -266,7 +310,7 @@
 <script>
     function openSourceInNewTab() {
         // URL of the button source
-        var buttonSourceUrl = "/esaksham/";
+        var buttonSourceUrl = "/esaksham_1/";
 
         // Open a new tab with the specified URL
         window.open(buttonSourceUrl, '_blank');

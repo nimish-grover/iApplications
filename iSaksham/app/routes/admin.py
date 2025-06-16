@@ -1,4 +1,5 @@
-from flask import flash, redirect, render_template, request, session, url_for
+import random
+from flask import flash, jsonify, redirect, render_template, request, session, url_for
 from flask_login import current_user, login_required, login_user, logout_user,login_manager
 from flask_smorest import Blueprint
 from passlib.hash import pbkdf2_sha256
@@ -32,8 +33,12 @@ def login():
         else:
             flash('No Records Found !! Please validate your Credentials.')
             return redirect(url_for('admin.login'))
-        
-    return render_template('login.html')
+    num1 = random.randint(1, 10)
+    num2 = random.randint(1, 10)
+    captcha = {"answer":num1 + num2,"num1":num1, "num2":num2}
+    session['captcha'] = captcha
+    captcha_display = f"{num1} + {num2} = ?"
+    return render_template('login.html',captcha_display=captcha_display)
 
 # Route for user registration
 @blp.route('/register', methods=["POST", "GET"])
@@ -68,8 +73,29 @@ def register():
         
         else:
             return redirect(url_for('admin.register'))
+        
+    num1 = random.randint(1, 10)
+    num2 = random.randint(1, 10)
+    captcha = {"answer":num1 + num2,"num1":num1, "num2":num2}
+    session['captcha'] = captcha
+    captcha_display = f"{num1} + {num2} = ?"
+    return render_template('register.html',captcha_display=captcha_display)
 
-    return render_template('register.html')
+@blp.route('/get_captcha', methods=['GET'])
+def get_captcha():
+    num1 = random.randint(1, 10)
+    num2 = random.randint(1, 10)
+    captcha = {"answer": num1 + num2, "num1": num1, "num2": num2}
+    session['captcha'] = captcha
+    return jsonify({"num1": num1, "num2": num2})
+
+@blp.route('/validate_captcha', methods=['POST'])
+def validate_captcha():
+    user_answer = request.json.get('answer')
+    expected_answer = session.get('captcha')['answer']
+    if user_answer and expected_answer and int(user_answer) == int(expected_answer):
+        return jsonify(valid=True)
+    return jsonify(valid=False)
 
 
 # Route for OTP verification

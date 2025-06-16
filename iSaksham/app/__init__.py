@@ -34,6 +34,12 @@ def convert_to_seven_digits(number):
 # Creating the Flask application
 def create_app():
     app = Flask(__name__)  # Initializing Flask app
+    app.config.update({
+    "SESSION_COOKIE_SECURE": True,          # Only over HTTPS
+    "SESSION_COOKIE_HTTPONLY": True,        # Not accessible via JS
+    "SESSION_COOKIE_SAMESITE": "Lax"        # Or "Strict" for tighter control
+})
+
     app.config['MAIL_SERVER'] = 'smtp.gmail.com'
     app.config['MAIL_PORT'] = 587
     app.config['MAIL_USE_TLS'] = True
@@ -57,6 +63,14 @@ def create_app():
     migrate = Migrate(app, db)  # Initializing Flask-Migrate with the Flask app
     app.register_blueprint(HomeBlueprint)  # Registering home blueprint with the Flask app
     app.register_blueprint(AuthBlueprint)  # Registering authentication blueprint with the Flask app
+    
+    @app.after_request
+    def set_security_headers(response):
+        response.headers["X-Content-Type-Options"] = "nosniff"
+        response.headers["X-Frame-Options"] = "SAMEORIGIN"
+        response.headers["X-XSS-Protection"] = "1; mode=block"
+        response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains; preload"
+        return response
 
     login_manager = LoginManager()  # Initializing LoginManager
     login_manager.login_view = 'admin.login'  # Setting the login view

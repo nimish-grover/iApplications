@@ -1,4 +1,5 @@
-from flask import flash, render_template, request
+import random
+from flask import flash, render_template, request, session
 from flask_smorest import Blueprint
 from flask_login import login_required
 from iSaksham.app.models.chapters import Chapters
@@ -121,4 +122,9 @@ def feedback():
 
         flash("Thank You for sharing your feedback")  # Flashing a message to indicate successful feedback submission
         return render_template('feedback.html')  # Rendering feedback.html template
-    return render_template('feedback.html')  # Rendering feedback.html template for GET requests
+    num1 = random.randint(1, 10)
+    num2 = random.randint(1, 10)
+    captcha = {"answer":num1 + num2,"num1":num1, "num2":num2}
+    session['captcha'] = captcha
+    captcha_display = f"{num1} + {num2} = ?"
+    return render_template('feedback.html',captcha_display=captcha_display)  # Rendering feedback.html template for GET requests

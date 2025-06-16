@@ -4,12 +4,14 @@ document.addEventListener('DOMContentLoaded', function () {
     var splashScreen = document.querySelector('.splash');
 
     function hideSplashScreen() {
-
-        // Simplify hide logic
+        if (splashScreen){
+            // Simplify hide logic
         splashScreen.classList.add('hidden');
 
         // Set session storage flag
         sessionStorage.setItem('hasSeenSplash', true);
+        }; // Ensure splashScreen exists
+        
 
     }
 
@@ -29,9 +31,12 @@ document.addEventListener('DOMContentLoaded', function () {
         hideSplashScreen();
 
     }
+    if (splashScreen) {
+    splashScreen.onclick = hideSplashScreen;
+
+    };
 
     // Bind directly to click
-    splashScreen.onclick = hideSplashScreen;
 
 });
 
@@ -61,6 +66,10 @@ window.addEventListener('load', function () {
 function showLoader() {
     var loader = document.querySelector('.loader');
     loader.classList.remove('loader-hidden');
+}
+function hideLoader() {
+    var loader = document.querySelector('.loader');
+    loader.classList.add('loader-hidden');
 }
 
 // Add .init-loader class to clickable elements (buttons and anchor tags) if they themselves do not have .no-loader class
