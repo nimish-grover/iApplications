@@ -2,6 +2,8 @@
 {% block title %}
 <title>Account - E-Saksham</title>
 {%endblock%}
+
+
 {%block content%}
 <!-- for desktops and laptops -->
 <div class="d-none d-md-block">
@@ -41,7 +43,8 @@
                         {% endwith %}
                         <form action="{{url_for('admin.login')}}" method="post" id="login-form-desktop">
                             <input type="hidden" name="next" value="{{ request.args.get('next', '/') }}">
-
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            
                             <div class="mt-4" >
                                 <input type="email" class="form-control" id="form-size" aria-describedby="emailHelp" name="email" placeholder="Email *">
                             </div>
@@ -54,15 +57,12 @@
                                 Remember Me
                                 </label>
                             </div>
-                             <!-- CAPTCHA Section -->
-                            <div class="mt-3">
-                                <div class="captcha p-2 rounded d-flex align-items-center border-secondary justify-content-center">
-                                    <label class="me-2 mb-0">Solve:</label>
-                                    <span id="captcha-display-desktop">{{ captcha_display }}</span>
-                                    <button type="button" class="btn btn-sm btn-outline-secondary ms-3 no-loader" onclick="refreshCaptcha()">↻ Refresh</button>
-                                </div>
-                                <div class="mt-2"><input type="text" class="form-control form-size" name="captcha_answer" placeholder="Enter CAPTCHA answer" required></div>
+                            
+                            <!-- reCAPTCHA v2 Checkbox -->
+                            <div class="mt-3 d-flex justify-content-center">
+                                <div class="g-recaptcha" data-sitekey="6LcGc2MrAAAAAAvs-_7k6a8zKiLSfTHupAWRf9Gg"></div>
                             </div>
+                            
                             <div class="row justify-content-center mx-1">
                                 <button id="form-size" type="submit" class="btn btn-primary mt-5">Login</button>
                             </div>
@@ -119,6 +119,7 @@
                         {% endif %}
                         {% endwith %}
                         <form action="{{url_for('admin.login')}}" method="post" id="login-form-mobile">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                             <div class="mt-4" >
                                 <input type="email" class="form-control" id="form-size" aria-describedby="emailHelp" name="email" placeholder="Email *">
                             </div>
@@ -132,15 +133,12 @@
                                 Remember Me
                                 </label>
                             </div>
-                             <!-- CAPTCHA Section -->
-                            <div class="mt-3">
-                                <div class="captcha p-2 rounded d-flex align-items-center border-secondary justify-content-center">
-                                    <label class="me-2 mb-0">Solve:</label>
-                                    <span id="captcha-display-mobile">{{ captcha_display }}</span>
-                                    <button type="button" class="btn btn-sm btn-outline-secondary ms-3 no-loader" onclick="refreshCaptcha()">↻ Refresh</button>
-                                </div>
-                                <div class="mt-2"><input type="text" class="form-control form-size" name="captcha_answer" placeholder="Enter CAPTCHA answer" required></div>
+                            
+                            <!-- reCAPTCHA v2 Checkbox for mobile -->
+                            <div class="mt-3 d-flex justify-content-center">
+                                <div class="g-recaptcha" data-sitekey="6LcGc2MrAAAAAAvs-_7k6a8zKiLSfTHupAWRf9Gg" data-size="compact"></div>
                             </div>
+                            
                             <div class="row justify-content-center mx-1">
                                 <button id="form-size" type="submit" class="btn btn-primary mt-3">Login</button>
                             </div>
@@ -160,52 +158,6 @@
         </div>
     </div>
 </div>
-<!-- CAPTCHA JS -->
-<script>
-function refreshCaptcha() {
-    fetch('{{ url_for("admin.get_captcha") }}')
-        .then(response => response.json())
-        .then(data => {
-            const expr = `${data.num1} + ${data.num2} = ?`;
-            document.getElementById('captcha-display-desktop').innerText = expr;
-            document.getElementById('captcha-display-mobile').innerText = expr;
-        })
-        .catch(err => console.error('CAPTCHA refresh failed:', err));
-}
 
-function handleCaptchaValidation(formId) {
-    const form = document.getElementById(formId);
-    form.addEventListener('submit', function (e) {
-        e.preventDefault();
-        const captchaAnswer = form.querySelector('input[name="captcha_answer"]').value;
-
-        fetch('{{ url_for("admin.validate_captcha") }}', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ answer: captchaAnswer })
-        })
-        .then(res => res.json())
-        .then(data => {
-            if (data.valid) {
-                showLoader();
-                form.submit();
-            } else {
-                hideLoader();
-                alert('Invalid CAPTCHA. Please try again.');
-                refreshCaptcha();
-                form.querySelector('input[name="captcha_answer"]').value = '';
-            }
-        })
-        .catch(() => {
-            alert('Error validating CAPTCHA. Try again.');
-        });
-    });
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-    handleCaptchaValidation('login-form-desktop');
-    handleCaptchaValidation('login-form-mobile');
-});
-</script>
-
+<!-- We don't need any additional JavaScript for v2 Checkbox as it handles verification on its own -->
 {%endblock%}

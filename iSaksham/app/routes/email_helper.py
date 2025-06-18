@@ -77,7 +77,7 @@ def send_email(recipient_email):
             If you didn't request this OTP, please ignore this email.
             
             Regards,
-            Yukt Saksham (Digital Learning Platform)
+            E Saksham (Digital Learning Platform)
         """
     # Create a multipart email
     msg = MIMEMultipart()
@@ -94,6 +94,90 @@ def send_email(recipient_email):
             server.sendmail(sender_email, recipient_email, msg.as_string())  # Send the email
             print("Email sent successfully!")
             return {"otp": otp}
+    except Exception as e:
+        print(f"Error sending email: {e}")
+        return False
+    
+
+    
+def send_new_user_email(recipient_email,username):
+    # SMTP server configuration
+    smtp_server = "smtp.gmail.com"
+    smtp_port = 587
+    sender_email = "noreply.esaksham@gmail.com"  # Your sender email
+    sender_password = 'hcpe tquf mabp bfyl'  # Your email password
+
+
+    # Create the email content
+    subject = "Account Created Successfully"
+    
+    template = f"""
+            Hello {username},
+            
+            Your account has been created. Your password is {username[:4]}_123@.
+            
+            If you have any questions, feel free to contact our support team.
+            
+            Regards,
+            E Saksham (Digital Learning Platform)
+        """
+    # Create a multipart email
+    msg = MIMEMultipart()
+    msg['From'] = sender_email
+    msg['To'] = recipient_email
+    msg['Subject'] = subject
+    msg.attach(MIMEText(template, 'plain'))
+
+    try:
+        # Connect to the SMTP server
+        with smtplib.SMTP(smtp_server, smtp_port) as server:
+            server.starttls()  # Upgrade the connection to secure
+            server.login(sender_email, sender_password)  # Log in to the server
+            server.sendmail(sender_email, recipient_email, msg.as_string())  # Send the email
+            print("Email sent successfully!")
+            return True
+    except Exception as e:
+        print(f"Error sending email: {e}")
+        return False
+
+    
+def send_reset_email(recipient_email,username):
+    # SMTP server configuration
+    smtp_server = "smtp.gmail.com"
+    smtp_port = 587
+    sender_email = "noreply.esaksham@gmail.com"  # Your sender email
+    sender_password = 'hcpe tquf mabp bfyl'  # Your email password
+
+
+    # Create the email content
+    subject = "Password Reset Request"
+    
+    template = f"""
+            Hello {username},
+            
+            We received a request to reset your password. Your password after reset is {recipient_email[:4]}_123@.
+            
+            If you didn't request this, please login and change the password.
+            If you have any questions, feel free to contact our support team.
+            
+            Regards,
+            E Saksham (Digital Learning Platform)
+        """
+    # Create a multipart email
+    msg = MIMEMultipart()
+    msg['From'] = sender_email
+    msg['To'] = recipient_email
+    msg['Subject'] = subject
+    msg.attach(MIMEText(template, 'plain'))
+
+    try:
+        # Connect to the SMTP server
+        with smtplib.SMTP(smtp_server, smtp_port) as server:
+            server.starttls()  # Upgrade the connection to secure
+            server.login(sender_email, sender_password)  # Log in to the server
+            server.sendmail(sender_email, recipient_email, msg.as_string())  # Send the email
+            print("Email sent successfully!")
+            return True
     except Exception as e:
         print(f"Error sending email: {e}")
         return False

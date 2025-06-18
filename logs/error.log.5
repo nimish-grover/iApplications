@@ -1,0 +1,126 @@
+2025-06-19 02:39:47,409 [ERROR] in __init__: Unhandled Exception
+Traceback (most recent call last):
+  File "/home/grove/miniconda3/envs/flask/lib/python3.11/site-packages/flask/app.py", line 867, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/grove/miniconda3/envs/flask/lib/python3.11/site-packages/flask/app.py", line 852, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/grove/miniconda3/envs/flask/lib/python3.11/site-packages/flask_login/utils.py", line 290, in decorated_view
+    return current_app.ensure_sync(func)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/grove/GitHub/iApplications/iSaksham/app/routes/admin.py", line 207, in change_password
+    return render_template('change_password.html')
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/grove/miniconda3/envs/flask/lib/python3.11/site-packages/flask/templating.py", line 152, in render_template
+    return _render(app, template, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/grove/miniconda3/envs/flask/lib/python3.11/site-packages/flask/templating.py", line 133, in _render
+    rv = template.render(context)
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/grove/miniconda3/envs/flask/lib/python3.11/site-packages/jinja2/environment.py", line 1304, in render
+    self.environment.handle_exception()
+  File "/home/grove/miniconda3/envs/flask/lib/python3.11/site-packages/jinja2/environment.py", line 939, in handle_exception
+    raise rewrite_traceback_stack(source=source)
+  File "/home/grove/GitHub/iApplications/iSaksham/app/templates/change_password.html", line 1, in top-level template code
+    {%extends 'base.html'%}
+  File "/home/grove/GitHub/iApplications/iSaksham/app/templates/base.html", line 234, in top-level template code
+    {% block content %}
+  File "/home/grove/GitHub/iApplications/iSaksham/app/templates/change_password.html", line 115, in block 'content'
+    <form action="{{url_for('admin.change_password',id = current_user.uuid)}}" method="post">
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/grove/miniconda3/envs/flask/lib/python3.11/site-packages/flask/app.py", line 1071, in url_for
+    return self.handle_url_build_error(error, endpoint, values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/grove/miniconda3/envs/flask/lib/python3.11/site-packages/flask/app.py", line 1060, in url_for
+    rv = url_adapter.build(  # type: ignore[union-attr]
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/grove/miniconda3/envs/flask/lib/python3.11/site-packages/werkzeug/routing/map.py", line 924, in build
+    raise BuildError(endpoint, values, method, self)
+werkzeug.routing.exceptions.BuildError: Could not build url for endpoint 'admin.change_password' with values ['id']. Did you forget to specify values ['uuid']?
+2025-06-19 02:39:47,430 [ERROR] in __init__: URL: http://127.0.0.1:8080/isaksham/change_password/7dc9292d-6481-4990-aa07-ea85eac51a62
+2025-06-19 02:39:47,434 [ERROR] in __init__: Payload: N/A
+2025-06-19 02:48:35,959 [ERROR] in __init__: Unhandled Exception
+Traceback (most recent call last):
+  File "/home/grove/miniconda3/envs/flask/lib/python3.11/site-packages/flask/app.py", line 867, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/grove/miniconda3/envs/flask/lib/python3.11/site-packages/flask/app.py", line 852, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/grove/miniconda3/envs/flask/lib/python3.11/site-packages/flask_login/utils.py", line 290, in decorated_view
+    return current_app.ensure_sync(func)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/grove/GitHub/iApplications/iSaksham/app/routes/admin.py", line 207, in change_password
+    return render_template('change_password.html')
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/grove/miniconda3/envs/flask/lib/python3.11/site-packages/flask/templating.py", line 152, in render_template
+    return _render(app, template, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/grove/miniconda3/envs/flask/lib/python3.11/site-packages/flask/templating.py", line 133, in _render
+    rv = template.render(context)
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/grove/miniconda3/envs/flask/lib/python3.11/site-packages/jinja2/environment.py", line 1304, in render
+    self.environment.handle_exception()
+  File "/home/grove/miniconda3/envs/flask/lib/python3.11/site-packages/jinja2/environment.py", line 939, in handle_exception
+    raise rewrite_traceback_stack(source=source)
+  File "/home/grove/GitHub/iApplications/iSaksham/app/templates/change_password.html", line 1, in top-level template code
+    {%extends 'base.html'%}
+  File "/home/grove/GitHub/iApplications/iSaksham/app/templates/base.html", line 234, in top-level template code
+    {% block content %}
+  File "/home/grove/GitHub/iApplications/iSaksham/app/templates/change_password.html", line 43, in block 'content'
+    <form action="{{url_for('admin.change_password',uuuuid = current_user.uuid)}}" method="post">
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/grove/miniconda3/envs/flask/lib/python3.11/site-packages/flask/app.py", line 1071, in url_for
+    return self.handle_url_build_error(error, endpoint, values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/grove/miniconda3/envs/flask/lib/python3.11/site-packages/flask/app.py", line 1060, in url_for
+    rv = url_adapter.build(  # type: ignore[union-attr]
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/grove/miniconda3/envs/flask/lib/python3.11/site-packages/werkzeug/routing/map.py", line 924, in build
+    raise BuildError(endpoint, values, method, self)
+werkzeug.routing.exceptions.BuildError: Could not build url for endpoint 'admin.change_password' with values ['uuuuid']. Did you forget to specify values ['uuid']?
+2025-06-19 02:48:35,974 [ERROR] in __init__: URL: http://127.0.0.1:8080/isaksham/change_password/7dc9292d-6481-4990-aa07-ea85eac51a62
+2025-06-19 02:48:35,978 [ERROR] in __init__: Payload: N/A
+2025-06-19 02:49:36,589 [ERROR] in __init__: Unhandled Exception
+Traceback (most recent call last):
+  File "/home/grove/miniconda3/envs/flask/lib/python3.11/site-packages/flask/app.py", line 867, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/grove/miniconda3/envs/flask/lib/python3.11/site-packages/flask/app.py", line 852, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/grove/miniconda3/envs/flask/lib/python3.11/site-packages/flask_login/utils.py", line 290, in decorated_view
+    return current_app.ensure_sync(func)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/grove/GitHub/iApplications/iSaksham/app/routes/admin.py", line 236, in reset_password
+    return render_template('reset_password.html')
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/grove/miniconda3/envs/flask/lib/python3.11/site-packages/flask/templating.py", line 152, in render_template
+    return _render(app, template, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/grove/miniconda3/envs/flask/lib/python3.11/site-packages/flask/templating.py", line 133, in _render
+    rv = template.render(context)
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/grove/miniconda3/envs/flask/lib/python3.11/site-packages/jinja2/environment.py", line 1304, in render
+    self.environment.handle_exception()
+  File "/home/grove/miniconda3/envs/flask/lib/python3.11/site-packages/jinja2/environment.py", line 939, in handle_exception
+    raise rewrite_traceback_stack(source=source)
+  File "/home/grove/GitHub/iApplications/iSaksham/app/templates/reset_password.html", line 1, in top-level template code
+    {%extends 'base.html'%}
+  File "/home/grove/GitHub/iApplications/iSaksham/app/templates/base.html", line 234, in top-level template code
+    {% block content %}
+  File "/home/grove/GitHub/iApplications/iSaksham/app/templates/reset_password.html", line 44, in block 'content'
+    <form action="{{url_for('admin.reset_password',id = current_user.id)}}" method="post">
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/grove/miniconda3/envs/flask/lib/python3.11/site-packages/flask/app.py", line 1071, in url_for
+    return self.handle_url_build_error(error, endpoint, values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/grove/miniconda3/envs/flask/lib/python3.11/site-packages/flask/app.py", line 1060, in url_for
+    rv = url_adapter.build(  # type: ignore[union-attr]
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/grove/miniconda3/envs/flask/lib/python3.11/site-packages/werkzeug/routing/map.py", line 924, in build
+    raise BuildError(endpoint, values, method, self)
+werkzeug.routing.exceptions.BuildError: Could not build url for endpoint 'admin.reset_password' with values ['id']. Did you forget to specify values ['uuid']?
+2025-06-19 02:49:36,611 [ERROR] in __init__: URL: http://127.0.0.1:8080/isaksham/reset_password/2
+2025-06-19 02:49:36,616 [ERROR] in __init__: Payload: N/A

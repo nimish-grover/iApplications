@@ -1,0 +1,14 @@
+User-agent: *
+Disallow: /admin/
+Disallow: /dev/
+Disallow: /api/
+Disallow: /login/
+Disallow: /register/
+Disallow: /reset-password/
+Disallow: /account/
+
+# Allow specific directories
+Allow: /static/
+Allow: /images/
+Allow: /css/
+Allow: /js/

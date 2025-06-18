@@ -1,0 +1,112 @@
+2025-06-19 01:45:27,614 [ERROR] in __init__: Unhandled Exception
+Traceback (most recent call last):
+  File "/home/grove/miniconda3/envs/flask/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "/home/grove/miniconda3/envs/flask/lib/python3.11/site-packages/sqlalchemy/engine/default.py", line 941, in do_execute
+    cursor.execute(statement, parameters)
+psycopg2.OperationalError: server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/grove/miniconda3/envs/flask/lib/python3.11/site-packages/flask/app.py", line 867, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/grove/miniconda3/envs/flask/lib/python3.11/site-packages/flask/app.py", line 852, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/grove/GitHub/iApplications/iSaksham/app/routes/admin.py", line 53, in login
+    user = User.query.filter_by(email=email).first()
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/grove/miniconda3/envs/flask/lib/python3.11/site-packages/sqlalchemy/orm/query.py", line 2728, in first
+    return self.limit(1)._iter().first()  # type: ignore
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/grove/miniconda3/envs/flask/lib/python3.11/site-packages/sqlalchemy/orm/query.py", line 2827, in _iter
+    result: Union[ScalarResult[_T], Result[_T]] = self.session.execute(
+                                                  ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/grove/miniconda3/envs/flask/lib/python3.11/site-packages/sqlalchemy/orm/session.py", line 2362, in execute
+    return self._execute_internal(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/grove/miniconda3/envs/flask/lib/python3.11/site-packages/sqlalchemy/orm/session.py", line 2247, in _execute_internal
+    result: Result[Any] = compile_state_cls.orm_execute_statement(
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/grove/miniconda3/envs/flask/lib/python3.11/site-packages/sqlalchemy/orm/context.py", line 305, in orm_execute_statement
+    result = conn.execute(
+             ^^^^^^^^^^^^^
+  File "/home/grove/miniconda3/envs/flask/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1418, in execute
+    return meth(
+           ^^^^^
+  File "/home/grove/miniconda3/envs/flask/lib/python3.11/site-packages/sqlalchemy/sql/elements.py", line 515, in _execute_on_connection
+    return connection._execute_clauseelement(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/grove/miniconda3/envs/flask/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1640, in _execute_clauseelement
+    ret = self._execute_context(
+          ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/grove/miniconda3/envs/flask/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1846, in _execute_context
+    return self._exec_single_context(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/grove/miniconda3/envs/flask/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1986, in _exec_single_context
+    self._handle_dbapi_exception(
+  File "/home/grove/miniconda3/envs/flask/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 2355, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "/home/grove/miniconda3/envs/flask/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "/home/grove/miniconda3/envs/flask/lib/python3.11/site-packages/sqlalchemy/engine/default.py", line 941, in do_execute
+    cursor.execute(statement, parameters)
+sqlalchemy.exc.OperationalError: (psycopg2.OperationalError) server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+
+[SQL: SELECT "user".id AS user_id, "user".name AS user_name, "user".email AS user_email, "user".password AS user_password, "user".is_active AS user_is_active, "user".is_admin AS user_is_admin, "user".registered_on AS user_registered_on, "user".uuid AS user_uuid 
+FROM "user" 
+WHERE "user".email = %(email_1)s 
+ LIMIT %(param_1)s]
+[parameters: {'email_1': 'grovernimish2003@gmail.com', 'param_1': 1}]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-06-19 01:45:27,639 [ERROR] in __init__: URL: http://127.0.0.1:8080/isaksham/login
+2025-06-19 01:45:27,643 [ERROR] in __init__: Payload: N/A
+2025-06-19 02:22:08,853 [ERROR] in __init__: Unhandled Exception
+Traceback (most recent call last):
+  File "/home/grove/miniconda3/envs/flask/lib/python3.11/site-packages/flask/app.py", line 867, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/grove/miniconda3/envs/flask/lib/python3.11/site-packages/flask/app.py", line 852, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/grove/miniconda3/envs/flask/lib/python3.11/site-packages/flask_login/utils.py", line 290, in decorated_view
+    return current_app.ensure_sync(func)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/grove/GitHub/iApplications/iSaksham/app/routes/learning.py", line 74, in course_2018
+    return render_template('course_2018.html',accordion_content = accordion_content,accordion_title= accordion_title,registered=registered,review=review)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/grove/miniconda3/envs/flask/lib/python3.11/site-packages/flask/templating.py", line 152, in render_template
+    return _render(app, template, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/grove/miniconda3/envs/flask/lib/python3.11/site-packages/flask/templating.py", line 133, in _render
+    rv = template.render(context)
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/grove/miniconda3/envs/flask/lib/python3.11/site-packages/jinja2/environment.py", line 1304, in render
+    self.environment.handle_exception()
+  File "/home/grove/miniconda3/envs/flask/lib/python3.11/site-packages/jinja2/environment.py", line 939, in handle_exception
+    raise rewrite_traceback_stack(source=source)
+  File "/home/grove/GitHub/iApplications/iSaksham/app/templates/course_2018.html", line 1, in top-level template code
+    {%extends 'base.html'%}
+  File "/home/grove/GitHub/iApplications/iSaksham/app/templates/base.html", line 234, in top-level template code
+    {% block content %}
+  File "/home/grove/GitHub/iApplications/iSaksham/app/templates/course_2018.html", line 13, in block 'content'
+    <a class="btn btn-primary mt-3" style="width: fit-content; z-index: 2; border-radius: 70px;" href="{{url_for('learning.play_chapter',id = 1)}}">
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/grove/miniconda3/envs/flask/lib/python3.11/site-packages/flask/app.py", line 1071, in url_for
+    return self.handle_url_build_error(error, endpoint, values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/grove/miniconda3/envs/flask/lib/python3.11/site-packages/flask/app.py", line 1060, in url_for
+    rv = url_adapter.build(  # type: ignore[union-attr]
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/grove/miniconda3/envs/flask/lib/python3.11/site-packages/werkzeug/routing/map.py", line 924, in build
+    raise BuildError(endpoint, values, method, self)
+werkzeug.routing.exceptions.BuildError: Could not build url for endpoint 'learning.play_chapter' with values ['id']. Did you forget to specify values ['uuid']?
+2025-06-19 02:22:08,877 [ERROR] in __init__: URL: http://127.0.0.1:8080/isaksham/course_2018
+2025-06-19 02:22:08,881 [ERROR] in __init__: Payload: N/A

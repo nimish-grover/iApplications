@@ -1,7 +1,0 @@
-Super user to be added 
-troubleshooting purpose(SU)
-with dashboard
-
-Closed User Group 
-
-Postgres hosted at AWS

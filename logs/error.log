@@ -1,0 +1,16 @@
+2025-06-19 03:03:04,655 [ERROR] in __init__: URL: http://127.0.0.1:8080/isaksham/register
+2025-06-19 03:03:04,661 [ERROR] in __init__: Payload: N/A
+2025-06-19 03:05:15,890 [ERROR] in __init__: Unhandled Exception
+Traceback (most recent call last):
+  File "/home/grove/miniconda3/envs/flask/lib/python3.11/site-packages/flask/app.py", line 867, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/grove/miniconda3/envs/flask/lib/python3.11/site-packages/flask/app.py", line 852, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/grove/GitHub/iApplications/iSaksham/app/routes/admin.py", line 145, in verify_otp
+    user = User(name, email, password)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: __init__() missing 2 required positional arguments: 'is_active' and 'is_admin'
+2025-06-19 03:05:15,894 [ERROR] in __init__: URL: http://127.0.0.1:8080/isaksham/verify_otp
+2025-06-19 03:05:15,895 [ERROR] in __init__: Payload: N/A

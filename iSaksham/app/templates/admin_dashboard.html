@@ -1,0 +1,871 @@
+{%extends 'base.html'%}
+{% block title %}
+<title>Admin Dashboard - E-Saksham</title>
+{%endblock%}
+{% block css %}
+<!-- Font Awesome CSS -->
+<style>
+    .user-actions {
+        white-space: nowrap;
+    }
+    .form-switch {
+        padding-left: 2.5em;
+    }
+    .table-responsive {
+        overflow-x: auto;
+    }
+    .search-container {
+        margin-bottom: 20px;
+    }
+    .timestamp {
+        white-space: nowrap;
+    }
+    .admin-info {
+        font-size: 0.9rem;
+        color: #6c757d;
+    }
+    .action-btn {
+        margin-right: 5px;
+    }
+    .sortable {
+        cursor: pointer;
+    }
+    .sortable:hover {
+        background-color: rgba(0,0,0,0.05);
+    }
+    .sort-icon {
+        margin-left: 7px;
+        cursor: pointer;
+    }
+    .form-check-input:checked {
+        background-color: #198754;
+        border-color: #198754;
+    }
+    .form-check-input:not(:checked) {
+        background-color: #dc3545;
+        border-color: #dc3545;
+    }
+    .mobile-list-item {
+        padding: 12px 15px;
+    }
+    .mobile-item-header {
+        margin-bottom: 10px;
+    }
+    .mobile-item-content {
+        margin-bottom: 8px;
+    }
+    .mobile-item-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-top: 8px;
+    }
+    .mobile-action-btn {
+        padding: 0.25rem 0.5rem;
+    }
+</style>
+{% endblock %}
+{%block content%}
+<!-- for desktops and laptops -->
+<div class="d-none d-md-block">
+    <div class="container-fluid m-0 p-0" style="background-color: #A3A2A2; width: 100%;">
+        <div class="row roboto pt-4 justify-content-center text-center">
+            <div class="fs-1 fw-semibold text-white">Admin Dashboard</div>
+            <div class="text-light">Manage users and system settings</div>
+            <div class="container mt-3" id="overlay" style="width: fit-content; z-index: 2;">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb p-3 m-0">
+                        <li class="breadcrumb-item"><a href="{{url_for('learning.home')}}" class="text-secondary" style="text-decoration: none;">Home</a></li>
+                        <li class="breadcrumb-item active" aria-current="page"><a href="{{url_for('admin.dashboard')}}" style="text-decoration: none;">Admin Dashboard</a></li>
+                    </ol>
+                </nav>
+            </div>
+            
+        </div>
+        <div class="row" style="margin-top: -30px; z-index: 1;">
+            <div class="container" id="overlay" style="width: 45%; height: 100px;"></div>
+        </div>
+        <div class="row p-0" style="height: 50px; min-width: 100%; margin-top:-70px; background-color: white;"></div>
+    </div>
+    <div class="container-fluid m-0 p-0 bg-white justify-content-center" style="width: 100%; display: flex;">
+        <div class="row py-5 mb-5" style="width: 90%;">
+            <div class="card py-4 px-4" style="border-width: 5px;">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="fs-2 fw-semibold">User Management</div>
+                        </div>
+                        <div class="col-md-6 text-end">
+                            <a href="{{url_for('admin.export_users')}}" class="btn btn-success me-2" data-bs-toggle="tooltip" title="Export Users to CSV">
+                                <i class="fas fa-file-excel"></i> Export Users
+                            </a>
+                            <a href="{{url_for('admin.add_user')}}" class="btn btn-primary" data-bs-toggle="tooltip" title="Create New User">
+                                <i class="fas fa-user-plus"></i> Add New User
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <div class="row mt-4">
+                        {% with messages = get_flashed_messages() %}
+                        {% if messages %}
+                        <div class="alert alert-{% if 'Successfully' in messages[0] %}success{%else%}danger{%endif%} text-center" role="alert">
+                        {{ messages[0] }}
+                        </div>
+                        {% endif %}
+                        {% endwith %}
+                        
+                        <!-- Search and Filter -->
+                        <div class="search-container">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="input-group">
+                                        <input type="text" id="searchInput" class="form-control" placeholder="Search by name or email">
+                                        <button class="btn btn-outline-secondary" type="button" id="searchButton">
+                                            <i class="fas fa-search"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <select class="form-select" id="statusFilter">
+                                        <option value="all">All Status</option>
+                                        <option value="active">Active</option>
+                                        <option value="inactive">Inactive</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <select class="form-select" id="sortBySelect">
+                                        <option value="name">Sort by Name</option>
+                                        <option value="email">Sort by Email</option>
+                                        <option value="date">Sort by Registration Date</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Users Table -->
+                        <div class="table-responsive mt-3">
+                            <table class="table table-hover" id="usersTable">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th scope="col">#</th>
+                                        <th scope="col" class="sortable" data-sort="name">Name <span class="sort-icon" style="cursor: pointer;"></span></th>
+                                        <th scope="col" class="sortable" data-sort="email">Email <span class="sort-icon" style="cursor: pointer;"></span></th>
+                                        <th scope="col" class="sortable" data-sort="date">Registration Date <span class="sort-icon" style="cursor: pointer;"></span></th>
+                                        <th scope="col">Status</th>
+                                        <th class="text-center" scope="col">Admin</th>
+                                        <th scope="col">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for user in users %}
+                                    <tr class="user-row" 
+                                        data-name="{{ user.name }}" 
+                                        data-email="{{ user.email }}" 
+                                        data-date="{{ user.registered_on.strftime('%Y-%m-%d %H:%M:%S') }}"
+                                        data-active="{{ user.is_active|lower }}"
+                                        data-admin="{{ user.is_admin|lower }}"
+                                        data-uuid="{{ user.uuid }}">
+                                        <th scope="row" class="row-index">{{ loop.index }}</th>
+                                        <td>{{ user.name }}</td>
+                                        <td>{{ user.email }}</td>
+                                        <td class="timestamp">{{ user.registered_on.strftime('%Y-%m-%d %H:%M') }}</td>
+                                        <td class="text-center">
+                                            <div class="form-check form-switch">
+                                                <input class="form-check-input status-toggle" type="checkbox" 
+                                                       id="statusToggle-{{ user.uuid }}" 
+                                                       data-user-uuid="{{ user.uuid }}" 
+                                                       {{ "checked" if user.is_active else "" }}>
+                                            </div>
+                                        </td>
+                                        <td class="text-center">
+                                            <i class="fas {% if user.is_admin %}fa-check text-success{% else %}fa-times text-danger{% endif %}"></i>
+                                        </td>
+                                        <td class="user-actions">
+                                            <!-- Reset Password Button -->
+                                            <button type="button" class="btn btn-sm btn-warning action-btn reset-password-btn" 
+                                                    data-user-uuid="{{ user.uuid }}" 
+                                                    data-user-email="{{ user.email }}"
+                                                    data-user-name="{{ user.name }}"
+                                                    data-bs-toggle="tooltip" title="Reset Password">
+                                                <i class="fas fa-key"></i>
+                                            </button>
+                                            
+                                            <!-- Delete User Button -->
+                                            <button type="button" class="btn btn-sm btn-danger action-btn delete-user-btn" 
+                                                    data-user-uuid="{{ user.uuid }}"
+                                                    data-user-name="{{ user.name }}"
+                                                    data-user-email="{{ user.email }}"
+                                                    data-bs-toggle="tooltip" title="Delete User">
+                                                <i class="fas fa-trash-alt"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- for mobiles -->
+<div class="d-sm-block d-md-none">
+    <div class="container-fluid m-0 p-0" style="background-color: #A3A2A2; width: 100%;">
+        <div class="row roboto pt-4 justify-content-center text-center">
+            <div class="fs-1 fw-semibold text-white">Admin Dashboard</div>
+            <div class="text-light">Manage users and system settings</div>
+            <div class="container mt-3" id="overlay" style="width: fit-content; z-index: 2;">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb p-3 m-0">
+                        <li class="breadcrumb-item"><a href="{{url_for('learning.home')}}" class="text-secondary" style="text-decoration: none;">Home</a></li>
+                        <li class="breadcrumb-item active" aria-current="page"><a href="{{url_for('admin.dashboard')}}" style="text-decoration: none;">Admin Dashboard</a></li>
+                    </ol>
+                </nav>
+            </div>
+        </div>
+        <div class="row" style="margin-top: -30px; z-index: 1;">
+            <div class="container" id="overlay" style="width: 65%; height: 100px;"></div>
+        </div>
+        <div class="row p-0" style="height: 50px; min-width: 100%; margin-top:-70px; background-color: white;"></div>
+    </div>
+    <div class="container-fluid p-0 bg-white justify-content-center" style="width: 100%; display: flex; margin-top: -2px;">
+        <div class="row py-3 mb-3" style="width: 95%;">
+            <div class="card py-3 px-3" style="border-width: 5px;">
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-12 mb-2">
+                            <div class="fs-4 fw-semibold">User Management</div>
+                        </div>
+                        <div class="col-12 mb-3">
+                            <div class="dropdown">
+                                <button class="btn btn-primary btn-sm dropdown-toggle" type="button" id="actionDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="fas fa-cog"></i> Actions
+                                </button>
+                                <ul class="dropdown-menu" aria-labelledby="actionDropdown">
+                                    <li><a class="dropdown-item" href="{{url_for('admin.export_users')}}"><i class="fas fa-file-excel me-2"></i> Export Users</a></li>
+                                    <li><a class="dropdown-item" href="{{url_for('admin.add_user')}}"><i class="fas fa-user-plus me-2"></i> Add New User</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        {% with messages = get_flashed_messages() %}
+                        {% if messages %}
+                        <div class="alert alert-{% if 'Successfully' in messages[0] %}success{%else%}danger{%endif%} text-center" role="alert">
+                        {{ messages[0] }}
+                        </div>
+                        {% endif %}
+                        {% endwith %}
+                        
+                        <!-- Search -->
+                        <div class="input-group mb-3">
+                            <input type="text" id="searchInputMobile" class="form-control" placeholder="Search users...">
+                            <button class="btn btn-outline-secondary" type="button" id="searchButtonMobile">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </div>
+                        
+                        <!-- Filter Options -->
+                        <div class="mb-3">
+                            <select class="form-select form-select-sm mb-2" id="statusFilterMobile">
+                                <option value="all">All Status</option>
+                                <option value="active">Active</option>
+                                <option value="inactive">Inactive</option>
+                            </select>
+                            <select class="form-select form-select-sm" id="sortBySelectMobile">
+                                <option value="name">Sort by Name</option>
+                                <option value="email">Sort by Email</option>
+                                <option value="date">Sort by Registration Date</option>
+                            </select>
+                        </div>
+                        
+                        <!-- Users List -->
+                        <div class="list-group" id="usersList">
+                            {% for user in users %}
+                            <div class="list-group-item list-group-item-action user-row-mobile mobile-list-item"
+                                 data-name="{{ user.name }}" 
+                                 data-email="{{ user.email }}" 
+                                 data-date="{{ user.registered_on.strftime('%Y-%m-%d %H:%M:%S') }}"
+                                 data-active="{{ user.is_active|lower }}"
+                                 data-admin="{{ user.is_admin|lower }}"
+                                 data-uuid="{{ user.uuid }}">
+                                <div class="d-flex w-100 justify-content-between mobile-item-header">
+                                    <h6 class="mb-1">{{ user.name }}</h6>
+                                    <span>
+                                        {% if user.is_admin %}
+                                        <i class="fas fa-crown text-warning ms-1" title="Admin"></i>
+                                        {% endif %}
+                                    </span>
+                                </div>
+                                <div class="mobile-item-content">
+                                    <p class="mb-1">{{ user.email }}</p>
+                                    <small>Registered: {{ user.registered_on.strftime('%Y-%m-%d') }}</small>
+                                </div>
+                                <div class="mobile-item-footer">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input status-toggle-mobile" type="checkbox" 
+                                               id="statusToggleMobile-{{ user.uuid }}" 
+                                               data-user-uuid="{{ user.uuid }}" 
+                                               {{ "checked" if user.is_active else "" }}>
+                                    </div>
+                                    <div>
+                                        <button type="button" class="btn btn-sm btn-warning mobile-action-btn reset-password-btn-mobile" 
+                                                data-user-uuid="{{ user.uuid }}" 
+                                                data-user-email="{{ user.email }}"
+                                                data-user-name="{{ user.name }}"
+                                                title="Reset Password">
+                                            <i class="fas fa-key"></i>
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-danger mobile-action-btn delete-user-btn-mobile" 
+                                                data-user-uuid="{{ user.uuid }}"
+                                                data-user-name="{{ user.name }}"
+                                                data-user-email="{{ user.email }}"
+                                                title="Delete User">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Hidden form for delete user action -->
+<form id="deleteUserForm" action="" method="post" style="display: none;">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+</form>
+
+<!-- JavaScript for user status toggle and other interactions -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize tooltips
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+    
+    // Current sort state
+    let currentSort = {
+        column: 'name',
+        direction: 'asc'
+    };
+    
+    // Apply initial sort
+    sortTable('name', 'asc');
+    
+    // Status toggle for desktop
+    const statusToggles = document.querySelectorAll('.status-toggle');
+    statusToggles.forEach(toggle => {
+        
+        toggle.addEventListener('change', function() {
+            const userUuid = this.dataset.userUuid;
+            const isActive = this.checked;
+            showLoader();
+            // Send AJAX request to update user status
+            fetch(`/isaksham/toggle-user-status/${userUuid}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCsrfToken() // Implement this function to get CSRF token
+                },
+                body: JSON.stringify({
+                    is_active: isActive
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Update data attribute for filtering
+                    this.closest('tr').dataset.active = isActive.toString();
+                    
+                    // Log activity
+                    logActivity(userUuid, `User status changed to ${isActive ? 'active' : 'inactive'}`);
+                    hideLoader();
+                } else {
+                    // Revert toggle if there was an error
+                    this.checked = !isActive;
+                    alert('Failed to update user status: ' + data.message);
+                    hideLoader();
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                this.checked = !isActive;
+                hideLoader();
+                alert('An error occurred while updating user status');
+            });
+        });
+    });
+    
+    // Status toggle for mobile
+    const mobileStatusToggles = document.querySelectorAll('.status-toggle-mobile');
+    mobileStatusToggles.forEach(toggle => {
+        toggle.addEventListener('change', function() {
+            const userUuid = this.dataset.userUuid;
+            const isActive = this.checked;
+            showLoader();
+            // Send AJAX request to update user status
+            fetch(`/isaksham/toggle-user-status/${userUuid}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCsrfToken()
+                },
+                body: JSON.stringify({
+                    is_active: isActive
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Update data attribute for filtering
+                    this.closest('.list-group-item').dataset.active = isActive.toString();
+                    
+                    // Log activity
+                    logActivity(userUuid, `User status changed to ${isActive ? 'active' : 'inactive'}`);
+                    hideLoader();
+                } else {
+                    // Revert toggle if there was an error
+                    this.checked = !isActive;
+                    hideLoader();
+                    alert('Failed to update user status: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                this.checked = !isActive;
+                hideLoader();
+                alert('An error occurred while updating user status');
+            });
+        });
+    });
+    
+    // Reset Password buttons for desktop
+    const resetPasswordBtns = document.querySelectorAll('.reset-password-btn');
+    resetPasswordBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const userUuid = this.dataset.userUuid;
+            const userEmail = this.dataset.userEmail;
+            const userName = this.dataset.userName;
+            showLoader();
+            // Generate default password (first four letters of email + _123@)
+            const defaultPassword = userEmail.substring(0, 4).toLowerCase() + "_123@";
+            
+            if (confirm(`Reset password for ${userName} (${userEmail}) to "${defaultPassword}"?`)) {
+                // Send request to reset password
+                fetch(`/isaksham/reset-password/${userUuid}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCsrfToken()
+                    },
+                    body: JSON.stringify({
+                        default_password: defaultPassword
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert(`Password for ${userName} has been reset to "${defaultPassword}"`);
+                        hideLoader();
+                        // Log activity
+                        logActivity(userUuid, `Password reset by admin (nimish-grover)`);
+                    } else {
+                        hideLoader();
+                        alert('Failed to reset password: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    hideLoader();
+                    alert('An error occurred while resetting password');
+                });
+            }
+        });
+    });
+    
+    // Reset Password buttons for mobile
+    const resetPasswordBtnsMobile = document.querySelectorAll('.reset-password-btn-mobile');
+    resetPasswordBtnsMobile.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const userUuid = this.dataset.userUuid;
+            const userEmail = this.dataset.userEmail;
+            const userName = this.dataset.userName;
+            showLoader();
+            // Generate default password (first four letters of email + _123@)
+            const defaultPassword = userEmail.substring(0, 4).toLowerCase() + "_123@";
+            
+            if (confirm(`Reset password for ${userName} to "${defaultPassword}"?`)) {
+                // Send request to reset password
+                fetch(`/isaksham/reset-password/${userUuid}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCsrfToken()
+                    },
+                    body: JSON.stringify({
+                        default_password: defaultPassword
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert(`Password for ${userName} has been reset to "${defaultPassword}"`);
+                        hideLoader();
+                        // Log activity
+                        logActivity(userUuid, `Password reset by admin (nimish-grover)`);
+                    } else {
+                        hideLoader();
+                        alert('Failed to reset password: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    hideLoader();
+                    console.error('Error:', error);
+                    alert('An error occurred while resetting password');
+                });
+            }
+        });
+    });
+    
+    // Delete User buttons for desktop
+    const deleteUserBtns = document.querySelectorAll('.delete-user-btn');
+    deleteUserBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const userUuid = this.dataset.userUuid;
+            const userName = this.dataset.userName;
+            const userEmail = this.dataset.userEmail;
+            showLoader();
+            if (confirm(`Are you sure you want to delete user: ${userName} (${userEmail})? This action cannot be undone.`)) {
+                // Log activity before deleting
+                
+                logActivity('admin', `Deleted user: ${userName} (${userEmail})`);
+                
+                const form = document.getElementById('deleteUserForm');
+                form.action = `/isaksham/delete-user/${userUuid}`;
+                form.submit();
+                hideLoader();
+            }
+        });
+    });
+    
+    // Delete User buttons for mobile
+    const deleteUserBtnsMobile = document.querySelectorAll('.delete-user-btn-mobile');
+    deleteUserBtnsMobile.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const userUuid = this.dataset.userUuid;
+            const userName = this.dataset.userName;
+            const userEmail = this.dataset.userEmail;
+            showLoader();
+            if (confirm(`Are you sure you want to delete user: ${userName}? This action cannot be undone.`)) {
+                // Log activity before deleting
+                logActivity('admin', `Deleted user: ${userName} (${userEmail})`);
+                
+                const form = document.getElementById('deleteUserForm');
+                form.action = `/isaksham/delete-user/${userUuid}`;
+                form.submit();
+                hideLoader();
+            }
+        });
+    });
+    
+    // Function to log activity
+    function logActivity(userUuid, action) {
+        showLoader();
+        fetch('/isaksham/log-activity', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCsrfToken()
+            },
+            body: JSON.stringify({
+                user_uuid: userUuid,
+                action: action,
+                timestamp: new Date().toISOString()
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            hideLoader();
+            if (!data.success) {
+                console.error('Failed to log activity:', data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error logging activity:', error);
+        });
+    }
+    
+    // Function to get CSRF token from cookie
+    function getCsrfToken() {
+        return document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+    }
+    
+    // Table sorting (client-side)
+    const sortableHeaders = document.querySelectorAll('.sortable');
+    sortableHeaders.forEach(header => {
+        header.addEventListener('click', function() {
+            const column = this.dataset.sort;
+            const direction = currentSort.column === column && currentSort.direction === 'asc' ? 'desc' : 'asc';
+            
+            // Update sort icons
+            sortableHeaders.forEach(h => {
+                h.querySelector('.sort-icon').innerHTML = '';
+            });
+            
+            const icon = direction === 'asc' ? '↑' : '↓';
+            this.querySelector('.sort-icon').innerHTML = icon;
+            
+            // Sort the table
+            sortTable(column, direction);
+            
+            // Update current sort state
+            currentSort.column = column;
+            currentSort.direction = direction;
+            
+            // Update sort select to match
+            document.getElementById('sortBySelect').value = column;
+            document.getElementById('sortBySelectMobile').value = column;
+        });
+    });
+    
+    // Function to sort table
+    function sortTable(column, direction) {
+        const table = document.getElementById('usersTable');
+        const tbody = table.querySelector('tbody');
+        const rows = Array.from(tbody.querySelectorAll('tr.user-row'));
+        
+        // Sort rows
+        rows.sort((a, b) => {
+            let valueA = a.dataset[column];
+            let valueB = b.dataset[column];
+            
+            // Handle date comparison
+            if (column === 'date') {
+                valueA = new Date(valueA);
+                valueB = new Date(valueB);
+                return direction === 'asc' ? valueA - valueB : valueB - valueA;
+            }
+            
+            // Handle string comparison
+            if (direction === 'asc') {
+                return valueA.localeCompare(valueB);
+            } else {
+                return valueB.localeCompare(valueA);
+            }
+        });
+        
+        // Reorder rows in the table
+        rows.forEach((row, index) => {
+            tbody.appendChild(row);
+            row.querySelector('.row-index').textContent = index + 1;
+        });
+        
+        // Also sort mobile list
+        sortMobileList(column, direction);
+    }
+    
+    // Function to sort mobile list
+    function sortMobileList(column, direction) {
+        const list = document.getElementById('usersList');
+        const items = Array.from(list.querySelectorAll('.user-row-mobile'));
+        
+        // Sort items
+        items.sort((a, b) => {
+            let valueA = a.dataset[column];
+            let valueB = b.dataset[column];
+            
+            // Handle date comparison
+            if (column === 'date') {
+                valueA = new Date(valueA);
+                valueB = new Date(valueB);
+                return direction === 'asc' ? valueA - valueB : valueB - valueA;
+            }
+            
+            // Handle string comparison
+            if (direction === 'asc') {
+                return valueA.localeCompare(valueB);
+            } else {
+                return valueB.localeCompare(valueA);
+            }
+        });
+        
+        // Reorder items in the list
+        items.forEach(item => {
+            list.appendChild(item);
+        });
+    }
+    
+    // Search functionality (client-side)
+    const searchInput = document.getElementById('searchInput');
+    const searchButton = document.getElementById('searchButton');
+    
+    function performSearch(query) {
+        query = query.toLowerCase();
+        
+        // Filter desktop table rows
+        const rows = document.querySelectorAll('tr.user-row');
+        rows.forEach(row => {
+            const name = row.dataset.name.toLowerCase();
+            const email = row.dataset.email.toLowerCase();
+            
+            if (name.includes(query) || email.includes(query)) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+        
+        // Filter mobile list items
+        const items = document.querySelectorAll('.user-row-mobile');
+        items.forEach(item => {
+            const name = item.dataset.name.toLowerCase();
+            const email = item.dataset.email.toLowerCase();
+            
+            if (name.includes(query) || email.includes(query)) {
+                item.style.display = '';
+            } else {
+                item.style.display = 'none';
+            }
+        });
+        
+        // Re-number visible rows
+        const visibleRows = Array.from(rows).filter(row => row.style.display !== 'none');
+        visibleRows.forEach((row, index) => {
+            row.querySelector('.row-index').textContent = index + 1;
+        });
+    }
+    
+    if (searchButton) {
+        searchButton.addEventListener('click', () => {
+            performSearch(searchInput.value);
+        });
+    }
+    
+    if (searchInput) {
+        searchInput.addEventListener('keyup', (e) => {
+            performSearch(searchInput.value);
+        });
+    }
+    
+    // Mobile search
+    const searchInputMobile = document.getElementById('searchInputMobile');
+    const searchButtonMobile = document.getElementById('searchButtonMobile');
+    
+    if (searchButtonMobile) {
+        searchButtonMobile.addEventListener('click', () => {
+            performSearch(searchInputMobile.value);
+        });
+    }
+    
+    if (searchInputMobile) {
+        searchInputMobile.addEventListener('keyup', (e) => {
+            performSearch(searchInputMobile.value);
+        });
+    }
+    
+    // Filter functionality (client-side)
+    const statusFilter = document.getElementById('statusFilter');
+    const sortBySelect = document.getElementById('sortBySelect');
+    const statusFilterMobile = document.getElementById('statusFilterMobile');
+    const sortBySelectMobile = document.getElementById('sortBySelectMobile');
+    
+    function applyFilters(status) {
+        // Filter desktop table rows
+        const rows = document.querySelectorAll('tr.user-row');
+        rows.forEach(row => {
+            const isActive = row.dataset.active === 'true';
+            
+            if (status === 'all' || (status === 'active' && isActive) || (status === 'inactive' && !isActive)) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+        
+        // Filter mobile list items
+        const items = document.querySelectorAll('.user-row-mobile');
+        items.forEach(item => {
+            const isActive = item.dataset.active === 'true';
+            
+            if (status === 'all' || (status === 'active' && isActive) || (status === 'inactive' && !isActive)) {
+                item.style.display = '';
+            } else {
+                item.style.display = 'none';
+            }
+        });
+        
+        // Re-number visible rows
+        const visibleRows = Array.from(rows).filter(row => row.style.display !== 'none');
+        visibleRows.forEach((row, index) => {
+            row.querySelector('.row-index').textContent = index + 1;
+        });
+    }
+    
+    if (statusFilter) {
+        statusFilter.addEventListener('change', () => {
+            applyFilters(statusFilter.value);
+            // Sync mobile filter
+            statusFilterMobile.value = statusFilter.value;
+        });
+    }
+    
+    if (sortBySelect) {
+        sortBySelect.addEventListener('change', () => {
+            const column = sortBySelect.value;
+            sortTable(column, 'asc');
+            currentSort.column = column;
+            currentSort.direction = 'asc';
+            
+            // Update sort icons
+            sortableHeaders.forEach(h => {
+                h.querySelector('.sort-icon').innerHTML = '';
+                if (h.dataset.sort === column) {
+                    h.querySelector('.sort-icon').innerHTML = '↑';
+                }
+            });
+            
+            // Sync mobile sort
+            sortBySelectMobile.value = sortBySelect.value;
+        });
+    }
+    
+    if (statusFilterMobile) {
+        statusFilterMobile.addEventListener('change', () => {
+            applyFilters(statusFilterMobile.value);
+            // Sync desktop filter
+            statusFilter.value = statusFilterMobile.value;
+        });
+    }
+    
+    if (sortBySelectMobile) {
+        sortBySelectMobile.addEventListener('change', () => {
+            const column = sortBySelectMobile.value;
+            sortTable(column, 'asc');
+            currentSort.column = column;
+            currentSort.direction = 'asc';
+            
+            // Update sort icons on desktop
+            sortableHeaders.forEach(h => {
+                h.querySelector('.sort-icon').innerHTML = '';
+                if (h.dataset.sort === column) {
+                    h.querySelector('.sort-icon').innerHTML = '↑';
+                }
+            });
+            
+            // Sync desktop sort
+            sortBySelect.value = sortBySelectMobile.value;
+        });
+    }
+});
+</script>
+{%endblock%}

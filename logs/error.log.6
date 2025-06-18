@@ -1,0 +1,95 @@
+2025-06-19 02:24:31,082 [ERROR] in __init__: Unhandled Exception
+Traceback (most recent call last):
+  File "/home/grove/miniconda3/envs/flask/lib/python3.11/site-packages/flask/app.py", line 867, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/grove/miniconda3/envs/flask/lib/python3.11/site-packages/flask/app.py", line 852, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/grove/miniconda3/envs/flask/lib/python3.11/site-packages/flask_login/utils.py", line 290, in decorated_view
+    return current_app.ensure_sync(func)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/grove/GitHub/iApplications/iSaksham/app/routes/learning.py", line 74, in course_2018
+    return render_template('course_2018.html',accordion_content = accordion_content,accordion_title= accordion_title,registered=registered,review=review)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/grove/miniconda3/envs/flask/lib/python3.11/site-packages/flask/templating.py", line 151, in render_template
+    template = app.jinja_env.get_or_select_template(template_name_or_list)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/grove/miniconda3/envs/flask/lib/python3.11/site-packages/jinja2/environment.py", line 1084, in get_or_select_template
+    return self.get_template(template_name_or_list, parent, globals)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/grove/miniconda3/envs/flask/lib/python3.11/site-packages/jinja2/environment.py", line 1013, in get_template
+    return self._load_template(name, globals)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/grove/miniconda3/envs/flask/lib/python3.11/site-packages/jinja2/environment.py", line 972, in _load_template
+    template = self.loader.load(self, name, self.make_globals(globals))
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/grove/miniconda3/envs/flask/lib/python3.11/site-packages/jinja2/loaders.py", line 138, in load
+    code = environment.compile(source, name, filename)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/grove/miniconda3/envs/flask/lib/python3.11/site-packages/jinja2/environment.py", line 768, in compile
+    self.handle_exception(source=source_hint)
+  File "/home/grove/miniconda3/envs/flask/lib/python3.11/site-packages/jinja2/environment.py", line 939, in handle_exception
+    raise rewrite_traceback_stack(source=source)
+  File "/home/grove/GitHub/iApplications/iSaksham/app/templates/course_2018.html", line 271, in template
+    <a class="list-group-item list-group-item-action" href="{{url_for('learning.play_chapter',uuid '3c12df79-7b8a-4d21-a5c3-bd4e129ee29e' chapter.uuid)}}" style="text-decoration: none;" >
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+jinja2.exceptions.TemplateSyntaxError: expected token ',', got 'string'
+2025-06-19 02:24:31,106 [ERROR] in __init__: URL: http://127.0.0.1:8080/isaksham/course_2018
+2025-06-19 02:24:31,110 [ERROR] in __init__: Payload: N/A
+2025-06-19 02:25:54,916 [ERROR] in __init__: Unhandled Exception
+Traceback (most recent call last):
+  File "/home/grove/miniconda3/envs/flask/lib/python3.11/site-packages/flask/app.py", line 867, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/grove/miniconda3/envs/flask/lib/python3.11/site-packages/flask/app.py", line 852, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/grove/miniconda3/envs/flask/lib/python3.11/site-packages/flask_login/utils.py", line 290, in decorated_view
+    return current_app.ensure_sync(func)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/grove/GitHub/iApplications/iSaksham/app/routes/learning.py", line 74, in course_2018
+    return render_template('course_2018.html',accordion_content = accordion_content,accordion_title= accordion_title,registered=registered,review=review)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/grove/miniconda3/envs/flask/lib/python3.11/site-packages/flask/templating.py", line 151, in render_template
+    template = app.jinja_env.get_or_select_template(template_name_or_list)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/grove/miniconda3/envs/flask/lib/python3.11/site-packages/jinja2/environment.py", line 1084, in get_or_select_template
+    return self.get_template(template_name_or_list, parent, globals)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/grove/miniconda3/envs/flask/lib/python3.11/site-packages/jinja2/environment.py", line 1013, in get_template
+    return self._load_template(name, globals)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/grove/miniconda3/envs/flask/lib/python3.11/site-packages/jinja2/environment.py", line 972, in _load_template
+    template = self.loader.load(self, name, self.make_globals(globals))
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/grove/miniconda3/envs/flask/lib/python3.11/site-packages/jinja2/loaders.py", line 138, in load
+    code = environment.compile(source, name, filename)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/grove/miniconda3/envs/flask/lib/python3.11/site-packages/jinja2/environment.py", line 768, in compile
+    self.handle_exception(source=source_hint)
+  File "/home/grove/miniconda3/envs/flask/lib/python3.11/site-packages/jinja2/environment.py", line 939, in handle_exception
+    raise rewrite_traceback_stack(source=source)
+  File "/home/grove/GitHub/iApplications/iSaksham/app/templates/course_2018.html", line 13, in template
+    <a class="btn btn-primary mt-3" style="width: fit-content; z-index: 2; border-radius: 70px;" href="{{url_for('learning.play_chapter',uuid = 3c12df79-7b8a-4d21-a5c3-bd4e129ee29e)}}">
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+jinja2.exceptions.TemplateSyntaxError: expected token ',', got 'c12df79'
+2025-06-19 02:25:54,930 [ERROR] in __init__: URL: http://127.0.0.1:8080/isaksham/course_2018
+2025-06-19 02:25:54,933 [ERROR] in __init__: Payload: N/A
+2025-06-19 02:35:57,676 [ERROR] in __init__: Unhandled Exception
+Traceback (most recent call last):
+  File "/home/grove/miniconda3/envs/flask/lib/python3.11/site-packages/flask/app.py", line 867, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/grove/miniconda3/envs/flask/lib/python3.11/site-packages/flask/app.py", line 852, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/grove/miniconda3/envs/flask/lib/python3.11/site-packages/flask_login/utils.py", line 290, in decorated_view
+    return current_app.ensure_sync(func)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/grove/GitHub/iApplications/iSaksham/app/routes/learning.py", line 101, in play_chapter
+    if chapter_db['link']:
+       ~~~~~~~~~~^^^^^^^^
+TypeError: 'NoneType' object is not subscriptable
+2025-06-19 02:35:57,681 [ERROR] in __init__: URL: http://127.0.0.1:8080/isaksham/play_chapter/411e3a30-efe2-4cce-b250-2ddcdf965d2
+2025-06-19 02:35:57,685 [ERROR] in __init__: Payload: N/A

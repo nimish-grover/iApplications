@@ -2,55 +2,71 @@
 {% block title %}
 <title>Contact - E-Saksham</title>
 {%endblock%}
+{%block css%}
+<style>
+    .map{
+        width: 100%;
+        height: 300px;
+        border-radius: 10px;
+        overflow: hidden;
+    }
+</style>
+{%endblock%}
 {%block content%}
 <!-- for desktops and laptops -->
 <div class="d-none d-md-block">
 <div class="container-fluid m-0 p-0" style="background-color: #A3A2A2; width: 100%;">
     <div class="row roboto px-5 justify-content-center text-center" style="width: 100%;">
         <div class="fs-1 fw-semibold text-white pt-3">Contact</div>
-        <div class="container mt-3 bg-primary " id="overlay" style="width: fit-content; z-index: 2;">
+        <div class="container mt-3 " id="overlay" style="width: fit-content; z-index: 2;">
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb p-3 m-0">
                     <li class="breadcrumb-item "><a href="{{url_for('learning.home')}}" 
-                            style="text-decoration: none; color: white;">Home</a></li>
+                            style="text-decoration: none;">Home</a></li>
                     <li class="breadcrumb-item active " aria-current="page"><a href="{{url_for('learning.contact')}}"
-                            style="text-decoration: none; color: white;">Contact</a></li>
+                            style="text-decoration: none;">Contact</a></li>
                 </ol>
             </nav>
         </div>
 
     </div>
     <div class="row" style="margin-top: -30px; z-index: 1; width: 100%;">
-        <div class="container bg-primary" id="overlay" style="width: 45%; height: 100px;"></div>
+        <div class="container" id="overlay" style="width: 45%; height: 100px;"></div>
     </div>
-    <div class="row mx-auto" style="height: 100px; width: 100%; margin-top:-70px; background-color: #0d6efd;">
+    <div class="row mx-auto bg-white" style="height: 100px; width: 100%; margin-top:-70px;">
 
     </div>
 </div>
-<div class="container-fluid m-0 p-0 bg-primary justify-content-center" style="width: 100%; display: flex; height: 100%;">
+<div class="container-fluid m-0 p-0 justify-content-center" style="width: 100%; display: flex; height: 100%;">
     <div class="row py-5 mb-5" style="width: 80%;">
         <div class="col-1"></div>
         <div class="col-5">
             <div class="address-container justify-content-center" style="display: grid; justify-items: center;">
-                <a class="no-loader" href="https://maps.app.goo.gl/XhEsnN6DZJii2kJw9" style="text-decoration: none;" target="_blank"><div class="location-circle"><i class="fa-solid fa-location-dot" style="color: #ffffff; font-size: 70px;"></i></div>
-                </a>
+                <!-- <a class="no-loader" href="https://maps.app.goo.gl/XhEsnN6DZJii2kJw9" style="text-decoration: none;" target="_blank"><div class="location-circle"><i class="fa-solid fa-location-dot" style="color: #ffffff; font-size: 70px;"></i></div>
+                </a> -->
+                <div class="map">
+                    <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3202.975928402601!2d77.18778967511483!3d28.566443775700915!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x390d1d86f4bf9563%3A0x78a36449d9899e9f!2sDeutsche%20Gesellschaft%20f%C3%BCr%20Internationale%20Zusammenarbeit%20(GIZ)%20GmbH!5e1!3m2!1sen!2sin!4v1750273216648!5m2!1sen!2sin" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+                </div>
                 <div class="row pt-5 text-center">
-                    <div class="fw-semibold text-white fs-5" style="width: 100%;">GIZ Office</div>
+                    <div class="fw-semibold fs-5" style="width: 100%;">GIZ Office</div>
                 </div>
                 <div class="row pt-3">
-                    <div class="text-white text-center">Deutsche Gesellschaft für Internationale Zusammenarbeit (GIZ) GmbH, A2/18, Block A 2, Nauroji Nagar, Safdarjung Enclave, New Delhi, Delhi 110029</div>
+                    <div class=" text-center">Deutsche Gesellschaft für Internationale Zusammenarbeit (GIZ) GmbH, A2/18, Block A 2, Nauroji Nagar, Safdarjung Enclave, New Delhi, Delhi 110029</div>
                 </div>
             </div>
         </div>
         
         <div class="col-5">
             <div class="address-container justify-content-center" style="display: grid; justify-items: center;">
-                <a class="no-loader" href="https://maps.app.goo.gl/vghGYeh68Fyb1nCW7" style="text-decoration: none;" target="_blank"><div class="location-circle"><i class="fa-solid fa-location-dot" style="color: #ffffff; font-size: 70px;"></i></div></a>
+                <!-- <a class="no-loader" href="https://maps.app.goo.gl/vghGYeh68Fyb1nCW7" style="text-decoration: none;" target="_blank"><div class="location-circle"><i class="fa-solid fa-location-dot" style="color: #ffffff; font-size: 70px;"></i></div></a> -->
+                <div class="map">
+                        <iframe src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d3201.4692472193856!2d77.2103778!3d28.61591!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x390ce2b6943f2eb3%3A0x1659fe3e955af504!2sKrishi%20Bhavan!5e1!3m2!1sen!2sin!4v1750273430819!5m2!1sen!2sin" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+                    </div>
                 <div class="row pt-5 text-center">
-                    <div class="fw-semibold text-white fs-5" style="width: 100%;">MGNREGA Office</div>
+                    <div class="fw-semibold fs-5" style="width: 100%;">MGNREGA Office</div>
                 </div>
                 <div class="row pt-3">
-                    <div class="text-white text-center">MGNREGA (Department of Rural Development), G Wing, Krishi Bhawan New Delhi Delhi , 11000</div>
+                    <div class="text-center">MGNREGA (Department of Rural Development), G Wing, Krishi Bhawan New Delhi Delhi , 11000</div>
                 </div>
             </div>
         </div>
@@ -58,54 +74,60 @@
     </div>
     
 </div>
-<div class="row mx-auto" style="height: 80px; width: 100%; background-color: #0d6efd;"></div>
+<div class="row mx-auto bg-white" style="height: 80px; width: 100%;"></div>
 </div>
 <!-- for mobiles -->
 <div class=" d-sm-block d-md-none">
     <div class="container-fluid m-0 p-0" style="background-color: #A3A2A2; width: 100%;">
         <div class="row roboto px-5 justify-content-center text-center">
             <div class="fs-1 fw-semibold text-white pt-3">Contact</div>
-            <div class="container mt-3 bg-primary " id="overlay" style="width: fit-content; z-index: 2;">
+            <div class="container mt-3 " id="overlay" style="width: fit-content; z-index: 2;">
                 <nav aria-label="breadcrumb">
                     <ol class="breadcrumb p-3 m-0">
                         <li class="breadcrumb-item "><a href="{{url_for('learning.home')}}" 
-                                style="text-decoration: none; color: white;">Home</a></li>
+                                style="text-decoration: none;">Home</a></li>
                         <li class="breadcrumb-item active " aria-current="page"><a href="{{url_for('learning.contact')}}"
-                                style="text-decoration: none; color: white;">Contact</a></li>
+                                style="text-decoration: none;">Contact</a></li>
                     </ol>
                 </nav>
             </div>
     
         </div>
         <div class="row" style="margin-top: -30px; z-index: 1; ">
-            <div class="container bg-primary" id="overlay" style="width: 65%; height: 100px;"></div>
+            <div class="container" id="overlay" style="width: 65%; height: 100px;"></div>
         </div>
-        <div class="row mx-auto" style="height: 80px; width: 100%; margin-top:-70px; background-color: #0d6efd;">
+        <div class="row mx-auto" style="height: 80px; width: 100%; margin-top:-70px;">
     
         </div>
     </div>
-    <div class="container-fluid m-0 p-0 bg-primary justify-content-center" style="width: 100%; height: 100%;">
+    <div class="container-fluid m-0 p-0 justify-content-center" style="width: 100%; height: 100%;">
         <div class="container p-3 mb-3">
             <div class="address-container justify-content-center" style="display: grid; justify-items: center;">
-                <a class="no-loader" href="https://maps.app.goo.gl/XhEsnN6DZJii2kJw9" style="text-decoration: none;" target="_blank"><div class="location-circle"><i class="fa-solid fa-location-dot" style="color: #ffffff; font-size: 70px;"></i></div>
-                </a>
+                <!-- <a class="no-loader" href="https://maps.app.goo.gl/XhEsnN6DZJii2kJw9" style="text-decoration: none;" target="_blank"><div class="location-circle"><i class="fa-solid fa-location-dot" style="color: #ffffff; font-size: 70px;"></i></div>
+                </a> -->
+                <div class="map">
+                    <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3202.975928402601!2d77.18778967511483!3d28.566443775700915!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x390d1d86f4bf9563%3A0x78a36449d9899e9f!2sDeutsche%20Gesellschaft%20f%C3%BCr%20Internationale%20Zusammenarbeit%20(GIZ)%20GmbH!5e1!3m2!1sen!2sin!4v1750273216648!5m2!1sen!2sin" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+                </div>
                 <div class="row pt-5 text-center">
-                    <div class="fw-semibold text-white fs-5" style="width: 100%;">GIZ Office</div>
+                    <div class="fw-semibold fs-5" style="width: 100%;">GIZ Office</div>
                 </div>
                 <div class="row pt-3">
-                    <div class="text-white text-center">Deutsche Gesellschaft für Internationale Zusammenarbeit (GIZ) GmbH, A2/18, Block A 2, Nauroji Nagar, Safdarjung Enclave, New Delhi, Delhi 110029</div>
+                    <div class="text-center">Deutsche Gesellschaft für Internationale Zusammenarbeit (GIZ) GmbH, A2/18, Block A 2, Nauroji Nagar, Safdarjung Enclave, New Delhi, Delhi 110029</div>
                 </div>
             </div>
         </div>
         <div class="container p-3">
             
                 <div class="address-container justify-content-center" style="display: grid; justify-items: center;">
-                    <a class="no-loader" href="https://maps.app.goo.gl/vghGYeh68Fyb1nCW7" style="text-decoration: none;" target="_blank"><div class="location-circle"><i class="fa-solid fa-location-dot" style="color: #ffffff; font-size: 70px;"></i></div></a>
+                    <!-- <a class="no-loader" href="https://maps.app.goo.gl/vghGYeh68Fyb1nCW7" style="text-decoration: none;" target="_blank"><div class="location-circle"><i class="fa-solid fa-location-dot" style="color: #ffffff; font-size: 70px;"></i></div></a> -->
+                    <div class="map">
+                        <iframe src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d3201.4692472193856!2d77.2103778!3d28.61591!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x390ce2b6943f2eb3%3A0x1659fe3e955af504!2sKrishi%20Bhavan!5e1!3m2!1sen!2sin!4v1750273430819!5m2!1sen!2sin" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+                    </div>
                     <div class="row pt-5 text-center">
-                        <div class="fw-semibold text-white fs-5" style="width: 100%;">MGNREGA Office</div>
+                        <div class="fw-semibold fs-5" style="width: 100%;">MGNREGA Office</div>
                     </div>
                     <div class="row pt-3">
-                        <div class="text-white text-center">MGNREGA (Department of Rural Development),&nbsp; G Wing, Krishi Bhawan New Delhi Delhi , 11000</div>
+                        <div class="text-center">MGNREGA (Department of Rural Development),&nbsp; G Wing, Krishi Bhawan New Delhi Delhi , 11000</div>
                     </div>
                 </div>
             
@@ -113,7 +135,7 @@
         </div>
         
     </div>
-    <div class="row mx-auto" style="height: 80px; width: 100%; background-color: #0d6efd; margin-top: -2px;"></div>
+    <div class="row mx-auto" style="height: 80px; width: 100%; margin-top: -2px;"></div>
 </div>
 
 

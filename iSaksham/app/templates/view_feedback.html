@@ -1,0 +1,856 @@
+{%extends 'base.html'%}
+{% block title %}
+<title>Manage Feedback - E-Saksham</title>
+{%endblock%}
+{% block css %}
+<!-- Font Awesome CSS -->
+<style>
+    .user-actions {
+        white-space: nowrap;
+    }
+    .table-responsive {
+        overflow-x: auto;
+    }
+    .search-container {
+        margin-bottom: 20px;
+    }
+    .timestamp {
+        white-space: nowrap;
+    }
+    .admin-info {
+        font-size: 0.9rem;
+        color: #6c757d;
+    }
+    .action-btn {
+        margin-right: 5px;
+    }
+    .sortable {
+        cursor: pointer;
+    }
+    .sortable:hover {
+        background-color: rgba(0,0,0,0.05);
+    }
+    .sort-icon {
+        margin-left: 5px;
+    }
+    .rating-display {
+        color: #ffc107;
+    }
+    .attachment-icon {
+        color: #0d6efd;
+        font-size: 1.2rem;
+        cursor: pointer;
+        transition: transform 0.2s ease;
+    }
+    .attachment-icon:hover {
+        transform: scale(1.2);
+    }
+    .message-preview {
+        max-width: 200px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .feedback-card {
+        margin-bottom: 15px;
+        border-radius: 10px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    .feedback-card .card-header {
+        background-color: #f8f9fa;
+    }
+    .feedback-card .rating-mobile {
+        color: #ffc107;
+        font-size: 18px;
+    }
+    .category-badge {
+        font-size: 0.8rem;
+        padding: 0.25rem 0.5rem;
+        border-radius: 10px;
+    }
+    .badge-technical {
+        background-color: #17a2b8;
+        color: white;
+    }
+    .badge-subject_related {
+        background-color: #28a745;
+        color: white;
+    }
+    .badge-admin {
+        background-color: #dc3545;
+        color: white;
+    }
+    .badge-course {
+        background-color: #fd7e14;
+        color: white;
+    }
+    .badge-others {
+        background-color: #6c757d;
+        color: white;
+    }
+    .filter-label {
+        font-weight: 600;
+        margin-bottom: 5px;
+    }
+    .feedback-detail {
+        margin-top: 15px;
+        display: none;
+        padding: 15px;
+        background-color: #f8f9fa;
+        border-radius: 8px;
+    }
+    .feedback-detail .message-full {
+        white-space: pre-wrap;
+        margin-top: 10px;
+    }
+    .feedback-row {
+        cursor: pointer;
+    }
+    .feedback-row:hover {
+        background-color: #f8f9fa;
+    }
+</style>
+{% endblock %}
+{%block content%}
+<!-- for desktops and laptops -->
+<div class="d-none d-md-block">
+    <div class="container-fluid m-0 p-0" style="background-color: #A3A2A2; width: 100%;">
+        <div class="row roboto pt-4 justify-content-center text-center">
+            <div class="fs-1 fw-semibold text-white">Feedback Management</div>
+            <div class="text-light">View and manage user feedback</div>
+            <div class="container mt-3" id="overlay" style="width: fit-content; z-index: 2;">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb p-3 m-0">
+                        <li class="breadcrumb-item"><a href="{{url_for('learning.home')}}" class="text-secondary" style="text-decoration: none;">Home</a></li>
+                        <li class="breadcrumb-item"><a href="{{url_for('admin.dashboard')}}" class="text-secondary" style="text-decoration: none;">Admin Dashboard</a></li>
+                        <li class="breadcrumb-item active" aria-current="page"><a href="{{url_for('admin.view_feedback')}}" style="text-decoration: none;">Feedback</a></li>
+                    </ol>
+                </nav>
+            </div>
+            
+        </div>
+        <div class="row" style="margin-top: -30px; z-index: 1;">
+            <div class="container" id="overlay" style="width: 45%; height: 100px;"></div>
+        </div>
+        <div class="row p-0" style="height: 50px; min-width: 100%; margin-top:-70px; background-color: white;"></div>
+    </div>
+    <div class="container-fluid m-0 p-0 bg-white justify-content-center" style="width: 100%; display: flex;">
+        <div class="row py-5 mb-5" style="width: 90%;">
+            <div class="card py-4 px-4" style="border-width: 5px;">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="fs-2 fw-semibold">Feedback Management</div>
+                        </div>
+                        <div class="col-md-6 text-end">
+                            <a href="{{url_for('admin.export_feedback')}}" class="btn btn-success me-2" data-bs-toggle="tooltip" title="Export Feedback to CSV">
+                                <i class="fas fa-file-excel"></i> Export Feedback
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <div class="row mt-4">
+                        {% with messages = get_flashed_messages() %}
+                        {% if messages %}
+                        <div class="alert alert-{% if 'Successfully' in messages[0] %}success{%else%}danger{%endif%} text-center" role="alert">
+                        {{ messages[0] }}
+                        </div>
+                        {% endif %}
+                        {% endwith %}
+                        
+                        <!-- Search and Filter -->
+                        <div class="search-container">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="input-group">
+                                        <input type="text" id="searchInput" class="form-control" placeholder="Search by name, email or subject">
+                                        <button class="btn btn-outline-secondary" type="button" id="searchButton">
+                                            <i class="fas fa-search"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <select class="form-select" id="categoryFilter">
+                                        <option value="all">All Categories</option>
+                                        <option value="technical">Technical</option>
+                                        <option value="subject_related">Subject Related</option>
+                                        <option value="admin">Admin</option>
+                                        <option value="course">Course</option>
+                                        <option value="others">Others</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-2">
+                                    <select class="form-select" id="ratingFilter">
+                                        <option value="all">All Ratings</option>
+                                        <option value="5">5 Stars</option>
+                                        <option value="4">4 Stars</option>
+                                        <option value="3">3 Stars</option>
+                                        <option value="2">2 Stars</option>
+                                        <option value="1">1 Star</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <select class="form-select" id="sortBySelect">
+                                        <option value="date_desc">Newest First</option>
+                                        <option value="date_asc">Oldest First</option>
+                                        <option value="rating_desc">Highest Rating</option>
+                                        <option value="rating_asc">Lowest Rating</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Feedback Table -->
+                        <div class="table-responsive">
+                            <table class="table table-hover" id="feedbackTable">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th scope="col" width="5%">#</th>
+                                        <th scope="col" class="sortable" data-sort="date" width="10%">Date <span class="sort-icon"></span></th>
+                                        <th scope="col" class="sortable" data-sort="name" width="15%">Name <span class="sort-icon"></span></th>
+                                        <th scope="col" class="sortable" data-sort="email" width="15%">Email <span class="sort-icon"></span></th>
+                                        <th scope="col" width="10%">Category</th>
+                                        <th scope="col" width="10%">Subject</th>
+                                        <th scope="col" width="25%">Message</th>
+                                        <th scope="col" class="sortable" data-sort="rating" width="5%">Rating <span class="sort-icon"></span></th>
+                                        <th scope="col" width="5%">Attachment</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for feedback in feedbacks %}
+                                    <tr class="feedback-row" 
+                                        data-name="{{ feedback.name }}" 
+                                        data-email="{{ feedback.email }}" 
+                                        data-subject="{{ feedback.subject }}"
+                                        data-category="{{ feedback.message_category }}"
+                                        data-rating="{{ feedback.rating }}"
+                                        data-date="{{ feedback.created_at.strftime('%Y-%m-%d %H:%M:%S') }}"
+                                        data-id="{{ feedback.id }}">
+                                        <th scope="row" class="row-index">{{ loop.index }}</th>
+                                        <td class="timestamp">{{ feedback.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                                        <td>{{ feedback.name }}</td>
+                                        <td>{{ feedback.email }}</td>
+                                        <td>
+                                            <span class="badge category-badge badge-{{ feedback.message_category }}">
+                                                {{ feedback.message_category|replace('_', ' ')|title }}
+                                            </span>
+                                        </td>
+                                        <td>{{ feedback.subject }}</td>
+                                        <td class="message-preview" title="{{ feedback.message }}">{{ feedback.message }}</td>
+                                        <td class="text-center">{{ feedback.rating }}</td>
+                                        <td class="text-center">
+                                            {% if feedback.image_filename %}
+                                            <a href="{{ url_for('static', filename='uploads/' + feedback.image_filename) }}" 
+                                               target="_blank"
+                                               data-bs-toggle="tooltip" 
+                                               title="View image in new tab">
+                                                <i class="fas fa-paperclip attachment-icon"></i>
+                                            </a>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    
+                                    <!-- Feedback Detail Section (Expandable) -->
+                                    <tr id="feedback-detail-{{ feedback.id }}" class="feedback-detail-row" style="display: none;">
+                                        <td colspan="9">
+                                            <div class="feedback-detail">
+                                                <div class="row mb-3">
+                                                    <div class="col-md-6">
+                                                        <p><strong>Name:</strong> {{ feedback.name }}</p>
+                                                        <p><strong>Email:</strong> {{ feedback.email }}</p>
+                                                        <p><strong>Date:</strong> {{ feedback.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</p>
+                                                        <p>
+                                                            <strong>Category:</strong> 
+                                                            <span class="badge category-badge badge-{{ feedback.message_category }}">
+                                                                {{ feedback.message_category|replace('_', ' ')|title }}
+                                                            </span>
+                                                        </p>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <p><strong>Subject:</strong> {{ feedback.subject }}</p>
+                                                        <p><strong>Rating:</strong> {{ feedback.rating }} star</p>
+                                                        {% if feedback.image_filename %}
+                                                        <p>
+                                                            <strong>Attachment:</strong> 
+                                                            <a href="{{ url_for('static', filename='uploads/' + feedback.image_filename) }}" 
+                                                               target="_blank" 
+                                                               class="btn btn-sm btn-primary">
+                                                                <i class="fas fa-external-link-alt me-1"></i> View Image
+                                                            </a>
+                                                        </p>
+                                                        {% endif %}
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col-12">
+                                                        <p><strong>Message:</strong></p>
+                                                        <div class="message-full p-3 bg-white rounded">
+                                                            {{ feedback.message|nl2br }}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- for mobiles -->
+<div class="d-sm-block d-md-none">
+    <div class="container-fluid m-0 p-0" style="background-color: #A3A2A2; width: 100%;">
+        <div class="row roboto pt-4 justify-content-center text-center">
+            <div class="fs-1 fw-semibold text-white">Feedback</div>
+            <div class="text-light">View user feedback</div>
+            <div class="container mt-3" id="overlay" style="width: fit-content; z-index: 2;">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb p-3 m-0">
+                        <li class="breadcrumb-item"><a href="{{url_for('learning.home')}}" class="text-secondary" style="text-decoration: none;">Home</a></li>
+                        <li class="breadcrumb-item"><a href="{{url_for('admin.dashboard')}}" class="text-secondary" style="text-decoration: none;">Admin</a></li>
+                        <li class="breadcrumb-item active" aria-current="page"><a href="{{url_for('admin.view_feedback')}}" style="text-decoration: none;">Feedback</a></li>
+                    </ol>
+                </nav>
+            </div>
+        </div>
+        <div class="row" style="margin-top: -30px; z-index: 1;">
+            <div class="container" id="overlay" style="width: 65%; height: 100px;"></div>
+        </div>
+        <div class="row p-0" style="height: 50px; min-width: 100%; margin-top:-70px; background-color: white;"></div>
+    </div>
+    <div class="container-fluid p-0 bg-white justify-content-center" style="width: 100%; display: flex; margin-top: -2px;">
+        <div class="row py-3 mb-3" style="width: 95%;">
+            <div class="card py-3 px-3" style="border-width: 5px;">
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-12 mb-2">
+                            <div class="fs-4 fw-semibold">Feedback Management</div>
+                            <div class="admin-info small">
+                                <i class="fas fa-user-shield me-1"></i> nimish-grover &nbsp;|&nbsp; 
+                                <i class="fas fa-clock me-1"></i> 2025-06-18 20:00:18
+                            </div>
+                        </div>
+                        <div class="col-12 mb-3 d-flex justify-content-between">
+                            <a href="{{url_for('admin.export_feedback')}}" class="btn btn-success btn-sm">
+                                <i class="fas fa-file-excel me-1"></i> Export
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        {% with messages = get_flashed_messages() %}
+                        {% if messages %}
+                        <div class="alert alert-{% if 'Successfully' in messages[0] %}success{%else%}danger{%endif%} text-center" role="alert">
+                        {{ messages[0] }}
+                        </div>
+                        {% endif %}
+                        {% endwith %}
+                        
+                        <!-- Search -->
+                        <div class="input-group mb-3">
+                            <input type="text" id="searchInputMobile" class="form-control" placeholder="Search feedback...">
+                            <button class="btn btn-outline-secondary" type="button" id="searchButtonMobile">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </div>
+                        
+                        <!-- Filter Options -->
+                        <div class="row mb-3">
+                            <div class="col-6">
+                                <div class="filter-label">Category</div>
+                                <select class="form-select form-select-sm" id="categoryFilterMobile">
+                                    <option value="all">All Categories</option>
+                                    <option value="technical">Technical</option>
+                                    <option value="subject_related">Subject</option>
+                                    <option value="admin">Admin</option>
+                                    <option value="course">Course</option>
+                                    <option value="others">Others</option>
+                                </select>
+                            </div>
+                            <div class="col-6">
+                                <div class="filter-label">Rating</div>
+                                <select class="form-select form-select-sm" id="ratingFilterMobile">
+                                    <option value="all">All Ratings</option>
+                                    <option value="5">5 Stars</option>
+                                    <option value="4">4 Stars</option>
+                                    <option value="3">3 Stars</option>
+                                    <option value="2">2 Stars</option>
+                                    <option value="1">1 Star</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <div class="filter-label">Sort By</div>
+                                <select class="form-select form-select-sm" id="sortBySelectMobile">
+                                    <option value="date_desc">Newest First</option>
+                                    <option value="date_asc">Oldest First</option>
+                                    <option value="rating_desc">Highest Rating</option>
+                                    <option value="rating_asc">Lowest Rating</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <!-- Feedback Cards -->
+                        <div id="feedbackCardContainer">
+                            {% for feedback in feedbacks %}
+                            <div class="card feedback-card mb-3" 
+                                 data-name="{{ feedback.name }}" 
+                                 data-email="{{ feedback.email }}" 
+                                 data-subject="{{ feedback.subject }}"
+                                 data-category="{{ feedback.message_category }}"
+                                 data-rating="{{ feedback.rating }}"
+                                 data-date="{{ feedback.created_at.strftime('%Y-%m-%d %H:%M:%S') }}"
+                                 data-id="{{ feedback.id }}">
+                                <div class="card-header d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <strong>{{ feedback.name }}</strong>
+                                        <div class="small text-muted">{{ feedback.created_at.strftime('%Y-%m-%d %H:%M') }}</div>
+                                    </div>
+                                    <div class="d-flex align-items-center">
+                                        <div class="rating-mobile me-2">
+                                            {{ feedback.rating }} star
+                                        </div>
+                                        {% if feedback.image_filename %}
+                                        <a href="{{ url_for('static', filename='uploads/' + feedback.image_filename) }}" 
+                                           target="_blank"
+                                           class="ms-2">
+                                            <i class="fas fa-paperclip attachment-icon"></i>
+                                        </a>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between mb-2">
+                                        <span class="badge category-badge badge-{{ feedback.message_category }}">
+                                            {{ feedback.message_category|replace('_', ' ')|title }}
+                                        </span>
+                                        <small class="text-muted">{{ feedback.email }}</small>
+                                    </div>
+                                    <h6 class="card-subtitle mb-2">{{ feedback.subject }}</h6>
+                                    <p class="card-text message-preview" data-feedback-id="{{ feedback.id }}">{{ feedback.message }}</p>
+                                    
+                                    <!-- Expandable message area for mobile -->
+                                    <div id="mobile-message-full-{{ feedback.id }}" class="message-full p-3 bg-white rounded mb-3" style="display: none; white-space: pre-wrap;">
+                                        {{ feedback.message }}
+                                    </div>
+                                    
+                                    <div class="text-end mt-2">
+                                        <button class="btn btn-sm btn-primary toggle-message-btn" 
+                                                data-feedback-id="{{ feedback.id }}">
+                                            View Details
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{%endblock%}
+{%block script%}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize tooltips
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+    
+    // Current sort state
+    let currentSort = {
+        column: 'date',
+        direction: 'desc'
+    };
+    
+    // Apply initial sort
+    sortTable('date', 'desc');
+    
+    // Make rows clickable for desktop view
+    const feedbackRows = document.querySelectorAll('.feedback-row');
+    feedbackRows.forEach(row => {
+        row.addEventListener('click', function() {
+            const feedbackId = this.dataset.id;
+            const detailRow = document.getElementById(`feedback-detail-${feedbackId}`);
+            
+            // Toggle visibility
+            if (detailRow.style.display === 'none') {
+                // Hide all other detail rows first
+                document.querySelectorAll('.feedback-detail-row').forEach(row => {
+                    row.style.display = 'none';
+                });
+                
+                // Show this detail row
+                detailRow.style.display = 'table-row';
+            } else {
+                detailRow.style.display = 'none';
+            }
+        });
+    });
+    
+    // Toggle message view on mobile
+    const toggleMessageBtns = document.querySelectorAll('.toggle-message-btn');
+    toggleMessageBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const feedbackId = this.getAttribute('data-feedback-id');
+            const messageFullElem = document.getElementById(`mobile-message-full-${feedbackId}`);
+            
+            if (messageFullElem.style.display === 'none') {
+                messageFullElem.style.display = 'block';
+                this.textContent = 'Hide Details';
+            } else {
+                messageFullElem.style.display = 'none';
+                this.textContent = 'View Details';
+            }
+        });
+    });
+    
+    // Filter handler for both desktop and mobile
+    function applyFilters() {
+        const searchQuery = document.getElementById('searchInput').value.toLowerCase();
+        const categoryFilter = document.getElementById('categoryFilter').value;
+        const ratingFilter = document.getElementById('ratingFilter').value;
+        
+        // For desktop table
+        const rows = document.querySelectorAll('.feedback-row');
+        rows.forEach(row => {
+            const name = row.dataset.name.toLowerCase();
+            const email = row.dataset.email.toLowerCase();
+            const subject = row.dataset.subject.toLowerCase();
+            const category = row.dataset.category.toLowerCase();
+            const rating = row.dataset.rating;
+            const feedbackId = row.dataset.id;
+            
+            // Check if row matches search query
+            const matchesSearch = searchQuery === '' || 
+                                  name.includes(searchQuery) || 
+                                  email.includes(searchQuery) || 
+                                  subject.includes(searchQuery);
+            
+            // Check if row matches category filter
+            const matchesCategory = categoryFilter === 'all' || category === categoryFilter;
+            
+            // Check if row matches rating filter
+            const matchesRating = ratingFilter === 'all' || rating === ratingFilter;
+            
+            // Show row if it matches all filters
+            if (matchesSearch && matchesCategory && matchesRating) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+                // Also hide detail row if it's visible
+                const detailRow = document.getElementById(`feedback-detail-${feedbackId}`);
+                if (detailRow) {
+                    detailRow.style.display = 'none';
+                }
+            }
+        });
+        
+        // Update row numbers for visible rows
+        const visibleRows = Array.from(rows).filter(row => row.style.display !== 'none');
+        visibleRows.forEach((row, index) => {
+            row.querySelector('.row-index').textContent = index + 1;
+        });
+        
+        // For mobile cards
+        const cards = document.querySelectorAll('.feedback-card');
+        cards.forEach(card => {
+            const name = card.dataset.name.toLowerCase();
+            const email = card.dataset.email.toLowerCase();
+            const subject = card.dataset.subject.toLowerCase();
+            const category = card.dataset.category.toLowerCase();
+            const rating = card.dataset.rating;
+            const feedbackId = card.dataset.id;
+            
+            // Check if card matches search query
+            const matchesSearch = searchQuery === '' || 
+                                  name.includes(searchQuery) || 
+                                  email.includes(searchQuery) || 
+                                  subject.includes(searchQuery);
+            
+            // Check if card matches category filter
+            const matchesCategory = categoryFilter === 'all' || category === categoryFilter;
+            
+            // Check if card matches rating filter
+            const matchesRating = ratingFilter === 'all' || rating === ratingFilter;
+            
+            // Show card if it matches all filters
+            if (matchesSearch && matchesCategory && matchesRating) {
+                card.style.display = '';
+            } else {
+                card.style.display = 'none';
+                // Also hide expanded message if it's visible
+                const messageFullElem = document.getElementById(`mobile-message-full-${feedbackId}`);
+                if (messageFullElem) {
+                    messageFullElem.style.display = 'none';
+                }
+            }
+        });
+    }
+    
+    // Function to sort table
+    function sortTable(column, direction) {
+        // Sort the table rows
+        const table = document.getElementById('feedbackTable');
+        const tbody = table.querySelector('tbody');
+        const rows = Array.from(tbody.querySelectorAll('tr.feedback-row'));
+        
+        rows.sort((a, b) => {
+            let valueA = a.dataset[column];
+            let valueB = b.dataset[column];
+            
+            // Handle special sorting for date
+            if (column === 'date') {
+                valueA = new Date(valueA);
+                valueB = new Date(valueB);
+                return direction === 'asc' ? valueA - valueB : valueB - valueA;
+            }
+            
+            // Handle special sorting for rating
+            if (column === 'rating') {
+                valueA = parseInt(valueA) || 0;
+                valueB = parseInt(valueB) || 0;
+                return direction === 'asc' ? valueA - valueB : valueB - valueA;
+            }
+            
+            // Default string comparison
+            return direction === 'asc' 
+                ? valueA.localeCompare(valueB) 
+                : valueB.localeCompare(valueA);
+        });
+        
+        // Reorder rows in the table
+        rows.forEach((row, index) => {
+            // Get the ID of this feedback
+            const feedbackId = row.dataset.id;
+            
+            // Also get the detail row if it exists
+            const detailRow = document.getElementById(`feedback-detail-${feedbackId}`);
+            
+            // Append the main row
+            tbody.appendChild(row);
+            row.querySelector('.row-index').textContent = index + 1;
+            
+            // Append the detail row right after it
+            if (detailRow) {
+                tbody.appendChild(detailRow);
+            }
+        });
+        
+        // Sort mobile cards
+        sortMobileCards(column, direction);
+    }
+    
+    // Function to sort mobile cards
+    function sortMobileCards(column, direction) {
+        const container = document.getElementById('feedbackCardContainer');
+        const cards = Array.from(container.querySelectorAll('.feedback-card'));
+        
+        cards.sort((a, b) => {
+            let valueA = a.dataset[column];
+            let valueB = b.dataset[column];
+            
+            // Handle special sorting for date
+            if (column === 'date') {
+                valueA = new Date(valueA);
+                valueB = new Date(valueB);
+                return direction === 'asc' ? valueA - valueB : valueB - valueA;
+            }
+            
+            // Handle special sorting for rating
+            if (column === 'rating') {
+                valueA = parseInt(valueA) || 0;
+                valueB = parseInt(valueB) || 0;
+                return direction === 'asc' ? valueA - valueB : valueB - valueA;
+            }
+            
+            // Default string comparison
+            return direction === 'asc' 
+                ? valueA.localeCompare(valueB) 
+                : valueB.localeCompare(valueA);
+        });
+        
+        // Reorder cards
+        cards.forEach(card => {
+            container.appendChild(card);
+        });
+    }
+    
+    // Table sorting (desktop)
+    const sortableHeaders = document.querySelectorAll('.sortable');
+    sortableHeaders.forEach(header => {
+        header.addEventListener('click', function() {
+            const column = this.dataset.sort;
+            const direction = currentSort.column === column && currentSort.direction === 'asc' ? 'desc' : 'asc';
+            
+            // Update sort icons
+            sortableHeaders.forEach(h => {
+                h.querySelector('.sort-icon').innerHTML = '';
+            });
+            
+            const icon = direction === 'asc' ? '↑' : '↓';
+            this.querySelector('.sort-icon').innerHTML = icon;
+            
+            // Sort the table
+            sortTable(column, direction);
+            
+            // Update current sort state
+            currentSort.column = column;
+            currentSort.direction = direction;
+            
+            // Update sort select to match
+            updateSortSelects(column, direction);
+        });
+    });
+    
+    // Function to update sort select dropdowns
+    function updateSortSelects(column, direction) {
+        let selectValue = '';
+        
+        if (column === 'date') {
+            selectValue = direction === 'asc' ? 'date_asc' : 'date_desc';
+        } else if (column === 'rating') {
+            selectValue = direction === 'asc' ? 'rating_asc' : 'rating_desc';
+        }
+        
+        if (selectValue) {
+            document.getElementById('sortBySelect').value = selectValue;
+            document.getElementById('sortBySelectMobile').value = selectValue;
+        }
+    }
+    
+    // Search functionality
+    const searchInput = document.getElementById('searchInput');
+    const searchButton = document.getElementById('searchButton');
+    const searchInputMobile = document.getElementById('searchInputMobile');
+    const searchButtonMobile = document.getElementById('searchButtonMobile');
+    
+    // Sync search inputs
+    searchInput.addEventListener('input', function() {
+        searchInputMobile.value = this.value;
+        applyFilters();
+    });
+    
+    searchInputMobile.addEventListener('input', function() {
+        searchInput.value = this.value;
+        applyFilters();
+    });
+    
+    if (searchButton) {
+        searchButton.addEventListener('click', applyFilters);
+    }
+    
+    if (searchButtonMobile) {
+        searchButtonMobile.addEventListener('click', applyFilters);
+    }
+    
+    // Category filter
+    const categoryFilter = document.getElementById('categoryFilter');
+    const categoryFilterMobile = document.getElementById('categoryFilterMobile');
+    
+    // Sync category filters
+    categoryFilter.addEventListener('change', function() {
+        categoryFilterMobile.value = this.value;
+        applyFilters();
+    });
+    
+    categoryFilterMobile.addEventListener('change', function() {
+        categoryFilter.value = this.value;
+        applyFilters();
+    });
+    
+    // Rating filter
+    const ratingFilter = document.getElementById('ratingFilter');
+    const ratingFilterMobile = document.getElementById('ratingFilterMobile');
+    
+    // Sync rating filters
+    ratingFilter.addEventListener('change', function() {
+        ratingFilterMobile.value = this.value;
+        applyFilters();
+    });
+    
+    ratingFilterMobile.addEventListener('change', function() {
+        ratingFilter.value = this.value;
+        applyFilters();
+    });
+    
+    // Sort by select
+    const sortBySelect = document.getElementById('sortBySelect');
+    const sortBySelectMobile = document.getElementById('sortBySelectMobile');
+    
+    // Sort by handler
+    function handleSortBy(value) {
+        let column, direction;
+        
+        switch (value) {
+            case 'date_asc':
+                column = 'date';
+                direction = 'asc';
+                break;
+            case 'date_desc':
+                column = 'date';
+                direction = 'desc';
+                break;
+            case 'rating_asc':
+                column = 'rating';
+                direction = 'asc';
+                break;
+            case 'rating_desc':
+                column = 'rating';
+                direction = 'desc';
+                break;
+        }
+        
+        if (column && direction) {
+            // Update sort icons
+            sortableHeaders.forEach(h => {
+                h.querySelector('.sort-icon').innerHTML = '';
+                if (h.dataset.sort === column) {
+                    const icon = direction === 'asc' ? '↑' : '↓';
+                    h.querySelector('.sort-icon').innerHTML = icon;
+                }
+            });
+            
+            // Sort the table
+            sortTable(column, direction);
+            
+            // Update current sort state
+            currentSort.column = column;
+            currentSort.direction = direction;
+        }
+    }
+    
+    // Sync sort by selects
+    sortBySelect.addEventListener('change', function() {
+        sortBySelectMobile.value = this.value;
+        handleSortBy(this.value);
+    });
+    
+    sortBySelectMobile.addEventListener('change', function() {
+        sortBySelect.value = this.value;
+        handleSortBy(this.value);
+    });
+    
+    // Format message text with line breaks
+    const formatMessages = function() {
+        document.querySelectorAll('.message-preview').forEach(elem => {
+            const originalText = elem.getAttribute('title');
+            elem.setAttribute('title', originalText.replace(/\n/g, ' '));
+        });
+    };
+    
+    formatMessages();
+});
+</script>
+{%endblock%}

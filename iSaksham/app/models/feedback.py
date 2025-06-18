@@ -1,3 +1,6 @@
+from datetime import datetime
+
+import pytz
 from iSaksham.app.db import db
 from sqlalchemy import distinct, extract, func, and_, or_
 
@@ -12,15 +15,18 @@ class Feedback(db.Model):
     message_category = db.Column(db.String(128))
     message = db.Column(db.String())
     rating = db.Column(db.Integer)
+    image_filename = db.Column(db.String(255))
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(tz=pytz.timezone('Asia/Kolkata')))
 
     # Constructor method to initialize Feedback instances
-    def __init__(self, name, email, subject, message_category, message, rating):
+    def __init__(self, name, email, subject, message_category, message, rating, image_filename):
         self.subject = subject
         self.name = name
         self.email = email
         self.message = message
         self.message_category = message_category
         self.rating = rating
+        self.image_filename = image_filename
 
     # Method to represent Feedback instances as JSON
     def json(self):
@@ -31,7 +37,8 @@ class Feedback(db.Model):
             'message': self.message,
             'message_category': self.message_category,
             'rating': self.rating,
-            'subject': self.subject
+            'subject': self.subject,
+            'image_filename': self.image_filename
         }
     
     # Method to fetch feedback by ID

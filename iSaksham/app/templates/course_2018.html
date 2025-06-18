@@ -10,8 +10,8 @@
             <div class="fs-1 fw-semibold text-white pt-3">GIS Based INRM Planning Under MGNREGA</div>
             <div class="fs-6 pt-1 text-white">An online course for the technical staff of MGNREGA and Line Departments.
             </div>
-            <a class="btn btn-primary mt-3" style="width: fit-content; z-index: 2; border-radius: 70px;" href="{{url_for('learning.play_chapter',id = 1)}}">
-                JOIN THIS COURSE
+            <a class="btn btn-primary mt-3" style="width: fit-content; z-index: 2; border-radius: 70px;" href="{{url_for('learning.play_chapter',uuid = '3c12df79-7b8a-4d21-a5c3-bd4e129ee29e')}}">
+                START THIS COURSE
             </a>
 
         </div>
@@ -25,14 +25,14 @@
             <div class="row mx-5" style="width: 50%;">
                 <div class="col text-center">
                     <div class="text-secondary">Students</div>
-                    <div class="fw-semibold">6721 (Registered)</div>
+                    <div class="fw-semibold">{{registered}} (Registered)</div>
                 </div>
                 <div class="col-1 justify-content-center d-block">
                     <div class="vertical-separator bg-secondary ms-2"></div>
                 </div>
                 <div class="col text-center">
                     <div class="text-secondary">Review</div>
-                    <div class="fw-semibold">(8 reviews)</div>
+                    <div class="fw-semibold">({{review}} reviews)</div>
                 </div>
             </div>
             <div class="row mt-3" style="width: 70%;">
@@ -113,7 +113,7 @@
                                             {% for module in accordion_content %}
                                                 {% for chapter in module %}
                                                     {% if chapter.module_id == title.id%}
-                                                        <a class="list-group-item list-group-item-action" href="{{url_for('learning.play_chapter',id = chapter.id)}}" style="text-decoration: none;" >
+                                                        <a class="list-group-item list-group-item-action" href="{{url_for('learning.play_chapter',uuid = chapter.uuid)}}" style="text-decoration: none;" >
                                                             <div class="row p-2">
                                                                 {% if 'FAQ' in chapter.title %}
                                                             <div class="col-1 pe-0">
@@ -161,8 +161,8 @@
             <div class="fs-4 fw-semibold text-white pt-3">GIS Based INRM Planning Under MGNREGA</div>
             <div class="fs-7 pt-1 text-white">An online course for the technical staff of MGNREGA and Line Departments.
             </div>
-            <a class="btn btn-primary mt-3 fs-7" style="width: fit-content; z-index: 2; border-radius: 70px;" href="{{url_for('learning.play_chapter',id = 1)}}">
-                JOIN THIS COURSE
+            <a class="btn btn-primary mt-3 fs-7" style="width: fit-content; z-index: 2; border-radius: 70px;" href="{{url_for('learning.play_chapter',uuid = '3c12duuf79-7b8a-4d21-a5c3-bd4e129ee29e')}}">
+                START THIS COURSE
             </a>
 
         </div>
@@ -268,7 +268,7 @@
                                             {% for module in accordion_content %}
                                                 {% for chapter in module %}
                                                     {% if chapter.module_id == title.id%}
-                                                        <a class="list-group-item list-group-item-action" href="{{url_for('learning.play_chapter',id = chapter.id)}}" style="text-decoration: none;" >
+                                                        <a class="list-group-item list-group-item-action" href="{{url_for('learning.play_chapter',uuid=chapter.uuid)}}" style="text-decoration: none;" >
                                                             <div class="row p-2">
                                                                 {% if 'FAQ' in chapter.title %}
                                                             <div class="col-1 pe-0">

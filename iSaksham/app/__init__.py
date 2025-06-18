@@ -1,15 +1,19 @@
+from http.client import HTTPException
+from logging.handlers import RotatingFileHandler
 import os
-from flask import Flask, g, request, send_from_directory,url_for,redirect  # Importing necessary Flask modules
+import traceback
+import logging
+from flask import Flask, g, render_template, request, session,url_for,redirect  # Importing necessary Flask modules
 from iSaksham.app.db import db  # Importing database extension
 from flask_migrate import Migrate  # Importing Flask-Migrate for database migrations
 from iSaksham.app.routes.learning import blp as HomeBlueprint  # Importing blueprint for home routes
 from iSaksham.app.routes.admin import blp as AuthBlueprint  # Importing blueprint for authentication routes
 from flask_login import LoginManager, current_user  # Importing LoginManager and current_user for user authentication
-from iSaksham.app.models.feedback import Feedback  # Importing Feedback model
 from iSaksham.app.models.user import User  # Importing User model
-from iSaksham.app.models.chapters import Chapters
-from iSaksham.app.models.modules import Modules
 from flask_mail import Mail
+from flask_wtf.csrf import CSRFProtect
+from iSaksham.app.routes.devloper import blp as DevBlueprint  # Importing blueprint for developer routes
+
 # File path to store visit count
 current_directory = os.getcwd()
 VISIT_COUNT_FILE = current_directory + '/iSaksham/app/static/visit_count.txt'
@@ -34,6 +38,15 @@ def convert_to_seven_digits(number):
 # Creating the Flask application
 def create_app():
     app = Flask(__name__)  # Initializing Flask app
+    if not os.path.exists('logs'):
+        os.mkdir('logs')
+
+    file_handler = RotatingFileHandler('logs/error.log', maxBytes=10240, backupCount=10)
+    file_handler.setLevel(logging.ERROR)
+    formatter = logging.Formatter('%(asctime)s [%(levelname)s] in %(module)s: %(message)s')
+    file_handler.setFormatter(formatter)
+    app.logger.addHandler(file_handler)
+    
     app.config.update({
     "SESSION_COOKIE_SECURE": True,          # Only over HTTPS
     "SESSION_COOKIE_HTTPONLY": True,        # Not accessible via JS
@@ -63,7 +76,8 @@ def create_app():
     migrate = Migrate(app, db)  # Initializing Flask-Migrate with the Flask app
     app.register_blueprint(HomeBlueprint)  # Registering home blueprint with the Flask app
     app.register_blueprint(AuthBlueprint)  # Registering authentication blueprint with the Flask app
-    
+    app.register_blueprint(DevBlueprint)  # Registering chapters blueprint with the Flask app
+    csrf = CSRFProtect(app)
     @app.after_request
     def set_security_headers(response):
         response.headers["X-Content-Type-Options"] = "nosniff"
@@ -89,10 +103,12 @@ def create_app():
     # Function to increment visit count before each request
     @app.before_request
     def increment_visit_count():
+        
         if 'static' not in request.path:
             g.visit_count = read_visit_count()
             g.visit_count += 1
             write_visit_count(g.visit_count)
+        
 
     # Context processor to inject data into templates
     @app.context_processor
@@ -109,5 +125,40 @@ def create_app():
             average_rating = 0
 
         return {'visit_count': visit_count, 'name': name, 'average_rating': average_rating}
+    
+    @app.errorhandler(404)
+    def page_not_found(error):
+        app.logger.warning(f"404 Not Found: {request.url}")
+        return render_template('developer/error.html', 
+                            error_code=404, 
+                            error_message="Page Not Found", 
+                            description="The page you are looking for does not exist."), 404
+
+    # Error handler for 500 Internal Server errors
+    @app.errorhandler(500)
+    def internal_server_error(error):
+        app.logger.error(f"500 Error: {request.url} - {error}")
+        return render_template('developer/error.html', 
+                            error_code=500, 
+                            error_message="Internal Server Error", 
+                            description="Something went wrong on our end. Please try again later."), 500
+
+    # General error handler for other errors
+    @app.errorhandler(Exception)
+    def handle_exception(error):
+        # Pass through HTTP errors
+        if isinstance(error, HTTPException):
+            return error
+        # Print the traceback to the terminal
+        traceback.print_exc()
+        app.logger.error("Unhandled Exception", exc_info=error)
+        app.logger.error(f"URL: {request.url}")
+        app.logger.error(f"Payload: {session.get('payload', 'N/A')}")
+        # Non-HTTP exceptions
+        return render_template('developer/error.html', 
+                            error_code=500, 
+                            error_message="Unexpected Error", 
+                            message = "Please report the bug in the feedback page with screenshot.",
+                            description="An unexpected error occurred:"+str(error)), 500
 
     return app  # Returning the Flask app instance

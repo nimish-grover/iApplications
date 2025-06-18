@@ -1,0 +1,136 @@
+2025-06-18 16:10:05,915 [ERROR] in __init__: Unhandled Exception
+Traceback (most recent call last):
+  File "/home/grove/miniconda3/envs/flask/lib/python3.11/site-packages/flask_wtf/csrf.py", line 261, in protect
+    validate_csrf(self._get_csrf_token())
+  File "/home/grove/miniconda3/envs/flask/lib/python3.11/site-packages/flask_wtf/csrf.py", line 100, in validate_csrf
+    raise ValidationError("The CSRF token is missing.")
+wtforms.validators.ValidationError: The CSRF token is missing.
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/grove/miniconda3/envs/flask/lib/python3.11/site-packages/flask/app.py", line 865, in full_dispatch_request
+    rv = self.preprocess_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/grove/miniconda3/envs/flask/lib/python3.11/site-packages/flask/app.py", line 1239, in preprocess_request
+    rv = self.ensure_sync(before_func)()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/grove/miniconda3/envs/flask/lib/python3.11/site-packages/flask_wtf/csrf.py", line 229, in csrf_protect
+    self.protect()
+  File "/home/grove/miniconda3/envs/flask/lib/python3.11/site-packages/flask_wtf/csrf.py", line 264, in protect
+    self._error_response(e.args[0])
+  File "/home/grove/miniconda3/envs/flask/lib/python3.11/site-packages/flask_wtf/csrf.py", line 307, in _error_response
+    raise CSRFError(reason)
+flask_wtf.csrf.CSRFError: 400 Bad Request: The CSRF token is missing.
+2025-06-18 16:10:05,939 [ERROR] in __init__: URL: http://127.0.0.1:8080/isaksham/dev/error_delete
+2025-06-18 16:10:05,941 [ERROR] in __init__: Payload: N/A
+2025-06-18 16:27:08,836 [ERROR] in __init__: Unhandled Exception
+Traceback (most recent call last):
+  File "/home/grove/miniconda3/envs/flask/lib/python3.11/site-packages/flask/app.py", line 867, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/grove/miniconda3/envs/flask/lib/python3.11/site-packages/flask/app.py", line 852, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/grove/GitHub/iApplications/iSaksham/app/routes/learning.py", line 219, in robots
+    return send_from_directory(url_for('static',filename="robots.txt"))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: send_from_directory() missing 1 required positional argument: 'path'
+2025-06-18 16:27:08,839 [ERROR] in __init__: URL: http://127.0.0.1:8080/isaksham/robots.txt
+2025-06-18 16:27:08,841 [ERROR] in __init__: Payload: N/A
+2025-06-18 16:52:51,544 [ERROR] in __init__: Unhandled Exception
+Traceback (most recent call last):
+  File "/home/grove/miniconda3/envs/flask/lib/python3.11/site-packages/flask/app.py", line 867, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/grove/miniconda3/envs/flask/lib/python3.11/site-packages/flask/app.py", line 852, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/grove/miniconda3/envs/flask/lib/python3.11/site-packages/flask_login/utils.py", line 290, in decorated_view
+    return current_app.ensure_sync(func)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/grove/GitHub/iApplications/iSaksham/app/routes/devloper.py", line 15, in decorated_function
+    abort(403)  # Forbidden
+    ^^^^^^^^^^
+  File "/home/grove/miniconda3/envs/flask/lib/python3.11/site-packages/flask/helpers.py", line 274, in abort
+    current_app.aborter(code, *args, **kwargs)
+  File "/home/grove/miniconda3/envs/flask/lib/python3.11/site-packages/werkzeug/exceptions.py", line 863, in __call__
+    raise self.mapping[code](*args, **kwargs)
+werkzeug.exceptions.Forbidden: 403 Forbidden: You don't have the permission to access the requested resource. It is either read-protected or not readable by the server.
+2025-06-18 16:52:51,570 [ERROR] in __init__: URL: http://127.0.0.1:8080/isaksham/dev/errors
+2025-06-18 16:52:51,578 [ERROR] in __init__: Payload: N/A
+2025-06-19 01:21:42,915 [ERROR] in __init__: Unhandled Exception
+Traceback (most recent call last):
+  File "/home/grove/miniconda3/envs/flask/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "/home/grove/miniconda3/envs/flask/lib/python3.11/site-packages/sqlalchemy/engine/default.py", line 941, in do_execute
+    cursor.execute(statement, parameters)
+psycopg2.OperationalError: server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/grove/miniconda3/envs/flask/lib/python3.11/site-packages/flask/app.py", line 867, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/grove/miniconda3/envs/flask/lib/python3.11/site-packages/flask/app.py", line 852, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/grove/GitHub/iApplications/iSaksham/app/routes/learning.py", line 206, in reviews
+    total_reviews = query.count()
+                    ^^^^^^^^^^^^^
+  File "/home/grove/miniconda3/envs/flask/lib/python3.11/site-packages/sqlalchemy/orm/query.py", line 3113, in count
+    self._legacy_from_self(col).enable_eagerloads(False).scalar()
+  File "/home/grove/miniconda3/envs/flask/lib/python3.11/site-packages/sqlalchemy/orm/query.py", line 2805, in scalar
+    ret = self.one()
+          ^^^^^^^^^^
+  File "/home/grove/miniconda3/envs/flask/lib/python3.11/site-packages/sqlalchemy/orm/query.py", line 2778, in one
+    return self._iter().one()  # type: ignore
+           ^^^^^^^^^^^^
+  File "/home/grove/miniconda3/envs/flask/lib/python3.11/site-packages/sqlalchemy/orm/query.py", line 2827, in _iter
+    result: Union[ScalarResult[_T], Result[_T]] = self.session.execute(
+                                                  ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/grove/miniconda3/envs/flask/lib/python3.11/site-packages/sqlalchemy/orm/session.py", line 2362, in execute
+    return self._execute_internal(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/grove/miniconda3/envs/flask/lib/python3.11/site-packages/sqlalchemy/orm/session.py", line 2247, in _execute_internal
+    result: Result[Any] = compile_state_cls.orm_execute_statement(
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/grove/miniconda3/envs/flask/lib/python3.11/site-packages/sqlalchemy/orm/context.py", line 305, in orm_execute_statement
+    result = conn.execute(
+             ^^^^^^^^^^^^^
+  File "/home/grove/miniconda3/envs/flask/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1418, in execute
+    return meth(
+           ^^^^^
+  File "/home/grove/miniconda3/envs/flask/lib/python3.11/site-packages/sqlalchemy/sql/elements.py", line 515, in _execute_on_connection
+    return connection._execute_clauseelement(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/grove/miniconda3/envs/flask/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1640, in _execute_clauseelement
+    ret = self._execute_context(
+          ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/grove/miniconda3/envs/flask/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1846, in _execute_context
+    return self._exec_single_context(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/grove/miniconda3/envs/flask/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1986, in _exec_single_context
+    self._handle_dbapi_exception(
+  File "/home/grove/miniconda3/envs/flask/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 2355, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "/home/grove/miniconda3/envs/flask/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "/home/grove/miniconda3/envs/flask/lib/python3.11/site-packages/sqlalchemy/engine/default.py", line 941, in do_execute
+    cursor.execute(statement, parameters)
+sqlalchemy.exc.OperationalError: (psycopg2.OperationalError) server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+
+[SQL: SELECT count(*) AS count_1 
+FROM (SELECT feedback.id AS feedback_id, feedback.name AS feedback_name, feedback.email AS feedback_email, feedback.subject AS feedback_subject, feedback.message_category AS feedback_message_category, feedback.message AS feedback_message, feedback.rating AS feedback_rating, feedback.image_filename AS feedback_image_filename, feedback.created_at AS feedback_created_at 
+FROM feedback 
+WHERE feedback.message_category = %(message_category_1)s) AS anon_1]
+[parameters: {'message_category_1': 'course'}]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-06-19 01:21:42,933 [ERROR] in __init__: URL: http://127.0.0.1:8080/isaksham/reviews
+2025-06-19 01:21:42,935 [ERROR] in __init__: Payload: N/A

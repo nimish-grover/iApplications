@@ -1,0 +1,515 @@
+{% extends 'base.html' %}
+{% block title %}
+<title>Error Logs - E-Saksham</title> 
+{% endblock %}
+
+{% block css %}
+<style>
+    .log-viewer-container {
+        background-color: #f8f9fa;
+        border-radius: 10px;
+        padding: 20px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    .log-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+    
+    .log-select-container {
+        background-color: white;
+        border-radius: 8px;
+        padding: 15px;
+        margin-bottom: 20px;
+        box-shadow: 0 1px 5px rgba(0,0,0,0.05);
+    }
+    
+    .log-content {
+        background-color: #282c34;
+        color: #f8f8f2;
+        font-family: 'Courier New', monospace;
+        padding: 15px;
+        border-radius: 5px;
+        height: 480px;
+        overflow-y: auto;
+        white-space: pre-wrap;
+        word-break: break-all;
+    }
+    
+    .log-content:empty::before {
+        content: "Select a log file to view its contents.";
+        color: #a0a0a0;
+        font-style: italic;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 50px 0;
+        color: #6c757d;
+    }
+    
+    .error-line {
+        color: #ff6b6b;
+        font-weight: bold;
+    }
+    
+    .warning-line {
+        color: #ffd166;
+    }
+    
+    .info-line {
+        color: #63c7ff;
+    }
+    
+    .debug-line {
+        color: #98c379;
+    }
+    
+    .timestamp {
+        color: #bb9af7;
+    }
+    
+
+    
+    .action-buttons {
+        display: flex;
+        gap: 10px;
+    }
+    
+    .file-info {
+        font-size: 0.85rem;
+        color: #6c757d;
+        margin-top: 5px;
+    }
+    
+    .btn-custom {
+        border-radius: 5px;
+        padding: 5px 15px;
+        font-size: 0.9rem;
+    }
+    
+    .refresh-btn {
+        margin-left: auto;
+    }
+    
+    .search-container {
+        margin-bottom: 15px;
+    }
+    
+    #searchHighlight {
+        position: sticky;
+        top: 10px;
+        z-index: 100;
+        background-color: rgba(240, 240, 240, 0.9);
+        padding: 10px;
+        border-radius: 5px;
+        display: none;
+    }
+    
+    .highlight {
+        background-color: yellow;
+        color: black;
+    }
+    
+    .active-highlight {
+        background-color: orange;
+        color: black;
+    }
+    
+    .file-select-wrapper {
+        flex-grow: 1;
+        max-width: 400px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid m-0 p-0" style="background-color: #A3A2A2; width: 100%;">
+    <div class="row roboto pt-4 justify-content-center text-center">
+        <div class="fs-1 fw-semibold text-white">Error Log Viewer</div>
+        <div class="text-light">View and manage system error logs</div>
+        <div class="container mt-3" id="overlay" style="width: fit-content; z-index: 2;">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb p-3 m-0">
+                    <li class="breadcrumb-item"><a href="{{url_for('learning.home')}}" class="text-secondary" style="text-decoration: none;">Home</a></li>
+                    <li class="breadcrumb-item"><a href="{{url_for('admin.dashboard')}}" class="text-secondary" style="text-decoration: none;">Admin</a></li>
+                    <li class="breadcrumb-item active" aria-current="page"><a href="{{url_for('developer.error_logs')}}" style="text-decoration: none;">Error Logs</a></li>
+                </ol>
+            </nav>
+        </div>
+        
+    </div>
+    <div class="row" style="margin-top: -30px; z-index: 1;">
+        <div class="container" id="overlay" style="width: 45%; height: 100px;"></div>
+    </div>
+    <div class="row p-0" style="height: 50px; min-width: 100%; margin-top:-70px; background-color: white;"></div>
+</div>
+
+<div class="container my-4">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    {% for category, message in messages %}
+    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
+
+    <div class="log-viewer-container">
+        <div class="log-header">
+            <div>
+                <h4 class="mb-0">System Error Logs</h4>
+            </div>
+            <div class="action-buttons">
+                {% if files %}
+                <a href="{{ url_for('developer.error_logs') }}" class="btn btn-outline-secondary btn-custom refresh-btn">
+                    <i class="fas fa-sync-alt"></i> Refresh
+                </a>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="log-select-container">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <!-- File Selection Form -->
+                    <form method="get" action="{{ url_for('developer.error_logs') }}" class="d-flex align-items-center" id="fileSelectForm">
+                        <div class="file-select-wrapper">
+                            <select name="file" class="form-select" id="fileSelect" {% if not files %}disabled{% endif %}>
+                                <option value="">-- Select a log file --</option>
+                                {% for file in files %}
+                                <option value="{{ file }}" {% if selected_file == file %}selected{% endif %}>{{ file }}</option>
+                                {% endfor %}
+                            </select>
+                            
+                        </div>
+                        <button type="submit" class="btn btn-primary ms-2 btn-custom no-loader" id="viewBtn" {% if not files %}disabled{% endif %}>
+                            View
+                        </button>
+                        {% if selected_file %}
+                            <div class="file-info ms-3">
+                                Last modified: {{ '%Y-%m-%d %H:%M:%S'|strftime(os.path.getmtime(os.path.join(ERROR_LOG_DIR, selected_file))) }}
+                                | Size: {{ '{:.2f}'.format(os.path.getsize(os.path.join(ERROR_LOG_DIR, selected_file)) / 1024) }} KB
+                            </div>
+                            {% endif %}
+                    </form>
+                </div>
+                <div class="col-md-6">
+                    <div class="d-flex justify-content-md-end mt-3 mt-md-0">
+                        {% if selected_file %}
+                        <form method="post" action="{{ url_for('developer.delete_log_file') }}" class="me-2" id="deleteForm">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <input type="hidden" name="filename" value="{{ selected_file }}">
+                            <button class="btn btn-danger btn-custom no-loader" type="button" id="deleteBtn">
+                                <i class="fas fa-trash-alt me-1"></i> Delete This File
+                            </button>
+                        </form>
+                        {% endif %}
+                        
+                        {% if files %}
+                        <form method="post" action="{{ url_for('developer.delete_log_file') }}" id="deleteAllForm">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <input type="hidden" name="filename" value="all">
+                            <button class="btn btn-outline-danger btn-custom no-loader" type="button" id="deleteAllBtn">
+                                <i class="fas fa-trash-alt me-1"></i> Delete All Files
+                            </button>
+                        </form>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            {% if selected_file %}
+            <div class="search-container mt-3">
+                <div class="input-group">
+                    <input type="text" id="searchInput" class="form-control" placeholder="Search in log file...">
+                    <button class="btn btn-outline-secondary no-loader" type="button" id="searchBtn">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+                <div id="searchHighlight" class="mt-2">
+                    <span id="matchCount">0 matches</span>
+                    <div class="float-end">
+                        <button id="prevMatch" class="btn btn-sm btn-outline-primary no-loader">
+                            <i class="fas fa-chevron-up"></i>
+                        </button>
+                        <button id="nextMatch" class="btn btn-sm btn-outline-primary no-loader">
+                            <i class="fas fa-chevron-down"></i>
+                        </button>
+                        <button id="clearSearch" class="btn btn-sm btn-outline-secondary no-loader">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        
+        {% if files %}
+            {% if selected_file %}
+                <pre class="log-content" id="logContent">{{ content }}</pre>
+            {% else %}
+                <pre class="log-content"></pre>
+            {% endif %}
+        {% else %}
+            <div class="empty-state">
+                <i class="fas fa-exclamation-circle fa-3x mb-3"></i>
+                <h5>No log files found</h5>
+                <p>There are currently no error log files in the system.</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block script %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // File selection change handler
+    const fileSelect = document.getElementById('fileSelect');
+    const viewBtn = document.getElementById('viewBtn');
+    const deleteBtn = document.getElementById('deleteBtn');
+    const deleteAllBtn = document.getElementById('deleteAllBtn');
+    const deleteForm = document.getElementById('deleteForm');
+    const deleteAllForm = document.getElementById('deleteAllForm');
+    const searchInput = document.getElementById('searchInput');
+    const searchBtn = document.getElementById('searchBtn');
+    const searchHighlight = document.getElementById('searchHighlight');
+    const prevMatch = document.getElementById('prevMatch');
+    const nextMatch = document.getElementById('nextMatch');
+    const clearSearch = document.getElementById('clearSearch');
+    const matchCount = document.getElementById('matchCount');
+    const logContent = document.getElementById('logContent');
+    
+    // Change file selection handler
+    if (fileSelect) {
+        fileSelect.addEventListener('change', function() {
+            if (this.value) {
+                viewBtn.disabled = false;
+            } else {
+                viewBtn.disabled = true;
+            }
+        });
+    }
+    
+    // Delete button handler
+    if (deleteBtn && deleteForm) {
+        deleteBtn.addEventListener('click', function() {
+            if (confirm('Are you sure you want to delete this log file?')) {
+                deleteForm.submit();
+            }
+        });
+    }
+    
+    // Delete all button handler
+    if (deleteAllBtn && deleteAllForm) {
+        deleteAllBtn.addEventListener('click', function() {
+            if (confirm('Are you sure you want to delete ALL log files? This action cannot be undone.')) {
+                deleteAllForm.submit();
+            }
+        });
+    }
+    
+    // Color code log lines
+    if (logContent && logContent.textContent.trim() !== "") {
+        const logText = logContent.innerHTML;
+        let coloredText = logText
+            .replace(/ERROR|CRITICAL/gi, '<span class="error-line">$&</span>')
+            .replace(/WARNING/gi, '<span class="warning-line">$&</span>')
+            .replace(/INFO/gi, '<span class="info-line">$&</span>')
+            .replace(/DEBUG/gi, '<span class="debug-line">$&</span>')
+            .replace(/\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}/g, '<span class="timestamp">$&</span>');
+        
+        logContent.innerHTML = coloredText;
+    }
+    
+    // Search functionality
+    let currentMatchIndex = -1;
+    let matches = [];
+    
+    if (searchBtn && searchInput && logContent) {
+        searchBtn.addEventListener('click', performSearch);
+        searchInput.addEventListener('keyup', function(e) {
+            if (e.key === 'Enter') {
+                performSearch();
+            }
+        });
+    }
+    
+    function performSearch() {
+        const searchTerm = searchInput.value.trim();
+        if (!searchTerm) return;
+        
+        // Reset previous search
+        clearHighlights();
+        
+        const text = logContent.textContent;
+        const regex = new RegExp(escapeRegExp(searchTerm), 'gi');
+        
+        // Create a document fragment
+        const fragment = document.createDocumentFragment();
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = logContent.innerHTML;
+        
+        // Find and highlight matches
+        highlightMatches(tempDiv, regex);
+        
+        // Append the modified content
+        fragment.appendChild(tempDiv);
+        logContent.innerHTML = tempDiv.innerHTML;
+        
+        // Get all highlighted elements
+        matches = logContent.querySelectorAll('.highlight');
+        
+        if (matches.length > 0) {
+            searchHighlight.style.display = 'block';
+            matchCount.textContent = `${matches.length} matches found`;
+            currentMatchIndex = 0;
+            scrollToMatch(0);
+        } else {
+            searchHighlight.style.display = 'block';
+            matchCount.textContent = 'No matches found';
+        }
+    }
+    
+    function highlightMatches(element, regex) {
+        // We need to process text nodes only
+        const walker = document.createTreeWalker(
+            element,
+            NodeFilter.SHOW_TEXT,
+            null,
+            false
+        );
+        
+        const nodesToReplace = [];
+        let node;
+        
+        // Collect text nodes that contain matches
+        while(node = walker.nextNode()) {
+            if (regex.test(node.nodeValue)) {
+                nodesToReplace.push(node);
+            }
+        }
+        
+        // Replace text in the collected nodes
+        nodesToReplace.forEach(node => {
+            const parent = node.parentNode;
+            const content = node.nodeValue;
+            
+            // Reset regex lastIndex
+            regex.lastIndex = 0;
+            
+            let lastIndex = 0;
+            let match;
+            const fragment = document.createDocumentFragment();
+            
+            // Process each match
+            while (match = regex.exec(content)) {
+                // Add text before the match
+                if (match.index > lastIndex) {
+                    fragment.appendChild(document.createTextNode(content.substring(lastIndex, match.index)));
+                }
+                
+                // Add highlighted match
+                const span = document.createElement('span');
+                span.className = 'highlight';
+                span.textContent = match[0];
+                fragment.appendChild(span);
+                
+                lastIndex = regex.lastIndex;
+            }
+            
+            // Add remaining text
+            if (lastIndex < content.length) {
+                fragment.appendChild(document.createTextNode(content.substring(lastIndex)));
+            }
+            
+            // Replace the original node with the fragment
+            parent.replaceChild(fragment, node);
+        });
+    }
+    
+    function scrollToMatch(index) {
+        if (matches.length > 0 && index >= 0 && index < matches.length) {
+            // Remove current active class
+            matches.forEach(match => match.classList.remove('active-highlight'));
+            
+            // Add active class to current match
+            matches[index].classList.add('active-highlight');
+            
+            // Scroll the match into view
+            matches[index].scrollIntoView({
+                behavior: 'smooth',
+                block: 'center'
+            });
+            
+            matchCount.textContent = `Match ${index + 1} of ${matches.length}`;
+        }
+    }
+    
+    function clearHighlights() {
+        if (logContent) {
+            const highlightedElements = logContent.querySelectorAll('.highlight');
+            highlightedElements.forEach(el => {
+                const parent = el.parentNode;
+                parent.replaceChild(document.createTextNode(el.textContent), el);
+            });
+            
+            // Normalize the DOM to merge adjacent text nodes
+            logContent.normalize();
+            
+            matches = [];
+            currentMatchIndex = -1;
+            searchHighlight.style.display = 'none';
+        }
+    }
+    
+    // Navigation buttons
+    if (prevMatch) {
+        prevMatch.addEventListener('click', function() {
+            if (matches.length > 0) {
+                currentMatchIndex = (currentMatchIndex - 1 + matches.length) % matches.length;
+                scrollToMatch(currentMatchIndex);
+            }
+        });
+    }
+    
+    if (nextMatch) {
+        nextMatch.addEventListener('click', function() {
+            if (matches.length > 0) {
+                currentMatchIndex = (currentMatchIndex + 1) % matches.length;
+                scrollToMatch(currentMatchIndex);
+            }
+        });
+    }
+    
+    if (clearSearch) {
+        clearSearch.addEventListener('click', function() {
+            searchInput.value = '';
+            clearHighlights();
+        });
+    }
+    
+    // Helper function to escape special regex characters
+    function escapeRegExp(string) {
+        return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    }
+    
+    // Auto-select the file if there's only one
+    if (fileSelect && fileSelect.options.length === 2) {
+        fileSelect.selectedIndex = 1;
+        document.getElementById('fileSelectForm').submit();
+    }
+    
+    // Log the file content to console for debugging
+    if (logContent) {
+        console.log("Log content length:", logContent.textContent.length);
+    }
+});
+</script>
+{% endblock %}

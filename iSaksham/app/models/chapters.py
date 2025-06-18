@@ -1,3 +1,4 @@
+import uuid
 from iSaksham.app.db import db
 from sqlalchemy import distinct, extract, func, and_, or_
 
@@ -10,10 +11,13 @@ class Chapters(db.Model):
     title = db.Column(db.String(128))
     length = db.Column(db.String(128))
     link = db.Column(db.String(256))
+    uuid = db.Column(db.String(36), unique=True, index=True,default=lambda: str(uuid.uuid4()))
     
 
     # Constructor method to initialize Feedback instances
-    def __init__(self, module_id, title, length, link):
+    def __init__(self, module_id, title, length, link,uuid=None):
+        if uuid is None:
+            uuid = str(uuid.uuid4())
         self.length = length
         self.module_id = module_id
         self.title = title
@@ -26,10 +30,19 @@ class Chapters(db.Model):
             'module_id': self.module_id,
             'title': self.title,
             'link': self.link,
-            'length': self.length
+            'length': self.length,
+            'uuid': self.uuid
         }
     
     # Method to fetch chapters by ID
+    @classmethod
+    def get_chapters_by_uuid(cls, _uuid):
+        query = cls.query.filter_by(uuid=_uuid).first()
+        if query:
+            return query.json()
+        else:
+            return None
+    
     @classmethod
     def get_chapters_by_id(cls, _id):
         query = cls.query.filter_by(id=_id).first()
@@ -37,7 +50,7 @@ class Chapters(db.Model):
             return query.json()
         else:
             return None
-    
+        
     # Method to fetch chapters by title
     @classmethod
     def get_chapters_by_title(cls, _title):
